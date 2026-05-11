@@ -1,353 +1,97 @@
-// ============================================
-// autenticacion.js - Versión para GitHub Pages
-// Lee el archivo SQL directamente desde Google Drive
-// ============================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login ASENORTE</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .error { color: red; margin-top: 10px; }
+        .success { color: green; margin-top: 10px; }
+        .loading { color: blue; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Login ASENORTE</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label>Tipo de Documento:</label>
+            <select id="tipoDocumento" required>
+                <option value="CC">Cédula de Ciudadanía</option>
+                <option value="TI">Tarjeta de Identidad</option>
+                <option value="CE">Cédula de Extranjería</option>
+                <option value="NIT">NIT</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Número de Documento:</label>
+            <input type="number" id="documento" required placeholder="Ej: 123456789">
+        </div>
+        <div class="form-group">
+            <label>Programa:</label>
+            <select id="programa" required>
+                <option value="SST">Salud y Seguridad en el Trabajo</option>
+                <option value="AE">Auxiliar en Enfermería</option>
+                <option value="SE">Secretariado Ejecutivo</option>
+                <option value="MD">Mantenimiento de Dispositivos</option>
+            </select>
+        </div>
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+    <div id="mensaje"></div>
 
-// Configuración - URL del archivo SQL en Google Drive
-// NOTA: Usa el ID del archivo de tu Google Drive
-// El ID está en la URL: drive.google.com/file/d/[ID_AQUI]/view
-const ARCHIVO_SQL_URL = 'https://drive.google.com/uc?export=download&id=TU_ID_DEL_ARCHIVO';
-
-// Configuración de caché para evitar múltiples descargas
-let datosCache = null;
-let ultimaDescarga = null;
-const TIEMPO_CACHE = 5 * 60 * 1000; // 5 minutos
-
-// ============================================
-// Función principal de autenticación
-// ============================================
-async function autenticarEstudiante(documento, tipoDocumento, programa) {
-    console.log('🔍 Iniciando autenticación para documento:', documento);
-    
-    if (!documento || documento.trim() === '') {
-        throw new Error('El número de documento es requerido');
-    }
-
-    try {
-        // 1. Obtener y parsear el archivo SQL
-        const datosSQL = await obtenerDatosSQL();
+    <script src="autenticacion.js"></script>
+    <script>
+        // Configurar la URL del archivo SQL en Google Drive
+        // Reemplaza TU_ID_DEL_ARCHIVO con el ID real de tu archivo
+        window.ARCHIVO_SQL_URL = 'https://drive.google.com/uc?export=download&id=TU_ID_DEL_ARCHIVO';
         
-        // 2. Buscar el estudiante en los datos
-        const estudiante = buscarEstudianteEnDatos(datosSQL, documento);
+        const form = document.getElementById('loginForm');
+        const mensajeDiv = document.getElementById('mensaje');
         
-        // 3. Si no se encuentra, retornar error
-        if (!estudiante.encontrado) {
-            throw new Error(`No se encontraron registros para el documento ${documento}`);
-        }
-        
-        // 4. Construir respuesta completa
-        return {
-            success: true,
-            message: 'Autenticación exitosa',
-            estudiante: {
-                documento: documento,
-                tipoDocumento: tipoDocumento || 'Cédula',
-                programa: programa,
-                nombre: estudiante.nombre || `Estudiante ${documento}`,
-                ciudad: estudiante.ciudad || 'Santa Marta',
-                institucion: 'ASENORTE - Asesorías del Norte',
-                totalFacturas: estudiante.facturas.length,
-                totalCreditos: estudiante.creditos.length,
-                totalRecibos: estudiante.recibos.length,
-                facturas: estudiante.facturas.slice(0, 10),
-                creditos: estudiante.creditos.slice(0, 10),
-                recibos: estudiante.recibos.slice(0, 10),
-                ultimoPago: estudiante.ultimoPago,
-                saldoPendiente: estudiante.saldoPendiente
-            }
-        };
-        
-    } catch (error) {
-        console.error('❌ Error en autenticación:', error);
-        throw error;
-    }
-}
-
-// ============================================
-// Obtener y parsear el archivo SQL desde Google Drive
-// ============================================
-async function obtenerDatosSQL() {
-    // Verificar caché
-    if (datosCache && ultimaDescarga && (Date.now() - ultimaDescarga < TIEMPO_CACHE)) {
-        console.log('📦 Usando datos en caché');
-        return datosCache;
-    }
-    
-    console.log('📥 Descargando archivo SQL desde Google Drive...');
-    
-    try {
-        // Descargar el archivo
-        const response = await fetch(ARCHIVO_SQL_URL);
-        
-        if (!response.ok) {
-            throw new Error(`Error al descargar el archivo: ${response.status}`);
-        }
-        
-        const sqlText = await response.text();
-        console.log('✅ Archivo descargado, tamaño:', sqlText.length, 'bytes');
-        
-        // Parsear el SQL
-        console.log('🔧 Parseando estructura SQL...');
-        const datosParseados = parsearSQL(sqlText);
-        
-        // Guardar en caché
-        datosCache = datosParseados;
-        ultimaDescarga = Date.now();
-        
-        console.log('✅ Datos parseados exitosamente');
-        console.log(`   - Facturas: ${datosParseados.facturas.length}`);
-        console.log(`   - Créditos: ${datosParseados.creditos.length}`);
-        console.log(`   - Recibos: ${datosParseados.recibos.length}`);
-        
-        return datosParseados;
-        
-    } catch (error) {
-        console.error('❌ Error al obtener datos SQL:', error);
-        throw new Error('No se pudo cargar la base de datos. Por favor, verifica la conexión.');
-    }
-}
-
-// ============================================
-// Parsear el archivo SQL y extraer datos relevantes
-// ============================================
-function parsearSQL(sqlText) {
-    const facturas = [];
-    const creditos = [];
-    const recibos = [];
-    
-    // Expresiones regulares para extraer INSERTS
-    // Patrón para INSERT INTO fac_facturas
-    const facturasPattern = /INSERT INTO `fac_facturas` \(.*?\) VALUES\s*\((.*?)\);?/gs;
-    const creditosPattern = /INSERT INTO `fac_creditos` \(.*?\) VALUES\s*\((.*?)\);?/gs;
-    const recibosPattern = /INSERT INTO `fac_recibos` \(.*?\) VALUES\s*\((.*?)\);?/gs;
-    
-    // Extraer facturas
-    let match;
-    while ((match = facturasPattern.exec(sqlText)) !== null) {
-        const valores = parsearValoresSQL(match[1]);
-        if (valores && valores.length > 0) {
-            // Extraer CLIENTE_FACTURA (índice 5 según estructura)
-            const clienteId = parseInt(valores[5]);
-            if (!isNaN(clienteId) && clienteId > 0) {
-                facturas.push({
-                    id: parseInt(valores[0]) || 0,
-                    cliente: clienteId,
-                    fecha: valores[6] || '',
-                    total: parseFloat(valores[11]) || 0,
-                    descripcion: valores[14] || '',
-                    vendedor: valores[7] || ''
-                });
-            }
-        }
-    }
-    
-    // Extraer créditos
-    while ((match = creditosPattern.exec(sqlText)) !== null) {
-        const valores = parsearValoresSQL(match[1]);
-        if (valores && valores.length > 0) {
-            const clienteId = parseInt(valores[4]);
-            if (!isNaN(clienteId) && clienteId > 0) {
-                creditos.push({
-                    id: parseInt(valores[0]) || 0,
-                    cliente: clienteId,
-                    fecha: valores[1] || '',
-                    valor: parseFloat(valores[5]) || 0,
-                    concepto: valores[6] || '',
-                    observaciones: valores[7] || ''
-                });
-            }
-        }
-    }
-    
-    // Extraer recibos
-    while ((match = recibosPattern.exec(sqlText)) !== null) {
-        const valores = parsearValoresSQL(match[1]);
-        if (valores && valores.length > 0) {
-            const clienteId = parseInt(valores[3]);
-            if (!isNaN(clienteId) && clienteId > 0) {
-                recibos.push({
-                    id: parseInt(valores[0]) || 0,
-                    cliente: clienteId,
-                    fecha: valores[2] || '',
-                    valor: parseFloat(valores[5]) || 0,
-                    concepto: valores[8] || '',
-                    formaPago: valores[6] || ''
-                });
-            }
-        }
-    }
-    
-    return {
-        facturas,
-        creditos,
-        recibos,
-        // Extraer todos los IDs de clientes únicos
-        clientes: [...new Set([
-            ...facturas.map(f => f.cliente),
-            ...creditos.map(c => c.cliente),
-            ...recibos.map(r => r.cliente)
-        ])].filter(id => id > 0).sort((a, b) => a - b)
-    };
-}
-
-// ============================================
-// Parsear una línea de valores SQL
-// ============================================
-function parsearValoresSQL(linea) {
-    const valores = [];
-    let actual = '';
-    let dentroComillas = false;
-    let i = 0;
-    
-    while (i < linea.length) {
-        const char = linea[i];
-        
-        if (char === "'" && linea[i-1] !== '\\') {
-            dentroComillas = !dentroComillas;
-            actual += char;
-        } else if (char === ',' && !dentroComillas) {
-            // Limpiar y agregar valor
-            let valor = actual.trim();
-            if (valor === 'NULL' || valor === 'null' || valor === '') {
-                valores.push(null);
-            } else if (valor.startsWith("'") && valor.endsWith("'")) {
-                valores.push(valor.slice(1, -1));
-            } else if (!isNaN(valor) && valor !== '') {
-                valores.push(parseFloat(valor));
-            } else {
-                valores.push(valor);
-            }
-            actual = '';
-        } else {
-            actual += char;
-        }
-        i++;
-    }
-    
-    // Agregar último valor
-    if (actual.trim()) {
-        let valor = actual.trim();
-        if (valor === 'NULL' || valor === 'null' || valor === '') {
-            valores.push(null);
-        } else if (valor.startsWith("'") && valor.endsWith("'")) {
-            valores.push(valor.slice(1, -1));
-        } else if (!isNaN(valor) && valor !== '') {
-            valores.push(parseFloat(valor));
-        } else {
-            valores.push(valor);
-        }
-    }
-    
-    return valores;
-}
-
-// ============================================
-// Buscar estudiante por documento en los datos parseados
-// ============================================
-function buscarEstudianteEnDatos(datos, documento) {
-    const documentoNum = parseInt(documento);
-    
-    if (isNaN(documentoNum)) {
-        return { encontrado: false, razon: 'Documento inválido' };
-    }
-    
-    // Filtrar registros del estudiante
-    const facturasEstudiante = datos.facturas.filter(f => f.cliente === documentoNum);
-    const creditosEstudiante = datos.creditos.filter(c => c.cliente === documentoNum);
-    const recibosEstudiante = datos.recibos.filter(r => r.cliente === documentoNum);
-    
-    const encontrado = facturasEstudiante.length > 0 || 
-                       creditosEstudiante.length > 0 || 
-                       recibosEstudiante.length > 0;
-    
-    if (!encontrado) {
-        return { encontrado: false, razon: 'Documento no registrado' };
-    }
-    
-    // Ordenar por fecha (más reciente primero)
-    const ordenarPorFecha = (a, b) => new Date(b.fecha) - new Date(a.fecha);
-    
-    facturasEstudiante.sort(ordenarPorFecha);
-    creditosEstudiante.sort(ordenarPorFecha);
-    recibosEstudiante.sort(ordenarPorFecha);
-    
-    // Calcular saldo pendiente (créditos - pagos)
-    const totalCreditos = creditosEstudiante.reduce((sum, c) => sum + (c.valor || 0), 0);
-    const totalPagos = recibosEstudiante.reduce((sum, r) => sum + (r.valor || 0), 0);
-    const saldoPendiente = totalCreditos - totalPagos;
-    
-    // Obtener último pago
-    let ultimoPago = null;
-    if (recibosEstudiante.length > 0) {
-        ultimoPago = {
-            fecha: recibosEstudiante[0].fecha,
-            valor: recibosEstudiante[0].valor,
-            concepto: recibosEstudiante[0].concepto
-        };
-    }
-    
-    // Intentar extraer nombre de alguna observación o concepto
-    let nombre = `Estudiante ${documento}`;
-    
-    // Buscar nombre en recibos
-    for (const recibo of recibosEstudiante) {
-        if (recibo.concepto && recibo.concepto.length > 0 && recibo.concepto.length < 100) {
-            nombre = recibo.concepto.split(' ').slice(0, 3).join(' ');
-            break;
-        }
-    }
-    
-    // Buscar ciudad en observaciones
-    let ciudad = 'Santa Marta';
-    const ciudades = ['Santa Marta', 'Barranquilla', 'Cartagena', 'Sincelejo', 'Riohacha', 'Valledupar'];
-    for (const credito of creditosEstudiante) {
-        if (credito.observaciones) {
-            for (const city of ciudades) {
-                if (credito.observaciones.toLowerCase().includes(city.toLowerCase())) {
-                    ciudad = city;
-                    break;
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const documento = document.getElementById('documento').value;
+            const tipoDocumento = document.getElementById('tipoDocumento').value;
+            const programa = document.getElementById('programa').value;
+            
+            // Mostrar loading
+            mensajeDiv.innerHTML = '<div class="loading">🔍 Buscando información...</div>';
+            
+            try {
+                const resultado = await autenticarEstudiante(documento, tipoDocumento, programa);
+                
+                if (resultado.success) {
+                    mensajeDiv.innerHTML = `
+                        <div class="success">
+                            ✅ ${resultado.message}<br>
+                            📄 Documento: ${resultado.estudiante.documento}<br>
+                            📚 Programa: ${resultado.estudiante.programa}<br>
+                            📊 Facturas: ${resultado.estudiante.totalFacturas}<br>
+                            💳 Créditos: ${resultado.estudiante.totalCreditos}<br>
+                            💰 Recibos: ${resultado.estudiante.totalRecibos}<br>
+                            💵 Saldo pendiente: $${resultado.estudiante.saldoPendiente?.toLocaleString() || 0}
+                        </div>
+                    `;
+                    
+                    // Guardar sesión
+                    localStorage.setItem('usuario', JSON.stringify(resultado.estudiante));
+                    
+                    // Redirigir después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 2000);
                 }
+            } catch (error) {
+                mensajeDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
             }
-        }
-    }
-    
-    return {
-        encontrado: true,
-        nombre: nombre,
-        ciudad: ciudad,
-        facturas: facturasEstudiante,
-        creditos: creditosEstudiante,
-        recibos: recibosEstudiante,
-        ultimoPago: ultimoPago,
-        saldoPendiente: saldoPendiente
-    };
-}
-
-// ============================================
-// Función para verificar estado de la conexión
-// ============================================
-async function verificarConexion() {
-    try {
-        const datos = await obtenerDatosSQL();
-        return {
-            conectado: true,
-            totalFacturas: datos.facturas.length,
-            totalCreditos: datos.creditos.length,
-            totalRecibos: datos.recibos.length,
-            totalClientes: datos.clientes.length,
-            fechaActualizacion: ultimaDescarga ? new Date(ultimaDescarga) : null
-        };
-    } catch (error) {
-        return {
-            conectado: false,
-            error: error.message
-        };
-    }
-}
-
-// ============================================
-// EXPORTAR FUNCIONES (para uso en otros archivos)
-// ============================================
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { autenticarEstudiante, verificarConexion, obtenerDatosSQL };
-}
+        });
+    </script>
+</body>
+</html>
