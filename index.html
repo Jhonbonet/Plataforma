@@ -8,7 +8,7 @@
     <style>
         :root { --primary: #0d7a6e; --accent: #d4a017; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 4px solid var(--primary); margin-bottom: 25px; padding-bottom: 15px; }
         .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #eee; padding: 25px; border-radius: 10px; flex-wrap: wrap; }
         input { flex: 1; max-width: 350px; padding: 14px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
@@ -19,18 +19,23 @@
         .result-card { display: none; animation: slideUp 0.5s ease; }
         .profile-header { background: var(--primary); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
         .profile-header h2 { margin: 0; word-break: break-word; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; overflow-x: auto; display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
         th { background: #f1f1f1; color: var(--primary); font-weight: bold; }
         .loader { display: none; text-align: center; padding: 20px; color: var(--primary); font-weight: bold; }
+        .loader i { margin-right: 8px; }
         h3 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 12px; margin-top: 30px; }
-        .error-message { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f5c6cb; }
-        .empty-message { background: #e2f0fb; color: #004085; padding: 12px; border-radius: 8px; text-align: center; }
+        .error-message { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f5c6cb; }
+        .error-message i { margin-right: 8px; }
+        .empty-message { background: #e2f0fb; color: #004085; padding: 15px; border-radius: 8px; text-align: center; }
+        .success-message { background: #d4edda; color: #155724; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .container { padding: 15px; }
             th, td { padding: 8px; font-size: 12px; }
+            table { display: block; overflow-x: auto; }
         }
+        .debug-info { background: #f5f5f5; padding: 10px; border-radius: 5px; margin-top: 20px; font-size: 12px; display: none; }
     </style>
 </head>
 <body>
@@ -42,11 +47,11 @@
     </div>
 
     <div class="search-box">
-        <input type="text" id="docInput" placeholder="Número de Cédula o ID" onkeypress="if(event.key==='Enter') consultar()">
+        <input type="text" id="docInput" placeholder="Número de Cédula o ID" onkeypress="if(event.key==='Enter') consultar()" value="1004375362">
         <button onclick="consultar()" id="searchBtn"><i class="fas fa-search"></i> CONSULTAR</button>
     </div>
 
-    <div id="loader" class="loader"><i class="fas fa-sync fa-spin"></i> Accediendo a la base de datos SQL...</div>
+    <div id="loader" class="loader"><i class="fas fa-sync fa-spin"></i> Procesando Base de Datos SQL...</div>
 
     <div id="resultArea" class="result-card">
         <div class="profile-header">
@@ -57,161 +62,230 @@
             <i class="fas fa-user-circle fa-3x"></i>
         </div>
 
-        <h3><i class="fas fa-star"></i> Mis Calificaciones</h3>
+        <h3><i class="fas fa-star"></i> Notas y Calificaciones</h3>
         <div id="tableNotas"></div>
 
         <h3><i class="fas fa-receipt"></i> Historial de Pagos</h3>
         <div id="tablePagos"></div>
+        
+        <h3><i fa-regular fa-calendar"></i> Matrículas</h3>
+        <div id="tableMatriculas"></div>
     </div>
+    
+    <div id="debugInfo" class="debug-info"></div>
 </div>
 
 <script>
-    // URL de descarga del archivo SQL (asegúrate que sea público)
+    // URL del archivo SQL en Google Drive
     const URL_SQL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
-
-    // Variables globales para cache
-    let cachedData = null;
-
+    
+    // Cache de datos
+    let databaseData = {
+        tbl_estudiantes: [],
+        tbl_notas: [],
+        fac_creditos: [],
+        fac_facturas: [],
+        fac_recibos: [],
+        tbl_matriculas: [],
+        tbl_inscripciones: []
+    };
+    
+    let dataLoaded = false;
+    
     async function consultar() {
         const busqueda = document.getElementById('docInput').value.trim();
         if (!busqueda) {
             alert("⚠️ Por favor, ingrese un número de cédula o ID");
             return;
         }
-
+        
         const searchBtn = document.getElementById('searchBtn');
         searchBtn.disabled = true;
         document.getElementById('loader').style.display = 'block';
         document.getElementById('resultArea').style.display = 'none';
-
+        document.getElementById('debugInfo').style.display = 'none';
+        
         try {
-            // Cargar o usar cache del SQL
-            let sqlText;
-            if (cachedData) {
-                sqlText = cachedData;
-            } else {
-                const response = await fetch(URL_SQL);
-                if (!response.ok) throw new Error(`HTTP ${response.status}: No se pudo descargar el archivo SQL`);
-                sqlText = await response.text();
-                cachedData = sqlText;
+            // Cargar datos si no están en caché
+            if (!dataLoaded) {
+                await cargarBaseDatos();
             }
-
-            // Parsear tablas del SQL
-            const tables = parseSQLTables(sqlText);
             
-            // Buscar usuario en tbl_usuarios
-            const usuario = buscarUsuario(tables.tbl_usuarios, busqueda);
+            // Buscar estudiante
+            const estudiante = buscarEstudiante(busqueda);
             
-            if (!usuario) {
+            if (!estudiante) {
                 mostrarError(`No se encontró ningún estudiante con el documento: ${busqueda}`);
                 return;
             }
-
-            // Mostrar información del usuario
-            const nombreCompleto = `${usuario.nombres || ''} ${usuario.apellidos || ''}`.trim() || usuario.usuario || 'Sin nombre';
-            document.getElementById('viewName').innerText = nombreCompleto.toUpperCase();
-            document.getElementById('viewInfo').innerText = `Documento: ${usuario.documento || busqueda} | Correo: ${usuario.email || 'No registrado'}`;
-
-            // Buscar notas del usuario (por id_usuario)
-            const notasUsuario = buscarNotas(tables.tbl_resultados, usuario.id, usuario.documento);
-            renderNotas(notasUsuario);
-
-            // Buscar pagos del usuario (por documento)
-            const pagosUsuario = buscarPagos(tables.fac_creditos, usuario.documento);
-            renderPagos(pagosUsuario);
-
+            
+            // Mostrar información del estudiante
+            mostrarInfoEstudiante(estudiante);
+            
+            // Buscar y mostrar notas
+            const notas = buscarNotas(estudiante.id, estudiante.documento);
+            mostrarNotas(notas);
+            
+            // Buscar y mostrar pagos
+            const pagos = buscarPagos(estudiante.documento);
+            mostrarPagos(pagos);
+            
+            // Buscar y mostrar matrículas
+            const matriculas = buscarMatriculas(estudiante.id);
+            mostrarMatriculas(matriculas);
+            
             document.getElementById('resultArea').style.display = 'block';
-
-        } catch (e) {
-            console.error('Error detallado:', e);
-            let errorMsg = "Error al cargar la base de datos. ";
-            if (e.message.includes('Failed to fetch')) {
-                errorMsg += "No se pudo descargar el archivo. Verifica: 1) El archivo existe en Drive 2) Es público 3) La URL es correcta";
-            } else if (e.message.includes('HTTP')) {
-                errorMsg += e.message;
+            
+        } catch (error) {
+            console.error('Error detallado:', error);
+            let mensajeError = "Error al procesar la base de datos. ";
+            
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                mensajeError += "No se pudo descargar el archivo SQL. Verifique:<br>1) El archivo existe en Google Drive<br>2) El archivo es público (Compartir → 'Cualquier persona con el enlace')<br>3) La URL es correcta<br>4) Su conexión a internet está activa";
+            } else if (error.message.includes('SQL')) {
+                mensajeError += "Error al parsear el archivo SQL. " + error.message;
             } else {
-                errorMsg += "Verifique los permisos del archivo en Google Drive (debe ser público).";
+                mensajeError += error.message;
             }
-            mostrarError(errorMsg);
+            
+            mostrarError(mensajeError);
+            
+            // Mostrar debug
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML = `<strong>Debug Info:</strong><br>${error.stack || error.message}`;
         } finally {
             document.getElementById('loader').style.display = 'none';
             searchBtn.disabled = false;
         }
     }
-
-    // Función mejorada para parsear tablas SQL
-    function parseSQLTables(sqlText) {
-        const tables = {
-            tbl_usuarios: [],
-            tbl_resultados: [],
-            fac_creditos: []
+    
+    async function cargarBaseDatos() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                document.getElementById('loader').innerHTML = '<i class="fas fa-sync fa-spin"></i> Descargando archivo SQL...';
+                
+                const response = await fetch(URL_SQL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const sqlText = await response.text();
+                
+                if (!sqlText || sqlText.length < 100) {
+                    throw new Error("El archivo SQL está vacío o es demasiado pequeño");
+                }
+                
+                document.getElementById('loader').innerHTML = '<i class="fas fa-sync fa-spin"></i> Parseando tablas SQL...';
+                
+                // Parsear el SQL
+                parseSQLDump(sqlText);
+                
+                dataLoaded = true;
+                document.getElementById('loader').innerHTML = '<i class="fas fa-sync fa-spin"></i> Base de datos cargada. Consultando...';
+                
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+    
+    function parseSQLDump(sqlText) {
+        // Resetear datos
+        databaseData = {
+            tbl_estudiantes: [],
+            tbl_notas: [],
+            fac_creditos: [],
+            fac_facturas: [],
+            fac_recibos: [],
+            tbl_matriculas: [],
+            tbl_inscripciones: []
         };
-
-        // Dividir por comandos INSERT
-        const insertRegex = /INSERT\s+INTO\s+`?(\w+)`?\s+VALUES\s*(\([^;]+\);?)/gi;
+        
+        // Buscar todas las sentencias INSERT
+        const insertRegex = /INSERT\s+INTO\s+`?(\w+)`?\s+VALUES\s+((?:\([^;]+\);?))/gi;
         let match;
-
+        let insertCount = 0;
+        
         while ((match = insertRegex.exec(sqlText)) !== null) {
-            const tableName = match[1];
+            const tableName = match[1].toLowerCase();
             const valuesBlock = match[2];
             
-            if (!tables[tableName]) continue;
-
-            // Extraer todas las filas del bloque VALUES
-            const rows = extractRows(valuesBlock);
-            
-            for (const row of rows) {
-                const parsedRow = parseRow(row);
-                if (parsedRow) {
-                    tables[tableName].push(parsedRow);
-                }
+            if (databaseData.hasOwnProperty(tableName)) {
+                const rows = parseValuesBlock(valuesBlock);
+                databaseData[tableName].push(...rows);
+                insertCount++;
             }
         }
-
-        return tables;
+        
+        console.log(`Parseadas ${insertCount} sentencias INSERT`);
+        console.log('Estudiantes:', databaseData.tbl_estudiantes.length);
+        console.log('Notas:', databaseData.tbl_notas.length);
+        console.log('Creditos:', databaseData.fac_creditos.length);
     }
-
-    // Extraer filas individuales de un bloque VALUES
-    function extractRows(valuesBlock) {
-        // Remover "VALUES" al inicio si existe
-        let clean = valuesBlock.replace(/^VALUES\s*/i, '');
-        
-        // Buscar patrones de filas: (valores)
-        const rowRegex = /\(([^)]+(?:\)\s*,\s*\()?[^)]*)\)/g;
+    
+    function parseValuesBlock(valuesBlock) {
         const rows = [];
-        let rowMatch;
+        let current = '';
+        let inString = false;
+        let parenthesesLevel = 0;
         
-        while ((rowMatch = rowRegex.exec(clean)) !== null) {
-            let rowContent = rowMatch[1];
-            // Si la fila está truncada, intentar recuperar
-            if (rowContent.split("'").length % 2 === 0) {
-                // Buscar el siguiente paréntesis
-                const nextParen = clean.indexOf('(', rowMatch.index + 1);
-                if (nextParen !== -1) {
-                    const extendedMatch = clean.substring(rowMatch.index, nextParen);
-                    const extendedRowMatch = extendedMatch.match(/\(([^)]+)\)/);
-                    if (extendedRowMatch) {
-                        rowContent = extendedRowMatch[1];
+        for (let i = 0; i < valuesBlock.length; i++) {
+            const char = valuesBlock[i];
+            
+            if (char === "'" && (i === 0 || valuesBlock[i-1] !== '\\')) {
+                inString = !inString;
+                current += char;
+            } else if (!inString) {
+                if (char === '(') {
+                    if (parenthesesLevel === 0) {
+                        current = '';
                     }
+                    parenthesesLevel++;
+                    current += char;
+                } else if (char === ')') {
+                    parenthesesLevel--;
+                    current += char;
+                    
+                    if (parenthesesLevel === 0 && current.trim()) {
+                        // Parsear esta fila
+                        const row = parseRow(current);
+                        if (row && row.length > 0) {
+                            rows.push(row);
+                        }
+                        current = '';
+                    }
+                } else if (char === ',' && parenthesesLevel === 0) {
+                    // Separador entre filas, ignorar
+                    continue;
+                } else {
+                    current += char;
                 }
+            } else {
+                current += char;
             }
-            rows.push(rowContent);
         }
         
         return rows;
     }
-
-    // Parsear una fila de valores SQL respetando strings entre comillas
+    
     function parseRow(rowStr) {
+        // Remover paréntesis externos
+        let clean = rowStr.trim();
+        if (clean.startsWith('(') && clean.endsWith(')')) {
+            clean = clean.substring(1, clean.length - 1);
+        }
+        
         const values = [];
         let current = '';
         let inQuote = false;
-        let i = 0;
         
-        while (i < rowStr.length) {
-            const char = rowStr[i];
+        for (let i = 0; i < clean.length; i++) {
+            const char = clean[i];
             
-            if (char === "'" && (i === 0 || rowStr[i-1] !== '\\')) {
+            if (char === "'" && (i === 0 || clean[i-1] !== '\\')) {
                 inQuote = !inQuote;
                 current += char;
             } else if (char === ',' && !inQuote) {
@@ -220,7 +294,6 @@
             } else {
                 current += char;
             }
-            i++;
         }
         
         if (current.trim()) {
@@ -229,105 +302,129 @@
         
         return values;
     }
-
-    // Limpiar un valor SQL
+    
     function cleanValue(val) {
         if (!val) return '';
         val = val.trim();
-        // Remover comillas externas
+        
+        // Remover comillas
         if (val.startsWith("'") && val.endsWith("'")) {
-            val = val.slice(1, -1);
+            val = val.substring(1, val.length - 1);
         }
+        
         // Manejar NULL
-        if (val.toUpperCase() === 'NULL') return '';
+        if (val.toUpperCase() === 'NULL' || val === '') {
+            return '';
+        }
+        
         return val;
     }
-
-    // Buscar usuario por documento o ID
-    function buscarUsuario(usuarios, criterio) {
-        if (!usuarios || !Array.isArray(usuarios)) return null;
-        
-        // Buscar por coincidencia exacta en cualquier campo relevante
-        for (const user of usuarios) {
-            // Asumiendo estructura típica: [id, usuario, clave, nombres, apellidos, email, documento, ...]
-            const id = user[0] || '';
-            const nombreUsuario = user[1] || '';
-            const nombres = user[3] || '';
-            const apellidos = user[4] || '';
-            const email = user[5] || '';
-            const documento = user[6] || '';
+    
+    function buscarEstudiante(criterio) {
+        for (const estudiante of databaseData.tbl_estudiantes) {
+            // La estructura puede variar, buscar en varios campos
+            const id = estudiante[0] || '';
+            const documento = estudiante[1] || estudiante[2] || estudiante[3] || '';
+            const nombres = estudiante[2] || estudiante[4] || '';
+            const apellidos = estudiante[3] || estudiante[5] || '';
             
-            if (documento === criterio || id === criterio || nombreUsuario === criterio) {
+            if (documento == criterio || id == criterio) {
                 return {
                     id: id,
-                    usuario: nombreUsuario,
+                    documento: documento,
                     nombres: nombres,
                     apellidos: apellidos,
-                    email: email,
-                    documento: documento
+                    nombreCompleto: `${nombres} ${apellidos}`.trim()
                 };
             }
         }
         return null;
     }
-
-    // Buscar notas del usuario
-    function buscarNotas(notas, userId, documento) {
-        if (!notas || !Array.isArray(notas)) return [];
+    
+    function buscarNotas(idEstudiante, documento) {
+        const notas = [];
         
-        const resultados = [];
-        for (const nota of notas) {
-            // Estructura típica: [id, id_usuario, modulo, nota, fecha, ...]
-            const idUsuarioNota = nota[1] || '';
-            const modulo = nota[2] || '';
-            const calificacion = nota[3] || '';
-            const fecha = nota[4] || '';
+        for (const nota of databaseData.tbl_notas) {
+            const idEstNota = nota[1] || nota[2] || '';
+            const materia = nota[2] || nota[3] || '';
+            const calificacion = nota[3] || nota[4] || '';
+            const periodo = nota[4] || nota[5] || '';
             
-            // Buscar por ID de usuario o por documento
-            if (idUsuarioNota == userId || idUsuarioNota == documento) {
-                resultados.push({
-                    modulo: modulo,
-                    nota: calificacion,
-                    fecha: fecha
+            if (idEstNota == idEstudiante || idEstNota == documento) {
+                notas.push({
+                    materia: materia,
+                    calificacion: calificacion,
+                    periodo: periodo
                 });
             }
         }
-        return resultados;
-    }
-
-    // Buscar pagos del usuario
-    function buscarPagos(pagos, documento) {
-        if (!pagos || !Array.isArray(pagos)) return [];
         
-        const resultados = [];
-        for (const pago of pagos) {
-            // Estructura típica de fac_creditos: adaptar según el dump real
-            const fecha = pago[1] || '';
-            const cliente = pago[4] || ''; // Campo de cédula/cliente
-            const concepto = pago[6] || '';
-            const monto = pago[5] || '';
+        return notas;
+    }
+    
+    function buscarPagos(documento) {
+        const pagos = [];
+        
+        for (const credito of databaseData.fac_creditos) {
+            const cliente = credito[4] || credito[5] || credito[3] || '';
+            const fecha = credito[1] || credito[2] || '';
+            const concepto = credito[6] || credito[7] || '';
+            const valor = credito[5] || credito[6] || credito[4] || '';
             
             if (cliente == documento) {
-                resultados.push({
+                pagos.push({
                     fecha: fecha,
                     concepto: concepto,
-                    monto: formatMonto(monto)
+                    valor: formatearMoneda(valor)
                 });
             }
         }
-        return resultados;
+        
+        // También buscar en fac_facturas
+        for (const factura of databaseData.fac_facturas) {
+            const cliente = factura[2] || factura[3] || '';
+            const fecha = factura[1] || '';
+            const total = factura[4] || factura[5] || '';
+            
+            if (cliente == documento) {
+                pagos.push({
+                    fecha: fecha,
+                    concepto: 'Factura',
+                    valor: formatearMoneda(total)
+                });
+            }
+        }
+        
+        return pagos;
     }
-
-    // Formatear monto
-    function formatMonto(monto) {
-        if (!monto) return '$0';
-        const num = parseFloat(monto);
-        if (isNaN(num)) return monto;
-        return '$' + num.toLocaleString('es-CO');
+    
+    function buscarMatriculas(idEstudiante) {
+        const matriculas = [];
+        
+        for (const matricula of databaseData.tbl_matriculas) {
+            const idEst = matricula[1] || matricula[2] || '';
+            const grado = matricula[2] || matricula[3] || '';
+            const anio = matricula[3] || matricula[4] || '';
+            const estado = matricula[4] || matricula[5] || '';
+            
+            if (idEst == idEstudiante) {
+                matriculas.push({
+                    grado: grado,
+                    anio: anio,
+                    estado: estado || 'Activa'
+                });
+            }
+        }
+        
+        return matriculas;
     }
-
-    // Renderizar tabla de notas
-    function renderNotas(notas) {
+    
+    function mostrarInfoEstudiante(estudiante) {
+        document.getElementById('viewName').innerHTML = estudiante.nombreCompleto || 'Estudiante';
+        document.getElementById('viewInfo').innerHTML = `Documento: ${estudiante.documento} | ID: ${estudiante.id}`;
+    }
+    
+    function mostrarNotas(notas) {
         const container = document.getElementById('tableNotas');
         
         if (!notas || notas.length === 0) {
@@ -335,22 +432,21 @@
             return;
         }
         
-        let html = `<table><thead><tr><th>Módulo / Materia</th><th>Calificación</th><th>Fecha Registro</th></tr></thead><tbody>`;
+        let html = `<table><thead><tr><th>Materia / Asignatura</th><th>Calificación</th><th>Periodo</th></tr></thead><tbody>`;
         
         for (const nota of notas) {
             html += `<tr>
-                <td>${escapeHtml(nota.modulo || '---')}</td>
-                <td>${escapeHtml(nota.nota || '---')}</td>
-                <td>${escapeHtml(nota.fecha || '---')}</td>
+                <td>${escapeHtml(nota.materia || '---')}</td>
+                <td><strong>${escapeHtml(nota.calificacion || '---')}</strong></td>
+                <td>${escapeHtml(nota.periodo || '---')}</td>
             </tr>`;
         }
         
-        html += `</tbody>}</div>`;
+        html += `</tbody>}%;
         container.innerHTML = html;
     }
-
-    // Renderizar tabla de pagos
-    function renderPagos(pagos) {
+    
+    function mostrarPagos(pagos) {
         const container = document.getElementById('tablePagos');
         
         if (!pagos || pagos.length === 0) {
@@ -358,57 +454,91 @@
             return;
         }
         
-        let html = `<tr><thead><tr><th>Fecha</th><th>Concepto</th><th>Valor</th></tr></thead><tbody>`;
+        let html = `<table><thead><tr><th>Fecha</th><th>Concepto</th><th>Valor</th></tr></thead><tbody>`;
         
         for (const pago of pagos) {
             html += `<tr>
                 <td>${escapeHtml(pago.fecha || '---')}</td>
                 <td>${escapeHtml(pago.concepto || '---')}</td>
-                <td>${escapeHtml(pago.monto || '$0')}</td>
+                <td>${escapeHtml(pago.valor || '$0')}</td>
             </tr>`;
         }
         
-        html += `</tbody>}</div>`;
+        html += `</tbody>}#
         container.innerHTML = html;
     }
-
-    // Mostrar mensaje de error
+    
+    function mostrarMatriculas(matriculas) {
+        const container = document.getElementById('tableMatriculas');
+        
+        if (!matriculas || matriculas.length === 0) {
+            container.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> No hay registros de matrícula.</div>';
+            return;
+        }
+        
+        let html = `<table><thead><tr><th>Grado / Curso</th><th>Año</th><th>Estado</th></tr></thead><tbody>`;
+        
+        for (const matricula of matriculas) {
+            html += `<tr>
+                <td>${escapeHtml(matricula.grado || '---')}</td>
+                <td>${escapeHtml(matricula.anio || '---')}</td>
+                <td>${escapeHtml(matricula.estado || 'Activa')}</td>
+            </tr>`;
+        }
+        
+        html += `</tbody>}#
+        container.innerHTML = html;
+    }
+    
+    function formatearMoneda(valor) {
+        if (!valor || valor === 'NULL') return '$0';
+        const numero = parseFloat(valor);
+        if (isNaN(numero)) return valor;
+        return '$' + numero.toLocaleString('es-CO');
+    }
+    
     function mostrarError(mensaje) {
         const resultArea = document.getElementById('resultArea');
         resultArea.style.display = 'block';
         resultArea.innerHTML = `
             <div class="error-message">
                 <i class="fas fa-exclamation-triangle"></i> 
-                <strong>Error:</strong> ${mensaje}
+                <strong>⚠️ Error:</strong><br>
+                ${mensaje}
+            </div>
+            <div class="empty-message" style="margin-top: 15px;">
+                <i class="fas fa-lightbulb"></i> <strong>Sugerencias:</strong><br>
+                1. Verifique que el archivo SQL sea público en Google Drive<br>
+                2. Confirme que la URL del archivo sea correcta<br>
+                3. Revise que el archivo no esté corrupto<br>
+                4. Intente nuevamente en unos minutos
             </div>
         `;
         
         // Limpiar otras secciones
-        document.getElementById('viewName').innerText = '';
-        document.getElementById('viewInfo').innerText = '';
+        document.getElementById('viewName').innerHTML = '';
+        document.getElementById('viewInfo').innerHTML = '';
         document.getElementById('tableNotas').innerHTML = '';
         document.getElementById('tablePagos').innerHTML = '';
+        document.getElementById('tableMatriculas').innerHTML = '';
     }
-
-    // Escapar HTML para prevenir XSS
+    
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-
-    // Cargar al inicio
+    
+    // Cargar datos al inicio
     window.addEventListener('DOMContentLoaded', () => {
-        // Pre-cargar datos en segundo plano
+        console.log('Portal ASENORTE cargado');
+        // Pre-cargar datos
         setTimeout(() => {
-            if (!cachedData) {
-                fetch(URL_SQL)
-                    .then(res => res.text())
-                    .then(sql => { cachedData = sql; })
-                    .catch(e => console.log('Pre-carga fallida:', e));
+            if (!dataLoaded) {
+                cargarBaseDatos().catch(e => console.log('Pre-carga fallida:', e));
             }
-        }, 1000);
+        }, 2000);
     });
 </script>
 </body>
