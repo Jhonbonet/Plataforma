@@ -2,71 +2,125 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Portal ASENORTE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Estudiantil - ASENORTE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
-        .card { background: white; max-width: 800px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background: #003366; color: white; }
-        .btn { background: #003366; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        input { padding: 10px; width: 250px; border: 1px solid #ccc; border-radius: 5px; }
+        :root { --primary: #003366; --accent: #ffcc00; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 30px; }
+        input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; }
+        button { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .card { display: none; border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: var(--primary); color: white; }
+        .loader { display: none; text-align: center; font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Consulta Estudiantil ASENORTE</h2>
-    <input type="text" id="doc" placeholder="Documento de identidad">
-    <button class="btn" onclick="consultar()">Buscar</button>
-</div>
+<div class="container">
+    <div class="header">
+        <h1>PORTAL ESTUDIANTIL ASENORTE</h1>
+        <p>Consulta desde Base de Datos SQL</p>
+    </div>
 
-<div id="resultado" class="card" style="display:none;">
-    <h3 id="nombreEst"></h3>
-    
-    <h4>Asistencia</h4>
-    <div id="tablaAsistencia"></div>
+    <div class="search-box">
+        <input type="text" id="studentDoc" placeholder="Ingrese Identificación del Estudiante...">
+        <button onclick="consultarSQL()"><i class="fas fa-search"></i> Consultar</button>
+    </div>
 
-    <h4>Pagos</h4>
-    <div id="tablaPagos"></div>
+    <div id="loader" class="loader">Procesando Base de Datos...</div>
+
+    <div id="resultCard" class="card">
+        <h2 id="studentName"></h2>
+        
+        <h3><i class="fas fa-graduation-cap"></i> Calificaciones</h3>
+        <div id="tablaNotas"></div>
+
+        <h3><i class="fas fa-wallet"></i> Registro de Pagos</h3>
+        <div id="tablaPagos"></div>
+    </div>
 </div>
 
 <script>
-    // PEGA AQUÍ TU NUEVA URL DE APPS SCRIPT
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby3-poU6gH9JE_qO9ENqtnwwoNgKPvfbqIRCoI_bWAVr9H7XbPhDrJVw38xV8Ycykg8/exec';
+    let db = null;
 
-    async function consultar() {
-        const doc = document.getElementById('doc').value;
-        if(!doc) return alert("Ingresa un documento");
+    // Inicializar el motor SQL
+    async function initSql() {
+        const sqlPromise = initSqlJs({
+            locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
+        });
+        const dataPromise = fetch("asenorte.sql").then(res => res.arrayBuffer());
+        
+        const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
+        db = new SQL.Database(new Uint8Array(buf));
+        console.log("Base de datos SQL cargada correctamente");
+    }
+
+    // Ejecutar al cargar la página
+    initSql().catch(err => console.error("Error cargando SQL:", err));
+
+    async function consultarSQL() {
+        const doc = document.getElementById('studentDoc').value;
+        if (!doc) return alert("Ingrese un documento");
+        if (!db) return alert("La base de datos aún se está cargando. Espere un momento.");
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('resultCard').style.display = 'none';
 
         try {
-            const res = await fetch(`${WEB_APP_URL}?doc=${doc}`);
-            const data = await res.json();
+            // Consulta 1: Datos del Estudiante (Ajusta los nombres de tabla/columna según tu .sql)
+            // Ejemplo: asumiendo tabla 'estudiantes' y columna 'documento'
+            const resEst = db.exec(`SELECT nombre FROM estudiantes WHERE documento = '${doc}' LIMIT 1`);
+            
+            if (resEst.length === 0) {
+                alert("Estudiante no encontrado en la base de datos.");
+                return;
+            }
 
-            if(data.error) throw new Error(data.error);
+            document.getElementById('studentName').innerText = resEst[0].values[0][0];
 
-            document.getElementById('resultado').style.display = 'block';
-            document.getElementById('nombreEst').innerText = data.estudiante.nombre;
+            // Consulta 2: Notas (Ajusta tabla 'notas')
+            const resNotas = db.exec(`SELECT materia, nota FROM notas WHERE documento = '${doc}'`);
+            renderTable('tablaNotas', resNotas, ["Materia", "Calificación"]);
 
-            // Mostrar Asistencia
-            let htmlAsist = "<table><tr><th>Fecha</th><th>Estado</th></tr>";
-            data.asistencia.forEach(a => {
-                htmlAsist += `<tr><td>${a.FECHA || 'S/D'}</td><td>${a.ASISTENCIA || 'P'}</td></tr>`;
-            });
-            document.getElementById('tablaAsistencia').innerHTML = htmlAsist + "</table>";
+            // Consulta 3: Pagos (Ajusta tabla 'pagos')
+            const resPagos = db.exec(`SELECT fecha, concepto, valor FROM pagos WHERE documento = '${doc}'`);
+            renderTable('tablaPagos', resPagos, ["Fecha", "Concepto", "Valor"]);
 
-            // Mostrar Pagos
-            let htmlPagos = "<table><tr><th>Concepto</th><th>Valor</th></tr>";
-            data.pagos.forEach(p => {
-                htmlPagos += `<tr><td>${p.CONCEPTO || 'Mensualidad'}</td><td>$${p.VALOR || 0}</td></tr>`;
-            });
-            document.getElementById('tablaPagos').innerHTML = htmlPagos + "</table>";
+            document.getElementById('resultCard').style.display = 'block';
 
-        } catch (e) {
-            alert("Error: " + e.message);
+        } catch (error) {
+            console.error(error);
+            alert("Error en la consulta SQL. Verifique que los nombres de tablas y columnas sean correctos.");
+        } finally {
+            document.getElementById('loader').style.display = 'none';
         }
     }
+
+    function renderTable(elementId, result, headers) {
+        let html = '<table><tr>';
+        headers.forEach(h => html += `<th>${h}</th>`);
+        html += '</tr>';
+
+        if (result.length > 0) {
+            result[0].values.forEach(row => {
+                html += '<tr>';
+                row.forEach(cell => html += `<td>${cell}</td>`);
+                html += '</tr>';
+            });
+        } else {
+            html += `<tr><td colspan="${headers.length}">No se encontraron registros</td></tr>`;
+        }
+        
+        document.getElementById(elementId).innerHTML = html + '</table>';
+    }
 </script>
+
 </body>
 </html>
