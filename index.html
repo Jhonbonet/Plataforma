@@ -2,152 +2,71 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Estudiantil - ASENORTE</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Portal ASENORTE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #003366;
-            --secondary: #f4f4f4;
-            --accent: #ffcc00;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--secondary); margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 30px; }
-        input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; }
-        button { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #002244; }
-        .card { border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-top: 20px; display: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background: var(--primary); color: white; }
-        .status-present { color: green; font-weight: bold; }
-        .status-absent { color: red; font-weight: bold; }
-        .loader { display: none; text-align: center; margin: 20px 0; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .card { background: white; max-width: 800px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #003366; color: white; }
+        .btn { background: #003366; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        input { padding: 10px; width: 250px; border: 1px solid #ccc; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>PORTAL ESTUDIANTIL ASENORTE</h1>
-        <p>Consulta de Notas, Pagos y Asistencia</p>
-    </div>
+<div class="card">
+    <h2>Consulta Estudiantil ASENORTE</h2>
+    <input type="text" id="doc" placeholder="Documento de identidad">
+    <button class="btn" onclick="consultar()">Buscar</button>
+</div>
 
-    <div class="search-box">
-        <input type="text" id="studentDoc" placeholder="Ingrese su número de documento...">
-        <button onclick="consultarPortal()"><i class="fas fa-search"></i> Consultar</button>
-    </div>
+<div id="resultado" class="card" style="display:none;">
+    <h3 id="nombreEst"></h3>
+    
+    <h4>Asistencia</h4>
+    <div id="tablaAsistencia"></div>
 
-    <div id="loader" class="loader">
-        <i class="fas fa-spinner fa-spin fa-2x"></i> Buscando información...
-    </div>
-
-    <div id="resultCard" class="card">
-        <h2 id="studentName"></h2>
-        <div id="studentInfo"></div>
-        
-        <h3><i class="fas fa-calendar-check"></i> Registro de Asistencia</h3>
-        <div id="attendanceTable"></div>
-
-        <h3><i class="fas fa-file-invoice-dollar"></i> Estado de Pagos</h3>
-        <div id="paymentsTable"></div>
-    </div>
+    <h4>Pagos</h4>
+    <div id="tablaPagos"></div>
 </div>
 
 <script>
-    // CONFIGURACIÓN PROPORCIONADA
-    const CONFIG = {
-        // URL de tu Google Apps Script
-        PHP_API_URL: 'https://script.google.com/macros/s/AKfycbxEY1YteHwXBKBfAmiZrpG8ApaFodZyg6hPuhKB4at-wlpNNplFZLgjhHRUE0kFioMy/exec',
-        
-        // ID de tu Google Sheets (Asistencia)
-        XLSX_DRIVE_ID: '1bCfy4YRWaAibI_022ETbOsPyhvH_ySOJ83eV9rCnsSo',
-        
-        // URL de exportación para Google Sheets
-        XLSX_URL: 'https://docs.google.com/spreadsheets/d/1bCfy4YRWaAibI_022ETbOsPyhvH_ySOJ83eV9rCnsSo/export?format=xlsx'
-    };
+    // PEGA AQUÍ TU NUEVA URL DE APPS SCRIPT
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby3-poU6gH9JE_qO9ENqtnwwoNgKPvfbqIRCoI_bWAVr9H7XbPhDrJVw38xV8Ycykg8/exec';
 
-    async function consultarPortal() {
-        const doc = document.getElementById('studentDoc').value;
-        if (!doc) return alert("Por favor ingrese su documento");
-
-        document.getElementById('loader').style.display = 'block';
-        document.getElementById('resultCard').style.display = 'none';
+    async function consultar() {
+        const doc = document.getElementById('doc').value;
+        if(!doc) return alert("Ingresa un documento");
 
         try {
-            // 1. Consultar Notas y Pagos desde Apps Script
-            const response = await fetch(`${CONFIG.PHP_API_URL}?doc=${doc}`);
-            const data = await response.json();
+            const res = await fetch(`${WEB_APP_URL}?doc=${doc}`);
+            const data = await res.json();
 
-            if (data.error) throw new Error(data.error);
+            if(data.error) throw new Error(data.error);
 
-            // 2. Consultar Asistencia desde el Excel/Google Sheet
-            const attendanceData = await fetchAttendance(doc);
+            document.getElementById('resultado').style.display = 'block';
+            document.getElementById('nombreEst').innerText = data.estudiante.nombre;
 
-            // Mostrar Resultados
-            mostrarResultados(data, attendanceData);
-
-        } catch (error) {
-            console.error(error);
-            alert("Error al consultar datos. Verifique el documento o los permisos del archivo.");
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
-    }
-
-    async function fetchAttendance(studentDoc) {
-        try {
-            const res = await fetch(CONFIG.XLSX_URL);
-            const arrayBuffer = await res.arrayBuffer();
-            const data = new Uint8Array(arrayBuffer);
-            const workbook = XLSX.read(data, {type: 'array'});
-            
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-            // Filtrar por el documento del estudiante
-            // Ajusta 'DOCUMENTO' si el nombre de la columna en tu Excel es distinto
-            return jsonData.filter(row => row.DOCUMENTO == studentDoc || row.Documento == studentDoc);
-        } catch (e) {
-            console.error("Error en asistencia:", e);
-            return [];
-        }
-    }
-
-    function mostrarResultados(data, attendance) {
-        document.getElementById('resultCard').style.display = 'block';
-        document.getElementById('studentName').innerText = data.estudiante.nombre;
-        
-        // Renderizar Asistencia
-        let attHtml = '<table><tr><th>Fecha</th><th>Estado</th></tr>';
-        if (attendance.length > 0) {
-            attendance.forEach(a => {
-                const estado = (a.ASISTENCIA || a.Asistencia || "P").toUpperCase();
-                const clase = estado === 'P' || estado === 'PRESENTE' ? 'status-present' : 'status-absent';
-                attHtml += `<tr><td>${a.FECHA || a.Fecha}</td><td class="${clase}">${estado}</td></tr>`;
+            // Mostrar Asistencia
+            let htmlAsist = "<table><tr><th>Fecha</th><th>Estado</th></tr>";
+            data.asistencia.forEach(a => {
+                htmlAsist += `<tr><td>${a.FECHA || 'S/D'}</td><td>${a.ASISTENCIA || 'P'}</td></tr>`;
             });
-        } else {
-            attHtml += '<tr><td colspan="2">No hay registros de asistencia</td></tr>';
-        }
-        attHtml += '</table>';
-        document.getElementById('attendanceTable').innerHTML = attHtml;
+            document.getElementById('tablaAsistencia').innerHTML = htmlAsist + "</table>";
 
-        // Renderizar Pagos
-        let payHtml = '<table><tr><th>Concepto</th><th>Fecha</th><th>Valor</th></tr>';
-        if (data.pagos && data.pagos.length > 0) {
+            // Mostrar Pagos
+            let htmlPagos = "<table><tr><th>Concepto</th><th>Valor</th></tr>";
             data.pagos.forEach(p => {
-                payHtml += `<tr><td>${p.CONCEPTO || 'Mensualidad'}</td><td>${p.FECHA || '-'}</td><td>$${p.VALOR || p.Valor || '0'}</td></tr>`;
+                htmlPagos += `<tr><td>${p.CONCEPTO || 'Mensualidad'}</td><td>$${p.VALOR || 0}</td></tr>`;
             });
-        } else {
-            payHtml += '<tr><td colspan="3">No se encontraron registros de pagos</td></tr>';
+            document.getElementById('tablaPagos').innerHTML = htmlPagos + "</table>";
+
+        } catch (e) {
+            alert("Error: " + e.message);
         }
-        payHtml += '</table>';
-        document.getElementById('paymentsTable').innerHTML = payHtml;
     }
 </script>
-
 </body>
 </html>
