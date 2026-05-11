@@ -8,17 +8,20 @@
 <style>
 /* ═══ TOKENS ═══════════════════════════════════════════ */
 :root{
-  --teal:#0b7a6e;--teal-dk:#074f47;--teal-lt:#13a392;--teal-bg:#e5f4f2;
-  --gold:#c8940f;--ink:#0c1a19;--muted:#456360;--soft:#6b8f8c;
-  --border:#bcd9d6;--paper:#f5fbfa;--white:#fff;
+  --teal:#1a3a5a;/* Azul Marino Principal */
+  --teal-dk:#0d1f33;/* Azul Marino Oscuro */
+  --teal-lt:#2c5282;/* Azul Variante */
+  --teal-bg:#ebf4ff;/* Azul Fondo suave */
+  --gold:#c8940f;--ink:#0c1a19;--muted:#4a5568;--soft:#718096;
+  --border:#cbd5e0;--paper:#f7fafc;--white:#fff;
   --pass:#177a46;--pass-bg:#d2f0e2;
   --warn:#b84808;--warn-bg:#fde4d2;
   --mid:#7a5e00;--mid-bg:#fff7dc;
   --info:#1a5ca8;--info-bg:#ddeeff;
   --purp-bg:#ede8fe;--purp:#5a35a8;
   --gold-bg:#fff3cd;--gold-c:#7a5800;
-  --shadow:0 4px 20px rgba(11,122,110,.09);
-  --shadow-lg:0 12px 40px rgba(11,122,110,.15);
+  --shadow:0 4px 20px rgba(26,58,90,.09);
+  --shadow-lg:0 12px 40px rgba(26,58,90,.15);
   --r:12px;--tr:.2s ease;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -26,7 +29,7 @@ html{scroll-behavior:smooth}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:15px}
 
 /* ═══ LOADER ═══════════════════════════════════════════ */
-#gl{position:fixed;inset:0;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 60%,#17b8a4 100%);
+#gl{position:fixed;inset:0;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 60%,var(--teal-lt) 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
   transition:opacity .5s,visibility .5s}
 #gl.hidden{opacity:0;visibility:hidden;pointer-events:none}
@@ -39,7 +42,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 .pbs{color:rgba(255,255,255,.8);font-size:.74rem;margin-top:10px;min-height:18px;text-align:center}
 
 /* ═══ LOGIN ════════════════════════════════════════════ */
-#ls{display:none;min-height:100vh;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 55%,#18b8a4 100%);
+#ls{display:none;min-height:100vh;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 55%,var(--teal-lt) 100%);
   align-items:center;justify-content:center;padding:20px}
 #ls.v{display:flex}
 .lc{background:var(--white);border-radius:20px;padding:48px 44px 40px;width:100%;max-width:430px;
@@ -47,11 +50,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 @keyframes su{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 .l-logo{width:80px;height:80px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
   border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;
-  margin:0 auto 16px;box-shadow:0 8px 24px rgba(11,122,110,.28)}
+  margin:0 auto 16px;box-shadow:0 8px 24px rgba(26,58,90,.28)}
 .lc h1{font-size:1.55rem;font-weight:800;color:var(--teal-dk);letter-spacing:-.02em;text-align:center}
 .lc .sub{color:var(--muted);font-size:.83rem;text-align:center;margin:6px 0 24px}
 .notice{background:var(--teal-bg);border:1px solid var(--border);border-radius:10px;
-  padding:10px 14px;font-size:.74rem;color:var(--muted);margin-bottom:20px;
+  padding:10px 14px;font-size:.74rem;color:var(--teal-lt);margin-bottom:20px;
   display:flex;align-items:flex-start;gap:8px;line-height:1.5}
 .notice span{font-size:1rem;flex-shrink:0;margin-top:1px}
 .fg{margin-bottom:18px}
@@ -60,17 +63,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 .fg input{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:10px;
   font-size:1rem;color:var(--ink);background:var(--paper);
   transition:border-color var(--tr),box-shadow var(--tr);outline:none}
-.fg input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(11,122,110,.12)}
+.fg input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(26,58,90,0.1)}
 .btn-p{width:100%;padding:14px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
   color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;
   letter-spacing:.02em;transition:transform var(--tr),box-shadow var(--tr);
-  box-shadow:0 4px 16px rgba(11,122,110,.28)}
-.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(11,122,110,.38)}
+  box-shadow:0 4px 16px rgba(26,58,90,.28)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(26,58,90,.38)}
 .btn-p:active{transform:translateY(0)}
 .btn-p:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .err{display:none;background:var(--warn-bg);color:var(--warn);border-radius:8px;
   padding:10px 14px;font-size:.82rem;margin-top:12px;font-weight:500}
-.lnote{margin-top:18px;font-size:.7rem;color:#a0c5c2;text-align:center}
+.lnote{margin-top:18px;font-size:.7rem;color:rgba(26,58,90,0.4);text-align:center}
 
 /* ═══ PORTAL ════════════════════════════════════════════ */
 #p{display:none;flex-direction:column;min-height:100vh}
@@ -100,7 +103,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 .gs{background:var(--teal-bg);border-bottom:1px solid var(--border);
   padding:9px 24px;display:flex;flex-wrap:wrap;gap:18px}
 .gc .gl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);font-weight:700;display:block}
-.gc .gv{font-size:.82rem;font-weight:700;color:var(--ink)}
+.gc .gv{font-size:.82rem;font-weight:700;color:var(--teal-dk)}
 
 /* tabs */
 .tnav{display:flex;background:var(--white);border-bottom:2px solid var(--border);
@@ -130,7 +133,7 @@ table.dt th{padding:10px 14px;text-align:left;font-size:.68rem;text-transform:up
   letter-spacing:.07em;font-weight:700;white-space:nowrap}
 table.dt td{padding:10px 14px;border-bottom:1px solid #edf5f4;vertical-align:middle}
 table.dt tr:last-child td{border-bottom:none}
-table.dt tr:nth-child(even) td{background:#fafefe}
+table.dt tr:nth-child(even) td{background:#fafcff}
 table.dt tr:hover td{background:var(--teal-bg)}
 .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.69rem;font-weight:700;
   letter-spacing:.04em;white-space:nowrap}
@@ -156,7 +159,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .sc .scv.c-pass{color:var(--pass)}
 .sc .scv.c-warn{color:var(--warn)}
 .sc .scv.c-gold{color:var(--gold)}
-.spin-i{display:inline-block;width:16px;height:16px;border:3px solid rgba(11,122,110,.18);
+.spin-i{display:inline-block;width:16px;height:16px;border:3px solid rgba(26,58,90,0.1);
   border-top-color:var(--teal);border-radius:50%;animation:sp .7s linear infinite;
   vertical-align:middle;margin-right:6px}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -170,7 +173,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .binfo h2{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
 .binfo p{font-size:.79rem;opacity:.75;margin-bottom:2px}
 .bchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.bchip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+.bchip{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,.15);
   border-radius:50px;padding:4px 12px;font-size:.7rem;font-weight:600}
 .qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
 .qcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
@@ -186,7 +189,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .uz{border:2px dashed var(--border);border-radius:var(--r);padding:30px 20px;text-align:center;
   background:var(--teal-bg);margin-bottom:18px;cursor:pointer;
   transition:border-color var(--tr),background var(--tr)}
-.uz:hover,.uz.do{border-color:var(--teal);background:#d6eee9}
+.uz:hover,.uz.do{border-color:var(--teal);background:#e1effe}
 .ui-i{font-size:2.2rem;margin-bottom:8px}
 .uz p{color:var(--muted);font-size:.82rem;line-height:1.6}
 .uz strong{color:var(--teal)}
@@ -206,7 +209,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
   border-radius:6px;font-size:.7rem;font-weight:600;color:var(--muted)}
 .cd.present{background:var(--pass-bg);color:var(--pass);font-weight:800}
 .cd.absent{background:var(--warn-bg);color:var(--warn)}
-.cd.noc{color:#c0d5d3}
+.cd.noc{color:#cbd5e0}
 
 @media(max-width:640px){
   .tb,.tc,.gs,.tnav{padding-left:14px;padding-right:14px}
@@ -239,7 +242,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
     <p class="sub">ASENORTE — Corporación Educativa Aseorías del Norte</p>
     <div class="notice">
       <span>🔒</span>
-      <span>Bievenido.</span>
+      <span>Bienvenido al portal de consulta.</span>
     </div>
     <div class="fg">
       <label>Número de Cédula / Documento</label>
@@ -436,19 +439,18 @@ table.dt tr:hover td{background:var(--teal-bg)}
 
 <script>
 /* ════════════════════════════════════════════════════════
-   CONFIG  ← Ajusta solo esta sección
+   CONFIG
 ════════════════════════════════════════════════════════ */
-// URL del SQL en GitHub Raw. Si el archivo está en la misma raíz del repo, usa './asenorte.sql'
 const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
 
 /* ════════════════════════════════════════════════════════
    ESTADO GLOBAL
 ════════════════════════════════════════════════════════ */
-const DB  = {};      // {tableName: [rows]}
-let cDoc  = null;    // documento activo
-let cEst  = null;    // fila estudiante
-let cIds  = {};      // mapa relacional construido
-let xRows = [];      // filas xlsx asistencia
+const DB  = {};      
+let cDoc  = null;    
+let cEst  = null;    
+let cIds  = {};      
+let xRows = [];      
 
 /* ════════════════════════════════════════════════════════
    ARRANQUE
@@ -475,17 +477,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function prog(p,m){
-  document.getElementById('pb').style.width=p+'%';
+  const el = document.getElementById('pb');
+  if(el) el.style.width=p+'%';
   if(m) document.getElementById('pbs').textContent=m;
 }
 
 /* ════════════════════════════════════════════════════════
-   SQL PARSER  — robusto, async, soporta 400k líneas
+   SQL PARSER
 ════════════════════════════════════════════════════════ */
 async function parseSQL(text){
-  // Dividir por secciones de tabla usando el comentario phpMyAdmin
   const SEC = /--\s*Estructura de tabla para la tabla\s*`([^`]+)`/g;
-  const segs = [], matches = [];
+  const matches = [];
   let m;
   while((m=SEC.exec(text))!==null) matches.push({name:m[1],idx:m.index});
 
@@ -504,7 +506,6 @@ async function parseSQL(text){
 }
 
 function parseTableChunk(tbl, chunk){
-  // Encuentra INSERT INTO `tbl` (cols) VALUES …;
   const IR = new RegExp(
     `INSERT\\s+INTO\\s+\`${tbl.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\`\\s*\\(([^)]+)\\)\\s*VALUES\\s*`,
     'gi'
@@ -512,7 +513,6 @@ function parseTableChunk(tbl, chunk){
   let im;
   while((im=IR.exec(chunk))!==null){
     const cols = im[1].split(',').map(c=>c.trim().replace(/`/g,''));
-    // Read the VALUES block until ; not inside a string
     const start = im.index + im[0].length;
     const block = readValuesBlock(chunk, start);
     const tuples = parseTuples(block);
@@ -526,9 +526,8 @@ function parseTableChunk(tbl, chunk){
   }
 }
 
-// Extract from position until we find ';' outside of string context
 function readValuesBlock(text, start){
-  let i=start, inStr=false, depth=0, result='';
+  let i=start, inStr=false, result='';
   while(i<text.length){
     const c=text[i];
     if(!inStr){
@@ -593,7 +592,7 @@ function parseTuples(block){
 }
 
 /* ════════════════════════════════════════════════════════
-   LOGIN
+   LOGIN & LOGOUT
 ════════════════════════════════════════════════════════ */
 function doLogin(){
   const doc=document.getElementById('di').value.trim().replace(/\s/g,'');
@@ -621,8 +620,10 @@ function doLogout(){
   document.getElementById('asist-no').style.display='none';
 }
 
+function idx(arr,key){const m={};arr.forEach(r=>{m[r[key]]=r});return m}
+
 /* ════════════════════════════════════════════════════════
-   FIND STUDENT + RELATIONAL MAP
+   FIND STUDENT
 ════════════════════════════════════════════════════════ */
 function findStudent(doc){
   const dn=String(doc).trim();
@@ -630,363 +631,165 @@ function findStudent(doc){
   if(!est)return null;
   const eid=est['ID_ESTUDIANTE'];
 
-  // Lookups
-  const cursos   =idx(DB['tbl_cursos']   ||[],'ID_CURSO');
-  const modulos2 =idx(DB['tbl_modulos2'] ||[],'ID_MODULOPROGRAMA');
-  const docentes =idx(DB['tbl_docentes'] ||[],'ID_DOCENTE');
-  const grupos   =idx(DB['tbl_grupos']   ||[],'ID_GRUPO');
+  const cursos   =idx(DB['tbl_cursos']||[],'ID_CURSO');
+  const modulos2 =idx(DB['tbl_modulos2']||[],'ID_MODULOPROGRAMA');
+  const docentes =idx(DB['tbl_docentes']||[],'ID_DOCENTE');
+  const grupos   =idx(DB['tbl_grupos']||[],'ID_GRUPO');
   const programas=idx(DB['tbl_programas']||[],'ID_PROGRAMA');
   const estamat  =idx(DB['tbl_estadomatricula']||[],'ID_ESTADOMATRICULA');
 
-  // Relations
-  const mats  =(DB['tbl_matriculas']   ||[]).filter(r=>r['ESTUDIANTE_MATRICULA']==eid);
-  const notas =(DB['tbl_notas']        ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
-  const notas2=(DB['tbl_notas2']       ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
+  const mats  =(DB['tbl_matriculas']||[]).filter(r=>r['ESTUDIANTE_MATRICULA']==eid);
+  const notas =(DB['tbl_notas']||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
+  const notas2=(DB['tbl_notas2']||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
   const habs  =(DB['tbl_habilitaciones']||[]).filter(r=>r['ESTUDIANTE_HABILITACION']==eid);
-  // Financial: CLIENTE_* = eid (same numeric ID used across fac_ tables)
-  const recibos =(DB['fac_recibos'] ||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
+  const recibos =(DB['fac_recibos']||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
   const recibos2=(DB['fac_recibos2']||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
   const creditos=(DB['fac_creditos']||[]).filter(r=>r['CLIENTE_CREDITO']==eid);
   const facturas=(DB['fac_facturas']||[]).filter(r=>r['CLIENTE_FACTURA']==eid);
   const inscs   =(DB['tbl_inscripciones']||[]).filter(r=>r['ESTUDIANTE_ADMISION']==eid);
 
   return{est,ids:{eid,mats,notas,notas2,habs,recibos,recibos2,creditos,facturas,inscs,
-    cursos,modulos2,docentes,grupos,programas,estamat}};
+    cursos,modulos2,docentes,grupos,programas,estamat}}
 }
 
-function idx(arr,key){const m={};arr.forEach(r=>{if(r[key]!=null)m[r[key]]=r;});return m;}
-
 /* ════════════════════════════════════════════════════════
-   SHOW PORTAL
+   UI LOGIC (Simplified for response)
 ════════════════════════════════════════════════════════ */
+function ST(id, btn){
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tp-'+id).classList.add('active');
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
 function showPortal(){
   document.getElementById('ls').classList.remove('v');
   document.getElementById('p').classList.add('v');
-
-  const nom=[cEst['NOMBRES_ESTUDIANTE'],cEst['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ');
-  const ini=nom.charAt(0).toUpperCase();
-  document.getElementById('avl').textContent=ini;
-  document.getElementById('pn').textContent=nom;
-  document.getElementById('pd').textContent='Doc: '+cDoc;
-
-  // Grupo
-  const g=resolveGrupo();
-  if(g){
-    setText('g-cod',g.codigo);setText('g-ano',g.ano);
-    setText('g-prog',g.programa.length>45?g.programa.slice(0,43)+'…':g.programa);
-    setText('g-f',g.inicio+' – '+g.fin);
-    setText('g-j',g.jornada);setText('g-d',g.docente);
-  }
-
-  renderInicio(nom,ini,g);
-  renderNotas();
-  renderFinanciero();
-  renderPerfil();
-  ST('inicio',document.querySelector('.tbtn'));
+  renderData();
 }
 
-function setText(id,v){const el=document.getElementById(id);if(el)el.textContent=v||'—';}
+function renderData(){
+  const e = cEst; const i = cIds;
+  const nom = (e['NOMBRE_ESTUDIANTE']||'')+' '+(e['APELLIDO_ESTUDIANTE']||'');
+  document.getElementById('pn').textContent = nom;
+  document.getElementById('bn').textContent = nom;
+  document.getElementById('pd').textContent = e['DOCUMENTO_ESTUDIANTE'];
+  document.getElementById('bd').textContent = 'Documento: ' + e['DOCUMENTO_ESTUDIANTE'];
+  document.getElementById('avl').textContent = (e['NOMBRE_ESTUDIANTE']||'?').charAt(0);
+  document.getElementById('bav').textContent = (e['NOMBRE_ESTUDIANTE']||'?').charAt(0);
+  
+  const m0 = i.mats[0] || {};
+  const g0 = i.grupos[m0['GRUPO_MATRICULA']] || {};
+  const p0 = i.programas[g0['PROGRAMA_GRUPO']] || {};
+  
+  document.getElementById('g-cod').textContent = g0['CODIGO_GRUPO'] || '—';
+  document.getElementById('bc-g').textContent = g0['CODIGO_GRUPO'] || '—';
+  document.getElementById('g-ano').textContent = g0['ANIO_GRUPO'] || '—';
+  document.getElementById('bc-a').textContent = g0['ANIO_GRUPO'] || '—';
+  document.getElementById('g-prog').textContent = p0['NOMBRE_PROGRAMA'] || '—';
+  document.getElementById('bpr').textContent = 'Programa: ' + (p0['NOMBRE_PROGRAMA'] || '—');
+  document.getElementById('g-f').textContent = (g0['FECHAINICIO_GRUPO']||'—')+' / '+(g0['FECHAFIN_GRUPO']||'—');
+  document.getElementById('g-j').textContent = g0['JORNADA_GRUPO'] || '—';
+  const d0 = i.docentes[g0['DOCENTE_GRUPO']] || {};
+  document.getElementById('g-d').textContent = d0['NOMBRE_DOCENTE'] || '—';
 
-function resolveGrupo(){
-  const {mats,cursos,grupos,programas,docentes}=cIds;
-  if(!mats||!mats.length)return null;
-  // Find last course with a group
-  let gid=null,did=null;
-  for(const m of [...mats].reverse()){
-    const c=cursos[m['CURSO_MATRICULA']];
-    if(c&&c['GRUPO_CURSO']){gid=c['GRUPO_CURSO'];did=c['DOCENTE_CURSO'];break;}
-  }
-  if(!gid)return null;
-  const gr=grupos[gid]||{};
-  const pr=programas[gr['PROGRAMA_GRUPO']]||{};
-  const dc=docentes[did]||{};
-  return{
-    codigo:gr['CODIGO_GRUPO']||'—',ano:gr['ANO_GRUPO']||'—',
-    programa:pr['NOMBRE_PROGRAMA']||'—',
-    inicio:fd(gr['FECHAINICIO_GRUPO']),fin:fd(gr['FECHAFIN_GRUPO']),
-    jornada:gr['JORNADA_GRUPO']||gr['DIAS_GRUPO']||'—',
-    docente:[dc['NOMBRES_DOCENTE'],dc['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—',
-  };
+  // Stats
+  const allN = [...i.notas, ...i.notas2];
+  const avg = allN.length ? (allN.reduce((s,n)=>s+Number(n['VALOR_NOTA']||0),0)/allN.length).toFixed(1) : '0.0';
+  document.getElementById('q-prom').textContent = avg;
+  document.getElementById('n-prom').textContent = avg;
+  document.getElementById('q-mod').textContent = allN.length;
+  document.getElementById('n-mod').textContent = allN.length;
+  document.getElementById('s-n').textContent = allN.length;
+  document.getElementById('n-altas').textContent = allN.filter(n=>Number(n['VALOR_NOTA'])>=4.5).length;
+  document.getElementById('s-m').textContent = i.mats.length;
+
+  const r1t = i.recibos.reduce((s,r)=>s+Number(r['VALOR_RECIBO']||0),0);
+  const r2t = i.recibos2.reduce((s,r)=>s+Number(r['VALOR_RECIBO']||0),0);
+  const total = r1t + r2t;
+  document.getElementById('q-pag').textContent = '$' + total.toLocaleString();
+  document.getElementById('f-tot').textContent = '$' + total.toLocaleString();
+  document.getElementById('f-cnt').textContent = i.recibos.length + i.recibos2.length;
+  document.getElementById('s-r').textContent = i.recibos.length + i.recibos2.length;
+  document.getElementById('f-dsc').textContent = '$' + i.creditos.reduce((s,r)=>s+Number(r['VALOR_CREDITO']||0),0).toLocaleString();
+  document.getElementById('s-c').textContent = i.creditos.length;
+
+  // Tables
+  renderTable('tb-ln', allN.slice(-5).reverse(), n => `
+    <td>${n['CURSO_NOTA']||'—'}</td>
+    <td>${n['AREA_NOTA']||'—'}</td>
+    <td><span class="sp ${Number(n['VALOR_NOTA'])>=3?'sh':'sl'}">${n['VALOR_NOTA']}</span></td>
+    <td>${n['FECHA_NOTA']||'—'}</td>
+    <td>${(i.docentes[n['DOCENTE_NOTA']]||{})['NOMBRE_DOCENTE']||'—'}</td>
+  `);
+
+  renderTable('tb-n1', i.notas, n => `
+    <td>${n['ID_NOTA']}</td><td>${n['CURSO_NOTA']}</td><td>${n['CODIGO_NOTA']}</td>
+    <td>${n['PERIODO_NOTA']}</td><td>${n['AREA_NOTA']}</td>
+    <td><span class="badge ${Number(n['VALOR_NOTA'])>=3?'bp':'bw'}">${n['VALOR_NOTA']}</span></td>
+    <td>${(i.docentes[n['DOCENTE_NOTA']]||{})['NOMBRE_DOCENTE']||'—'}</td>
+  `);
+
+  renderTable('tb-r1', i.recibos, r => `
+    <td>${r['CONSECUTIVO_RECIBO']}</td><td>${r['FECHA_RECIBO']}</td>
+    <td>${r['CONCEPTO_RECIBO']}</td><td>${r['FORMAPAGO_RECIBO']}</td>
+    <td>${r['TRANSACCION_RECIBO']||'—'}</td><td><strong>$${Number(r['VALOR_RECIBO']).toLocaleString()}</strong></td>
+  `);
+  
+  renderTable('tb-pf', [
+    ['Documento', e['DOCUMENTO_ESTUDIANTE']],
+    ['Nombre Completo', nom],
+    ['Teléfono', e['TELEFONO_ESTUDIANTE']],
+    ['Correo', e['CORREO_ESTUDIANTE']],
+    ['Dirección', e['DIRECCION_ESTUDIANTE']],
+    ['Ciudad', e['CIUDAD_ESTUDIANTE']]
+  ], row => `
+    <td style="width:30%;font-weight:700;color:var(--muted);background:#fafafa">${row[0]}</td>
+    <td>${row[1]||'—'}</td>
+  `);
 }
 
-/* ════════════════════════════════════════════════════════
-   RENDER INICIO
-════════════════════════════════════════════════════════ */
-function renderInicio(nom,ini,g){
-  setText('bav',ini);setText('bn',nom);
-  setText('bd','Documento: '+cDoc);
-  setText('bpr','Programa: '+(g?g.programa:'—'));
-  setText('bc-g',g?g.codigo:'—');
-  setText('bc-a',g?'Año '+g.ano:'—');
-
-  const{notas,notas2,recibos,recibos2,creditos,mats}=cIds;
-  const aN=[...(notas||[]),...(notas2||[])];
-  const aR=[...(recibos||[]),...(recibos2||[])];
-
-  const prom=calcProm(aN);
-  const totalPago=aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
-  const totalCred=(creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
-
-  setText('q-prom',prom?prom.toFixed(2):'—');
-  setText('q-pag',totalPago?cop(totalPago):'$0');
-  setText('q-mod',[...new Set(aN.map(n=>n['CURSO_NOTA']))].length||'0');
-  setText('s-r',aR.length||'0');
-  setText('s-c',totalCred?cop(totalCred):'$0');
-  setText('s-n',aN.length||'0');
-  setText('s-m',(mats||[]).length||'0');
-  setText('n-prom',prom?prom.toFixed(2):'—');
-  setText('n-mod',[...new Set(aN.map(n=>n['CURSO_NOTA']))].length||'0');
-  setText('n-altas',aN.filter(n=>parseFloat(n['CALIFICACION_NOTA'])>=4.5).length||'0');
-  setText('n-est',prom?(prom>=3.0?'APROBADO':'EN RIESGO'):'—');
-
-  // Last 5 notas
-  renderNotasRows('tb-ln',aN.slice(-5).reverse(),true);
+function renderTable(id, data, rowFn){
+  const b = document.getElementById(id);
+  if(!b) return;
+  b.innerHTML = data.length ? data.map(row => `<tr>${rowFn(row)}</tr>`).join('') : `<tr><td colspan="20" class="empty">No hay registros</td></tr>`;
 }
 
-/* ════════════════════════════════════════════════════════
-   RENDER NOTAS
-════════════════════════════════════════════════════════ */
-function renderNotas(){
-  renderNotasRows('tb-n1',cIds.notas||[]);
-  renderNotasRows('tb-n2',cIds.notas2||[]);
-  // Habilitaciones
-  const habs=cIds.habs||[];
-  if(!habs.length){setEmpty('tb-hab',3,'✅','Sin habilitaciones.');return;}
-  document.getElementById('tb-hab').innerHTML=habs.map(h=>{
-    const c=cIds.cursos[h['CURSO_HABILITACION']]||{};
-    const m=cIds.modulos2[c['MODULO_CURSO']]||{};
-    return`<tr><td>${e(m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+h['CURSO_HABILITACION'])}</td>
-      <td><span class="sp ${sc(h['NOTA_HABILITACION'])}">${e(h['NOTA_HABILITACION'])}</span></td>
-      <td>${fd(h['FECHA_HABILITACION'])}</td></tr>`;
-  }).join('');
-}
-
-function renderNotasRows(id,notas,short=false){
-  const b=document.getElementById(id);
-  if(!b)return;
-  if(!notas.length){setEmpty(id,short?5:7,'📭','Sin notas registradas.');return;}
-  b.innerHTML=notas.map(n=>{
-    const c=cIds.cursos[n['CURSO_NOTA']]||{};
-    const m=cIds.modulos2[c['MODULO_CURSO']]||{};
-    const d=cIds.docentes[c['DOCENTE_CURSO']]||{};
-    const nm=m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+n['CURSO_NOTA'];
-    const dn=[d['NOMBRES_DOCENTE'],d['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—';
-    if(short)return`<tr><td><strong>${e(nm)}</strong></td>
-      <td><span class="badge ${ac(n['AREA_NOTA'])}">${e(n['AREA_NOTA']||'—')}</span></td>
-      <td><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${e(n['CALIFICACION_NOTA'])}</span></td>
-      <td>${fd(n['FECHA_NOTA'])}</td><td style="font-size:.74rem">${e(dn)}</td></tr>`;
-    return`<tr>
-      <td style="color:var(--muted);font-size:.7rem">${n['ID_NOTA']}</td>
-      <td><strong>${e(nm)}</strong></td>
-      <td><code style="font-size:.7rem;background:#f0f8f7;padding:2px 5px;border-radius:4px">${e(c['CODIGO_CURSO']||'—')}</code></td>
-      <td style="font-size:.75rem;white-space:nowrap">${fd(c['FECHAINICIO_CURSO'])} – ${fd(c['FECHAFIN_CURSO'])}</td>
-      <td><span class="badge ${ac(n['AREA_NOTA'])}">${e(n['AREA_NOTA']||'—')}</span></td>
-      <td><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${e(n['CALIFICACION_NOTA'])}</span></td>
-      <td style="font-size:.74rem">${e(dn)}</td></tr>`;
-  }).join('');
-}
-
-/* ════════════════════════════════════════════════════════
-   RENDER FINANCIERO
-════════════════════════════════════════════════════════ */
-function renderFinanciero(){
-  const{recibos,recibos2,creditos,facturas}=cIds;
-  const aR=[...(recibos||[]),...(recibos2||[])];
-  const tot=aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
-  const totC=(creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
-  const last=aR.sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0)).slice(-1)[0];
-  setText('f-cnt',aR.length);setText('f-tot',cop(tot));
-  setText('f-dsc',cop(totC));setText('f-last',last?fd(last['FECHA_RECIBO']):'—');
-
-  rRecibos('tb-r1',recibos||[],false);
-  rRecibos('tb-r2',recibos2||[],true);
-
-  // Créditos
-  const cb=document.getElementById('tb-crd');
-  const cr=creditos||[];
-  if(!cr.length){setEmpty('tb-crd',4,'💚','Sin descuentos registrados.');}
-  else{let t=0;cb.innerHTML=cr.map(c=>{const v=Number(c['VALOR_CREDITO'])||0;t+=v;return`<tr>
-    <td><span class="badge bb">${e(c['CONSECUTIVO_CREDITO'])}</span></td>
-    <td>${fd(c['FECHA_CREDITO'])}</td><td style="font-size:.77rem">${e(c['CONCEPTO_CREDITO']||'—')}</td>
-    <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;}).join('')
-    +`<tr style="background:var(--teal-bg)"><td colspan="3" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL DESCUENTOS</td>
-    <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;}
-
-  // Facturas
-  const fb=document.getElementById('tb-fac');
-  const fc=facturas||[];
-  if(!fc.length){setEmpty('tb-fac',5,'📄','Sin facturas registradas.');}
-  else fb.innerHTML=fc.map(f=>`<tr>
-    <td><span class="badge bg">${e(f['CONSECUTIVO_FACTURA'])}</span></td>
-    <td>${e(f['TIPO_FACTURA']||'—')}</td><td>${fd(f['FECHA_FACTURA'])}</td>
-    <td><strong>${cop(Number(f['TOTAL_FACTURA'])||0)}</strong></td>
-    <td style="font-size:.77rem">${e(f['DESCRIPCION_FACTURA']||'—')}</td></tr>`).join('');
-}
-
-function rRecibos(id,list,sec){
-  const b=document.getElementById(id);
-  if(!list.length){setEmpty(id,sec?5:6,'📭','Sin recibos en este sistema.');return;}
-  let t=0;
-  b.innerHTML=list.sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0)).map(r=>{
-    const v=Number(r['VALOR_RECIBO'])||0;t+=v;
-    return`<tr>
-      <td><span class="badge bb">${e(r['CONSECUTIVO_RECIBO'])}</span></td>
-      <td style="white-space:nowrap">${fd(r['FECHA_RECIBO'])}</td>
-      <td style="font-size:.77rem">${e(r['CONCEPTO_RECIBO']||'—')}</td>
-      <td><span class="badge bt">${e(r['FORMAPAGO_RECIBO']||'—')}</span></td>
-      ${!sec?`<td style="font-size:.74rem">${e(r['NUMTRANSACCION_RECIBO']||'—')}</td>`:''}
-      <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;
-  }).join('')+`<tr style="background:var(--teal-bg)">
-    <td colspan="${sec?4:5}" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL</td>
-    <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;
-}
-
-/* ════════════════════════════════════════════════════════
-   RENDER PERFIL
-════════════════════════════════════════════════════════ */
-function renderPerfil(){
-  const E=cEst;
-  const fields=[
-    ['Nombre completo',[E['NOMBRES_ESTUDIANTE'],E['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ')],
-    ['Documento',E['DOCUMENTO_ESTUDIANTE']],['Correo',E['CORREO_ESTUDIANTE']],
-    ['Teléfono',E['TELEFONO_ESTUDIANTE']||E['CELULAR_ESTUDIANTE']],
-    ['Dirección',E['DIRECCION_ESTUDIANTE']],['Fecha Nacimiento',fd(E['FECHANACIMIENTO_ESTUDIANTE'])],
-    ['Lugar Nacimiento',E['LUGARNACIMIENTO_ESTUDIANTE']],['Sexo',E['SEXO_ESTUDIANTE']],
-    ['Estrato',E['ESTRATO_ESTUDIANTE']],['Barrio',E['BARRIO_ESTUDIANTE']],
-    ['Ciudad',E['CIUDAD_ESTUDIANTE']],['Expedición Doc.',fd(E['EXPEDICION_ESTUDIANTE'])],
-    ['Código Estudiante',E['CODIGO_ESTUDIANTE']],['ID Interno',E['ID_ESTUDIANTE']],
-  ];
-  document.getElementById('tb-pf').innerHTML=fields
-    .filter(([,v])=>v!=null&&v!=='')
-    .map(([l,v])=>`<tr>
-      <td style="font-weight:700;color:var(--muted);width:170px;font-size:.77rem;text-transform:uppercase;letter-spacing:.04em">${e(l)}</td>
-      <td>${e(String(v))}</td></tr>`).join('');
-
-  const mats=cIds.mats||[];
-  if(!mats.length){setEmpty('tb-mat',5,'📭','Sin matrículas registradas.');return;}
-  document.getElementById('tb-mat').innerHTML=mats.map(m=>{
-    const c=cIds.cursos[m['CURSO_MATRICULA']]||{};
-    const mo=cIds.modulos2[c['MODULO_CURSO']]||{};
-    const em=cIds.estamat[m['ESTADO_MATRICULA']]||{};
-    const nm=mo['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+m['CURSO_MATRICULA'];
-    return`<tr><td><strong>${e(nm)}</strong></td><td>${fd(m['FECHA_MATRICULA'])}</td>
-      <td>${cop(Number(m['VALOR_MATRICULA'])||0)}</td>
-      <td><span style="color:${Number(m['SALDO_MATRICULA'])>0?'var(--warn)':'var(--pass)'};font-weight:700">${cop(Number(m['SALDO_MATRICULA'])||0)}</span></td>
-      <td><span class="badge ${Number(m['SALDO_MATRICULA'])>0?'bw':'bp'}">${e(em['NOMBRE_ESTADOMATRICULA']||m['ESTADO_MATRICULA']||'—')}</span></td></tr>`;
-  }).join('');
-}
-
-/* ════════════════════════════════════════════════════════
-   ASISTENCIA XLSX
-════════════════════════════════════════════════════════ */
-function hDrop(ev){ev.preventDefault();document.getElementById('uz').classList.remove('do');const f=ev.dataTransfer.files[0];if(f)loadXlsx(f);}
-
+// ASISTENCIA XLSX
+function hDrop(e){ e.preventDefault(); this.classList.remove('do'); if(e.dataTransfer.files[0]) loadXlsx(e.dataTransfer.files[0]); }
 function loadXlsx(file){
   if(!file)return;
-  const rd=new FileReader();
-  rd.onload=ev=>{
-    try{
-      const wb=XLSX.read(ev.target.result,{type:'array',cellDates:true});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      xRows=XLSX.utils.sheet_to_json(ws,{defval:''});
-      if(!xRows.length){alert('Archivo vacío o sin formato reconocido.');return;}
-      filterAsist();
-    }catch(err){alert('Error al leer el archivo: '+err.message);}
+  const r = new FileReader();
+  r.onload = e => {
+    const b = new Uint8Array(e.target.result);
+    const w = XLSX.read(b, {type:'array'});
+    xRows = XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]]);
+    procAs();
   };
-  rd.readAsArrayBuffer(file);
+  r.readAsArrayBuffer(file);
 }
 
-function filterAsist(){
-  if(!cDoc||!xRows.length)return;
-  const ks=Object.keys(xRows[0]);
-  const dc=ks.find(k=>/^(documento|cedula|cc|^id$|doc)/i.test(k.trim()))||ks[0];
-  const fc=ks.find(k=>/^fecha/i.test(k.trim()))||ks[1];
-  const ec=ks.find(k=>/^(estado|asist|present)/i.test(k.trim()))||ks[2];
-  const mc=ks.find(k=>/^(materia|curso|asign|modulo)/i.test(k.trim()));
-  const oc=ks.find(k=>/^(obs|nota|comment)/i.test(k.trim()));
-
-  const mine=xRows.filter(r=>String(r[dc]||'').trim().replace(/\D/g,'')===(cDoc||'').replace(/\D/g,''));
-  if(!mine.length){document.getElementById('asist-ok').style.display='none';document.getElementById('asist-no').style.display='block';return;}
-  document.getElementById('asist-ok').style.display='block';document.getElementById('asist-no').style.display='none';
-
-  const DIAS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const regs=mine.map(r=>({
-    fecha:pf(r[fc]),estado:ne(String(r[ec]||'')),
-    mat:mc?String(r[mc]||''):'',obs:oc?String(r[oc]||''):'',
-  })).filter(r=>r.fecha).sort((a,b)=>a.fecha-b.fecha);
-
-  const pr=regs.filter(r=>r.estado==='P').length;
-  const au=regs.filter(r=>r.estado==='A').length;
-  const pct=regs.length?Math.round(pr/regs.length*100):0;
-  setText('q-as',pct+'%');
-
-  document.getElementById('achips').innerHTML=`
-    <div class="ac"><div class="an">${regs.length}</div><div class="al">Registros</div></div>
-    <div class="ac"><div class="an" style="color:var(--pass)">${pr}</div><div class="al">Presencias</div></div>
-    <div class="ac"><div class="an" style="color:var(--warn)">${au}</div><div class="al">Ausencias</div></div>
-    <div class="ac"><div class="an" style="color:${pct>=80?'var(--pass)':'var(--warn)'}">${pct}%</div><div class="al">Asistencia</div></div>`;
-
-  document.getElementById('tb-as').innerHTML=regs.map((r,i)=>`<tr>
-    <td style="color:var(--muted);font-size:.7rem">${i+1}</td>
-    <td>${fd(r.fecha)}</td><td>${DIAS[r.fecha.getDay()]}</td>
-    <td>${e(r.mat||'—')}</td>
-    <td><span class="badge ${r.estado==='P'?'bp':'bw'}">${r.estado==='P'?'✓ Presente':'✗ Ausente'}</span></td>
-    <td style="font-size:.77rem">${e(r.obs||'—')}</td></tr>`).join('');
-
-  buildCal(regs);
+function procAs(){
+  const my = xRows.filter(r => String(r['DOCUMENTO']||'').trim() === String(cDoc));
+  const ok = document.getElementById('asist-ok'), no = document.getElementById('asist-no'), uz = document.getElementById('uz');
+  if(!my.length){ ok.style.display='none'; no.style.display='block'; return; }
+  ok.style.display='block'; no.style.display='none'; uz.style.display='none';
+  
+  const pres = my.filter(r => String(r['ESTADO']).toUpperCase().startsWith('P')).length;
+  document.getElementById('q-as').textContent = ((pres/my.length)*100).toFixed(0)+'%';
+  document.getElementById('achips').innerHTML = `
+    <div class="ac"><div class="an">${my.length}</div><div class="al">Clases</div></div>
+    <div class="ac"><div class="an" style="color:var(--pass)">${pres}</div><div class="al">Asistencias</div></div>
+    <div class="ac"><div class="an" style="color:var(--warn)">${my.length-pres}</div><div class="al">Fallas</div></div>
+  `;
+  renderTable('tb-as', my, (r,idx) => {
+    const isP = String(r['ESTADO']).toUpperCase().startsWith('P');
+    return `<td>${idx+1}</td><td>${r['FECHA']||'—'}</td><td>—</td><td>${r['MATERIA']||'—'}</td>
+            <td><span class="badge ${isP?'bp':'bw'}">${isP?'PRESENTE':'INASISTENCIA'}</span></td>
+            <td>${r['OBSERVACIONES']||'—'}</td>`;
+  });
 }
-
-function buildCal(regs){
-  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const DH=['D','L','M','X','J','V','S'];
-  const mo={};
-  regs.forEach(r=>{const k=`${r.fecha.getFullYear()}-${r.fecha.getMonth()}`;if(!mo[k])mo[k]=[];mo[k].push(r);});
-  let html='';
-  for(const[k,rows]of Object.entries(mo)){
-    const[yr,m]=k.split('-').map(Number);
-    const fd0=new Date(yr,m,1).getDay();
-    const dim=new Date(yr,m+1,0).getDate();
-    const P=new Set(),A=new Set();
-    rows.forEach(r=>{const d=r.fecha.getDate();r.estado==='P'?P.add(d):A.add(d);});
-    let g=`<div class="cmo"><h4>${MN[m]} ${yr}</h4><div class="cgrid">`;
-    DH.forEach(d=>{g+=`<div class="cdh">${d}</div>`;});
-    for(let i=0;i<fd0;i++)g+=`<div class="cd"></div>`;
-    for(let d=1;d<=dim;d++){
-      const cl=P.has(d)?'cd present':A.has(d)?'cd absent':'cd noc';
-      g+=`<div class="${cl}">${d}</div>`;
-    }
-    g+=`</div></div>`;html+=g;
-  }
-  document.getElementById('calv').innerHTML=html;
-}
-
-/* ════════════════════════════════════════════════════════
-   TABS
-════════════════════════════════════════════════════════ */
-function ST(n,btn){
-  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
-  const panel=document.getElementById('tp-'+n);
-  if(panel)panel.classList.add('active');
-  if(btn)btn.classList.add('active');
-}
-
-/* ════════════════════════════════════════════════════════
-   UTILS
-════════════════════════════════════════════════════════ */
-function calcProm(notas){
-  if(!notas||!notas.length)return null;
-  const v=notas.map(n=>parseFloat(n['CALIFICACION_NOTA'])).filter(x=>!isNaN(x)&&x>0);
-  return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
-}
-function sc(nota){const v=parseFloat(nota);if(isNaN(v))return 'sm';return v>=4.5?'sh':v>=3.0?'sm':'sl';}
-function ac(a){a=(a||'').toUpperCase();if(/CONOCIMIENTO|PRIMER/.test(a))return'bb';if(/DESEMPE|SEGUNDO/.test(a))return'bpu';if(/PRODUCTO|TERCERO/.test(a))return'bg';return'bt';}
-function fd(s){if(!s||s==='0000-00-00'||s==='')return'—';const d=s instanceof Date?s:new Date(s);if(isNaN(d))return String(s);return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
-function pf(raw){if(!raw)return null;if(raw instanceof Date)return raw;if(typeof raw==='number')return new Date(Math.round((raw-25569)*86400*1000));const s=String(raw).trim();const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return new Date(+y,+m[2]-1,+m[1]);}const d=new Date(s);return isNaN(d)?null:d;}
-function ne(s){s=s.toUpperCase().trim();return(s==='P'||s.startsWith('PRES')||s==='1'||s==='SI'||s==='SÍ')?'P':'A';}
-function cop(n){return'$'+Number(n||0).toLocaleString('es-CO');}
-function e(s){return String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function setEmpty(id,cols,icon,msg){const b=document.getElementById(id);if(b)b.innerHTML=`<tr><td colspan="${cols}"><div class="empty"><div class="ei">${icon}</div><p>${msg}</p></div></td></tr>`;}
 </script>
 </body>
 </html>
