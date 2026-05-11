@@ -10,19 +10,27 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 4px solid var(--primary); margin-bottom: 25px; padding-bottom: 15px; }
-        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #eee; padding: 25px; border-radius: 10px; }
+        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #eee; padding: 25px; border-radius: 10px; flex-wrap: wrap; }
         input { flex: 1; max-width: 350px; padding: 14px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
         input:focus { border-color: var(--primary); }
         button { padding: 14px 28px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         button:hover { background: #085a52; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         .result-card { display: none; animation: slideUp 0.5s ease; }
-        .profile-header { background: var(--primary); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        .profile-header { background: var(--primary); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
+        .profile-header h2 { margin: 0; word-break: break-word; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; overflow-x: auto; display: block; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
         th { background: #f1f1f1; color: var(--primary); font-weight: bold; }
         .loader { display: none; text-align: center; padding: 20px; color: var(--primary); font-weight: bold; }
         h3 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 12px; margin-top: 30px; }
+        .error-message { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f5c6cb; }
+        .empty-message { background: #e2f0fb; color: #004085; padding: 12px; border-radius: 8px; text-align: center; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            th, td { padding: 8px; font-size: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -34,15 +42,15 @@
     </div>
 
     <div class="search-box">
-        <input type="text" id="docInput" placeholder="Número de Cédula o ID">
-        <button onclick="consultar()"><i class="fas fa-search"></i> CONSULTAR</button>
+        <input type="text" id="docInput" placeholder="Número de Cédula o ID" onkeypress="if(event.key==='Enter') consultar()">
+        <button onclick="consultar()" id="searchBtn"><i class="fas fa-search"></i> CONSULTAR</button>
     </div>
 
     <div id="loader" class="loader"><i class="fas fa-sync fa-spin"></i> Accediendo a la base de datos SQL...</div>
 
     <div id="resultArea" class="result-card">
         <div class="profile-header">
-            <div>
+            <div style="flex:1">
                 <h2 id="viewName" style="margin:0;"></h2>
                 <p id="viewInfo" style="margin:5px 0 0 0; opacity: 0.9;"></p>
             </div>
@@ -58,112 +66,350 @@
 </div>
 
 <script>
-    // URL de descarga del archivo SQL
+    // URL de descarga del archivo SQL (asegúrate que sea público)
     const URL_SQL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
+
+    // Variables globales para cache
+    let cachedData = null;
 
     async function consultar() {
         const busqueda = document.getElementById('docInput').value.trim();
-        if (!busqueda) return alert("Ingrese un documento");
+        if (!busqueda) {
+            alert("⚠️ Por favor, ingrese un número de cédula o ID");
+            return;
+        }
 
+        const searchBtn = document.getElementById('searchBtn');
+        searchBtn.disabled = true;
         document.getElementById('loader').style.display = 'block';
         document.getElementById('resultArea').style.display = 'none';
 
         try {
-            const response = await fetch(URL_SQL);
-            const sqlText = await response.text();
+            // Cargar o usar cache del SQL
+            let sqlText;
+            if (cachedData) {
+                sqlText = cachedData;
+            } else {
+                const response = await fetch(URL_SQL);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: No se pudo descargar el archivo SQL`);
+                sqlText = await response.text();
+                cachedData = sqlText;
+            }
 
-            // Dividimos el archivo SQL por el nombre de las tablas (Delimitador phpMyAdmin)
-            const secciones = sqlText.split('-- Volcado de datos para la tabla');
-
-            // 1. BUSCAR USUARIO (tbl_usuarios)
-            const secUser = secciones.find(s => s.includes('`tbl_usuarios`'));
-            const filaUser = extraerFila(secUser, busqueda);
-
-            if (!filaUser) {
-                alert("Estudiante no encontrado.");
+            // Parsear tablas del SQL
+            const tables = parseSQLTables(sqlText);
+            
+            // Buscar usuario en tbl_usuarios
+            const usuario = buscarUsuario(tables.tbl_usuarios, busqueda);
+            
+            if (!usuario) {
+                mostrarError(`No se encontró ningún estudiante con el documento: ${busqueda}`);
                 return;
             }
 
-            const u = limpiarCampos(filaUser);
-            const idUsuario = u[0]; // ID Primario
+            // Mostrar información del usuario
+            const nombreCompleto = `${usuario.nombres || ''} ${usuario.apellidos || ''}`.trim() || usuario.usuario || 'Sin nombre';
+            document.getElementById('viewName').innerText = nombreCompleto.toUpperCase();
+            document.getElementById('viewInfo').innerText = `Documento: ${usuario.documento || busqueda} | Correo: ${usuario.email || 'No registrado'}`;
 
-            document.getElementById('viewName').innerText = (u[3] + " " + u[4]).toUpperCase();
-            document.getElementById('viewInfo').innerText = `Documento: ${u[6]} | Correo: ${u[5]}`;
+            // Buscar notas del usuario (por id_usuario)
+            const notasUsuario = buscarNotas(tables.tbl_resultados, usuario.id, usuario.documento);
+            renderNotas(notasUsuario);
 
-            // 2. BUSCAR NOTAS (tbl_resultados)
-            const secNotas = secciones.find(s => s.includes('`tbl_resultados`'));
-            const filasNotas = extraerMultiplesFilas(secNotas, idUsuario, 1); // El ID_USUARIO suele ser el segundo campo
-            const notas = filasNotas.map(f => {
-                const n = limpiarCampos(f);
-                return { modulo: 'Unidad ' + n[2], nota: n[3], fecha: n[4] };
-            });
-            renderTable('tableNotas', notas, ["Referencia", "Nota", "Fecha"], ["modulo", "nota", "fecha"]);
-
-            // 3. BUSCAR PAGOS (fac_creditos)
-            const secPagos = secciones.find(s => s.includes('`fac_creditos`'));
-            const filasPagos = extraerMultiplesFilas(secPagos, busqueda, 4); // El CLIENTE_CREDITO es el quinto campo (cédula)
-            const pagos = filasPagos.map(f => {
-                const p = limpiarCampos(f);
-                return { fecha: p[1], concepto: p[6], monto: '$' + parseInt(p[5]).toLocaleString() };
-            });
-            renderTable('tablePagos', pagos, ["Fecha", "Concepto", "Valor"], ["fecha", "monto", "monto"]);
+            // Buscar pagos del usuario (por documento)
+            const pagosUsuario = buscarPagos(tables.fac_creditos, usuario.documento);
+            renderPagos(pagosUsuario);
 
             document.getElementById('resultArea').style.display = 'block';
 
         } catch (e) {
-            console.error(e);
-            alert("Error al cargar la base de datos. Verifique los permisos del archivo.");
+            console.error('Error detallado:', e);
+            let errorMsg = "Error al cargar la base de datos. ";
+            if (e.message.includes('Failed to fetch')) {
+                errorMsg += "No se pudo descargar el archivo. Verifica: 1) El archivo existe en Drive 2) Es público 3) La URL es correcta";
+            } else if (e.message.includes('HTTP')) {
+                errorMsg += e.message;
+            } else {
+                errorMsg += "Verifique los permisos del archivo en Google Drive (debe ser público).";
+            }
+            mostrarError(errorMsg);
         } finally {
             document.getElementById('loader').style.display = 'none';
+            searchBtn.disabled = false;
         }
     }
 
-    // --- MOTOR DE EXTRACCIÓN SQL ---
+    // Función mejorada para parsear tablas SQL
+    function parseSQLTables(sqlText) {
+        const tables = {
+            tbl_usuarios: [],
+            tbl_resultados: [],
+            fac_creditos: []
+        };
 
-    function extraerFila(seccion, criterio) {
-        if (!seccion) return null;
-        // Busca una línea que contenga el criterio rodeado de comillas o comas
-        const regex = new RegExp(`INSERT INTO [^;]*VALUES[^;]*'${criterio}'[^;]*;`, 'is');
-        const match = seccion.match(regex);
-        if (!match) return null;
-        
-        // Si hay múltiples filas en un solo INSERT, buscamos la tupla específica
-        const tuplas = match[0].split('),(');
-        return tuplas.find(t => t.includes(`'${criterio}'`));
+        // Dividir por comandos INSERT
+        const insertRegex = /INSERT\s+INTO\s+`?(\w+)`?\s+VALUES\s*(\([^;]+\);?)/gi;
+        let match;
+
+        while ((match = insertRegex.exec(sqlText)) !== null) {
+            const tableName = match[1];
+            const valuesBlock = match[2];
+            
+            if (!tables[tableName]) continue;
+
+            // Extraer todas las filas del bloque VALUES
+            const rows = extractRows(valuesBlock);
+            
+            for (const row of rows) {
+                const parsedRow = parseRow(row);
+                if (parsedRow) {
+                    tables[tableName].push(parsedRow);
+                }
+            }
+        }
+
+        return tables;
     }
 
-    function extraerMultiplesFilas(seccion, criterio) {
-        if (!seccion) return [];
-        const regex = new RegExp(`INSERT INTO [^;]*VALUES[^;]*;`, 'gis');
-        const matches = seccion.match(regex) || [];
-        let resultados = [];
+    // Extraer filas individuales de un bloque VALUES
+    function extractRows(valuesBlock) {
+        // Remover "VALUES" al inicio si existe
+        let clean = valuesBlock.replace(/^VALUES\s*/i, '');
         
-        matches.forEach(m => {
-            const tuplas = m.split('),(');
-            const filtradas = tuplas.filter(t => t.includes(`'${criterio}'`) || t.includes(`,${criterio},`));
-            resultados = resultados.concat(filtradas);
-        });
+        // Buscar patrones de filas: (valores)
+        const rowRegex = /\(([^)]+(?:\)\s*,\s*\()?[^)]*)\)/g;
+        const rows = [];
+        let rowMatch;
+        
+        while ((rowMatch = rowRegex.exec(clean)) !== null) {
+            let rowContent = rowMatch[1];
+            // Si la fila está truncada, intentar recuperar
+            if (rowContent.split("'").length % 2 === 0) {
+                // Buscar el siguiente paréntesis
+                const nextParen = clean.indexOf('(', rowMatch.index + 1);
+                if (nextParen !== -1) {
+                    const extendedMatch = clean.substring(rowMatch.index, nextParen);
+                    const extendedRowMatch = extendedMatch.match(/\(([^)]+)\)/);
+                    if (extendedRowMatch) {
+                        rowContent = extendedRowMatch[1];
+                    }
+                }
+            }
+            rows.push(rowContent);
+        }
+        
+        return rows;
+    }
+
+    // Parsear una fila de valores SQL respetando strings entre comillas
+    function parseRow(rowStr) {
+        const values = [];
+        let current = '';
+        let inQuote = false;
+        let i = 0;
+        
+        while (i < rowStr.length) {
+            const char = rowStr[i];
+            
+            if (char === "'" && (i === 0 || rowStr[i-1] !== '\\')) {
+                inQuote = !inQuote;
+                current += char;
+            } else if (char === ',' && !inQuote) {
+                values.push(cleanValue(current.trim()));
+                current = '';
+            } else {
+                current += char;
+            }
+            i++;
+        }
+        
+        if (current.trim()) {
+            values.push(cleanValue(current.trim()));
+        }
+        
+        return values;
+    }
+
+    // Limpiar un valor SQL
+    function cleanValue(val) {
+        if (!val) return '';
+        val = val.trim();
+        // Remover comillas externas
+        if (val.startsWith("'") && val.endsWith("'")) {
+            val = val.slice(1, -1);
+        }
+        // Manejar NULL
+        if (val.toUpperCase() === 'NULL') return '';
+        return val;
+    }
+
+    // Buscar usuario por documento o ID
+    function buscarUsuario(usuarios, criterio) {
+        if (!usuarios || !Array.isArray(usuarios)) return null;
+        
+        // Buscar por coincidencia exacta en cualquier campo relevante
+        for (const user of usuarios) {
+            // Asumiendo estructura típica: [id, usuario, clave, nombres, apellidos, email, documento, ...]
+            const id = user[0] || '';
+            const nombreUsuario = user[1] || '';
+            const nombres = user[3] || '';
+            const apellidos = user[4] || '';
+            const email = user[5] || '';
+            const documento = user[6] || '';
+            
+            if (documento === criterio || id === criterio || nombreUsuario === criterio) {
+                return {
+                    id: id,
+                    usuario: nombreUsuario,
+                    nombres: nombres,
+                    apellidos: apellidos,
+                    email: email,
+                    documento: documento
+                };
+            }
+        }
+        return null;
+    }
+
+    // Buscar notas del usuario
+    function buscarNotas(notas, userId, documento) {
+        if (!notas || !Array.isArray(notas)) return [];
+        
+        const resultados = [];
+        for (const nota of notas) {
+            // Estructura típica: [id, id_usuario, modulo, nota, fecha, ...]
+            const idUsuarioNota = nota[1] || '';
+            const modulo = nota[2] || '';
+            const calificacion = nota[3] || '';
+            const fecha = nota[4] || '';
+            
+            // Buscar por ID de usuario o por documento
+            if (idUsuarioNota == userId || idUsuarioNota == documento) {
+                resultados.push({
+                    modulo: modulo,
+                    nota: calificacion,
+                    fecha: fecha
+                });
+            }
+        }
         return resultados;
     }
 
-    function limpiarCampos(tupla) {
-        // Limpiar paréntesis y el INSERT inicial
-        let limpia = tupla.replace(/.*VALUES\s*\(/i, "").replace(/\);$/, "").replace(/^\(/, "");
-        // Separar por comas respetando el texto interno
-        return limpia.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(v => v.trim().replace(/^'|'$/g, ""));
+    // Buscar pagos del usuario
+    function buscarPagos(pagos, documento) {
+        if (!pagos || !Array.isArray(pagos)) return [];
+        
+        const resultados = [];
+        for (const pago of pagos) {
+            // Estructura típica de fac_creditos: adaptar según el dump real
+            const fecha = pago[1] || '';
+            const cliente = pago[4] || ''; // Campo de cédula/cliente
+            const concepto = pago[6] || '';
+            const monto = pago[5] || '';
+            
+            if (cliente == documento) {
+                resultados.push({
+                    fecha: fecha,
+                    concepto: concepto,
+                    monto: formatMonto(monto)
+                });
+            }
+        }
+        return resultados;
     }
 
-    function renderTable(id, datos, cabeceras, keys) {
-        let h = '<table><thead><tr>' + cabeceras.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
-        if (datos.length > 0) {
-            datos.forEach(d => {
-                h += '<tr>' + keys.map(k => `<td>${d[k] || '---'}</td>`).join('') + '</tr>';
-            });
-        } else {
-            h += `<tr><td colspan="${cabeceras.length}" style="text-align:center;">No hay registros encontrados.</td></tr>`;
-        }
-        document.getElementById(id).innerHTML = h + '</tbody></table>';
+    // Formatear monto
+    function formatMonto(monto) {
+        if (!monto) return '$0';
+        const num = parseFloat(monto);
+        if (isNaN(num)) return monto;
+        return '$' + num.toLocaleString('es-CO');
     }
+
+    // Renderizar tabla de notas
+    function renderNotas(notas) {
+        const container = document.getElementById('tableNotas');
+        
+        if (!notas || notas.length === 0) {
+            container.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> No hay calificaciones registradas para este estudiante.</div>';
+            return;
+        }
+        
+        let html = `<table><thead><tr><th>Módulo / Materia</th><th>Calificación</th><th>Fecha Registro</th></tr></thead><tbody>`;
+        
+        for (const nota of notas) {
+            html += `<tr>
+                <td>${escapeHtml(nota.modulo || '---')}</td>
+                <td>${escapeHtml(nota.nota || '---')}</td>
+                <td>${escapeHtml(nota.fecha || '---')}</td>
+            </tr>`;
+        }
+        
+        html += `</tbody>}</div>`;
+        container.innerHTML = html;
+    }
+
+    // Renderizar tabla de pagos
+    function renderPagos(pagos) {
+        const container = document.getElementById('tablePagos');
+        
+        if (!pagos || pagos.length === 0) {
+            container.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> No hay registros de pagos para este estudiante.</div>';
+            return;
+        }
+        
+        let html = `<tr><thead><tr><th>Fecha</th><th>Concepto</th><th>Valor</th></tr></thead><tbody>`;
+        
+        for (const pago of pagos) {
+            html += `<tr>
+                <td>${escapeHtml(pago.fecha || '---')}</td>
+                <td>${escapeHtml(pago.concepto || '---')}</td>
+                <td>${escapeHtml(pago.monto || '$0')}</td>
+            </tr>`;
+        }
+        
+        html += `</tbody>}</div>`;
+        container.innerHTML = html;
+    }
+
+    // Mostrar mensaje de error
+    function mostrarError(mensaje) {
+        const resultArea = document.getElementById('resultArea');
+        resultArea.style.display = 'block';
+        resultArea.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <strong>Error:</strong> ${mensaje}
+            </div>
+        `;
+        
+        // Limpiar otras secciones
+        document.getElementById('viewName').innerText = '';
+        document.getElementById('viewInfo').innerText = '';
+        document.getElementById('tableNotas').innerHTML = '';
+        document.getElementById('tablePagos').innerHTML = '';
+    }
+
+    // Escapar HTML para prevenir XSS
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Cargar al inicio
+    window.addEventListener('DOMContentLoaded', () => {
+        // Pre-cargar datos en segundo plano
+        setTimeout(() => {
+            if (!cachedData) {
+                fetch(URL_SQL)
+                    .then(res => res.text())
+                    .then(sql => { cachedData = sql; })
+                    .catch(e => console.log('Pre-carga fallida:', e));
+            }
+        }, 1000);
+    });
 </script>
 </body>
 </html>
