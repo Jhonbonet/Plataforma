@@ -7,22 +7,18 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #0d7a6e; --accent: #d4a017; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 4px solid var(--primary); margin-bottom: 30px; padding-bottom: 20px; }
-        .search-box { display: flex; gap: 15px; justify-content: center; margin-bottom: 40px; background: #eee; padding: 20px; border-radius: 10px; }
-        input { width: 300px; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
-        input:focus { border-color: var(--primary); }
-        button { padding: 15px 30px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #085a52; transform: translateY(-2px); }
-        .card { display: none; animation: fadeIn 0.6s ease; }
-        h3 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 10px; margin-top: 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-        th, td { padding: 15px; border: 1px solid #eee; text-align: left; }
+        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #f1f1f1; padding: 20px; border-radius: 10px; }
+        input { width: 300px; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .card { display: none; animation: fadeIn 0.5s ease; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
         th { background: var(--primary); color: white; }
-        tr:nth-child(even) { background: #f9f9f9; }
-        .loader { display: none; text-align: center; margin: 20px; font-weight: bold; color: var(--primary); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { display: none; text-align: center; margin: 20px; color: var(--primary); font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -30,89 +26,87 @@
 <div class="container">
     <div class="header">
         <h1>ASENORTE</h1>
-        <p>Portal de Consulta de Información Académica</p>
+        <p>Portal de Consulta Académica</p>
     </div>
 
     <div class="search-box">
-        <input type="text" id="studentDoc" placeholder="Número de Identificación">
-        <button onclick="procesarConsulta()"><i class="fas fa-search"></i> CONSULTAR</button>
+        <input type="text" id="studentDoc" placeholder="Número de Documento">
+        <button onclick="consultar()"><i class="fas fa-search"></i> CONSULTAR</button>
     </div>
 
-    <div id="loader" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Accediendo al servidor de datos...</div>
+    <div id="loader" class="loader"><i class="fas fa-sync fa-spin"></i> Procesando base de datos...</div>
 
     <div id="resultCard" class="card">
-        <div style="background: var(--primary); color: white; padding: 20px; border-radius: 10px;">
+        <div style="background: var(--primary); color: white; padding: 15px; border-radius: 8px;">
             <h2 id="studentName" style="margin:0;"></h2>
-            <p id="studentEmail" style="margin:5px 0 0 0; opacity: 0.9;"></p>
+            <p id="studentProg" style="margin:5px 0 0 0;"></p>
         </div>
         
-        <h3><i class="fas fa-chart-line"></i> Calificaciones Registradas</h3>
+        <h3><i class="fas fa-graduation-cap"></i> Notas y Resultados</h3>
         <div id="tablaNotas"></div>
 
-        <h3><i class="fas fa-receipt"></i> Historial de Pagos y Créditos</h3>
+        <h3><i class="fas fa-money-bill-wave"></i> Registro de Pagos / Créditos</h3>
         <div id="tablaPagos"></div>
     </div>
 </div>
 
 <script>
-    // URL de descarga directa del volcado SQL
+    // URL de descarga de tu archivo SQL en Drive
     const SQL_URL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
 
-    async function procesarConsulta() {
+    async function consultar() {
         const doc = document.getElementById('studentDoc').value.trim();
-        if (!doc) return alert("Por favor, ingrese su documento.");
+        if (!doc) return alert("Ingrese un documento");
 
         document.getElementById('loader').style.display = 'block';
         document.getElementById('resultCard').style.display = 'none';
 
         try {
             const response = await fetch(SQL_URL);
-            const text = await response.text();
+            const sqlText = await response.text();
 
-            // 1. Buscar Usuario en 'tbl_usuarios'
-            // El formato es: INSERT INTO `tbl_usuarios` VALUES (ID, 'login', 'pass', 'nombre', 'apellido', 'correo', 'identificacion', ...);
-            const userMatch = buscarLinea(text, 'tbl_usuarios', doc);
-            
-            if (!userMatch) {
-                alert("No se encontró información para el documento ingresado.");
+            // 1. Buscar en tbl_usuarios (Estructura real detectada)
+            const usuario = buscarDatos(sqlText, 'tbl_usuarios', doc);
+            if (!usuario) {
+                alert("No se encontró el estudiante.");
                 return;
             }
 
-            const userData = extraerValores(userMatch);
-            // Según el SQL: [3] es nombre, [4] apellido, [5] correo, [6] identificacion
-            document.getElementById('studentName').innerText = `${userData[3]} ${userData[4]}`;
-            document.getElementById('studentEmail').innerText = `ID: ${userData[6]} | Correo: ${userData[5]}`;
+            // Mapeo según tu SQL: [3] nombre, [4] apellido, [0] ID interno
+            document.getElementById('studentName').innerText = usuario[3] + " " + usuario[4];
+            document.getElementById('studentProg').innerText = "Identificación: " + usuario[6];
 
-            // 2. Buscar Notas en 'tbl_resultados'
-            const notasLines = buscarLineasMultiples(text, 'tbl_resultados', userData[0]); // Busca por el ID interno de usuario
-            const notasData = notasLines.map(line => {
-                const v = extraerValores(line);
-                return { modulo: 'Módulo ' + v[2], nota: v[3], fecha: v[4] };
+            // 2. Buscar Notas en tbl_resultados (vinculado por el ID del usuario)
+            const idInterno = usuario[0];
+            const notasRaw = buscarLineasMultiples(sqlText, 'tbl_resultados', idInterno);
+            const notas = notasRaw.map(n => {
+                const v = extraerValores(n);
+                return { modulo: 'Unidad ' + v[1], nota: v[3], fecha: v[4] };
             });
-            renderTable('tablaNotas', notasData, ["Referencia", "Calificación", "Fecha"], ["modulo", "nota", "fecha"]);
+            renderTable('tablaNotas', notas, ["Referencia", "Nota", "Fecha"], ["modulo", "nota", "fecha"]);
 
-            // 3. Buscar Pagos en 'fac_pagos' o 'fac_creditos'
-            const pagosLines = buscarLineasMultiples(text, 'fac_pagos', doc);
-            const pagosData = pagosLines.map(line => {
-                const v = extraerValores(line);
+            // 3. Buscar Pagos en fac_creditos (vinculado por documento)
+            const pagosRaw = buscarLineasMultiples(sqlText, 'fac_creditos', doc);
+            const pagos = pagosRaw.map(p => {
+                const v = extraerValores(p);
                 return { concepto: v[6], valor: v[5], fecha: v[1] };
             });
-            renderTable('tablaPagos', pagosData, ["Concepto", "Monto", "Fecha de Pago"], ["concepto", "valor", "fecha"]);
+            renderTable('tablaPagos', pagos, ["Concepto", "Monto", "Fecha"], ["concepto", "valor", "fecha"]);
 
             document.getElementById('resultCard').style.display = 'block';
+
         } catch (e) {
             console.error(e);
-            alert("Error al procesar la base de datos. Verifique su conexión.");
+            alert("Error al acceder a la base de datos.");
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     }
 
-    // Funciones de búsqueda en texto plano SQL
-    function buscarLinea(texto, tabla, criterio) {
+    function buscarDatos(texto, tabla, criterio) {
         const regex = new RegExp(`INSERT INTO \`${tabla}\` VALUES\\([^;]*'${criterio}'[^;]*\\);`, 'i');
         const match = texto.match(regex);
-        return match ? match[0] : null;
+        return match ? extraerValores(match[0]) : null;
     }
 
     function buscarLineasMultiples(texto, tabla, criterio) {
@@ -121,24 +115,21 @@
     }
 
     function extraerValores(linea) {
-        // Extrae lo que está entre comillas simples o números entre comas
-        const matches = linea.match(/\((.*)\)/);
-        if (!matches) return [];
-        return matches[1].split(/,\s*/).map(v => v.replace(/'/g, "").trim());
+        const contenido = linea.match(/\((.*)\)/)[1];
+        return contenido.split(/,\s*/).map(v => v.replace(/'/g, "").trim());
     }
 
-    function renderTable(containerId, lista, headers, keys) {
-        let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
-        if (lista.length > 0) {
-            lista.forEach(item => {
-                html += '<tr>' + keys.map(k => `<td>${item[k] || '---'}</td>`).join('') + '</tr>';
+    function renderTable(id, datos, encabezados, campos) {
+        let html = '<table><tr>' + encabezados.map(h => `<th>${h}</th>`).join('') + '</tr>';
+        if (datos.length > 0) {
+            datos.forEach(d => {
+                html += '<tr>' + campos.map(c => `<td>${d[c]}</td>`).join('') + '</tr>';
             });
         } else {
-            html += `<tr><td colspan="${headers.length}" style="text-align:center;">No se registran datos actuales</td></tr>`;
+            html += `<tr><td colspan="${encabezados.length}">No hay registros</td></tr>`;
         }
-        document.getElementById(containerId).innerHTML = html + '</tbody></table>';
+        document.getElementById(id).innerHTML = html + '</table>';
     }
 </script>
-
 </body>
 </html>
