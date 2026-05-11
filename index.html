@@ -1,184 +1,1163 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Reporte de Pagos - ASENORTE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @media print { .no-print { display: none; } body { background: white; } }
-        .navy-asenorte { background-color: #001f3f; }
-        .table-oficial th { background-color: #f1f5f9; color: #001f3f; font-size: 0.7rem; border: 1px solid #cbd5e1; padding: 10px; text-transform: uppercase; }
-        .table-oficial td { border: 1px solid #cbd5e1; padding: 8px; font-size: 0.8rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Estudiantil · ASENORTE</title>
+
+<!-- SheetJS para leer ASISTENCIA.XLSX desde Google Drive -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --teal:      #0d7a6e;
+  --teal-dk:   #085a52;
+  --teal-lt:   #13a392;
+  --teal-bg:   #e8f7f5;
+  --teal-glow: rgba(13,122,110,.18);
+  --gold:      #d4a017;
+  --gold-lt:   #f5c842;
+  --ink:       #0e1c1b;
+  --muted:     #4a6360;
+  --border:    #c2dedd;
+  --paper:     #f4fbfa;
+  --white:     #ffffff;
+  --pass:      #1b7a4e;
+  --warn:      #c55a11;
+  --danger:    #b91c1c;
+  --shadow-sm: 0 2px 10px rgba(13,122,110,.08);
+  --shadow-md: 0 6px 28px rgba(13,122,110,.14);
+  --shadow-lg: 0 16px 48px rgba(13,122,110,.18);
+  --radius:    14px;
+  --radius-sm: 8px;
+  --transition: all .22s cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONFIGURACIÓN (banner superior editable)
+═══════════════════════════════════════════════════════════════ */
+/*
+  ┌─────────────────────────────────────────────────────────────┐
+  │  INSTRUCCIONES DE CONFIGURACIÓN                             │
+  │                                                             │
+  │  1. Publica ASENORTE.php en Google Drive como aplicación    │
+  │     web (Apps Script) y copia la URL en PHP_API_URL.        │
+  │                                                             │
+  │  2. Sube ASISTENCIA.XLSX a Google Drive, hazla pública y    │
+  │     reemplaza el FILE_ID en XLSX_DRIVE_ID.                  │
+  │                                                             │
+  │  La URL de descarga directa queda:                          │
+  │  https://drive.google.com/uc?export=download&id=FILE_ID     │
+  └─────────────────────────────────────────────────────────────┘
+*/
+
+/* ═══════════════════════════════════════════════════════════════
+   PANTALLA DE LOGIN
+═══════════════════════════════════════════════════════════════ */
+#screen-login {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* fondo animado */
+#screen-login::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(13,122,110,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(212,160,23,.14) 0%, transparent 55%),
+    linear-gradient(160deg, #0b3330 0%, #0d5c52 40%, #0e1c1b 100%);
+  z-index: 0;
+}
+
+/* partículas decorativas */
+.login-bg-circle {
+  position: fixed;
+  border-radius: 50%;
+  opacity: .07;
+  animation: float 8s ease-in-out infinite;
+}
+.lbc1 { width:360px;height:360px;top:-80px;right:-100px;background:var(--gold);animation-delay:0s; }
+.lbc2 { width:220px;height:220px;bottom:60px;left:-60px;background:var(--teal-lt);animation-delay:2.5s; }
+.lbc3 { width:140px;height:140px;top:50%;left:15%;background:var(--gold-lt);animation-delay:5s; }
+
+@keyframes float {
+  0%,100%{ transform:translateY(0) rotate(0deg); }
+  50%{ transform:translateY(-22px) rotate(8deg); }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 24px;
+  padding: 52px 48px 48px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06);
+  animation: cardIn .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(28px) scale(.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 8px;
+}
+.login-logo .logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-lt));
+  border-radius: 20px;
+  font-size: 36px;
+  box-shadow: 0 8px 24px rgba(13,163,146,.4);
+  margin-bottom: 16px;
+}
+.login-logo h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -.01em;
+}
+.login-logo p {
+  color: rgba(255,255,255,.55);
+  font-size: .82rem;
+  margin-top: 4px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.login-divider {
+  height: 1px;
+  background: rgba(255,255,255,.1);
+  margin: 28px 0;
+}
+
+.form-label {
+  display: block;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.55);
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(255,255,255,.15);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  outline: none;
+  transition: var(--transition);
+}
+.form-input::placeholder { color: rgba(255,255,255,.28); letter-spacing:.04em; }
+.form-input:focus {
+  border-color: var(--teal-lt);
+  background: rgba(255,255,255,.1);
+  box-shadow: 0 0 0 3px rgba(19,163,146,.22);
+}
+
+.btn-login {
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-lt));
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 6px 20px rgba(13,122,110,.45);
+  position: relative;
+  overflow: hidden;
+}
+.btn-login::after {
+  content:'';
+  position:absolute;inset:0;
+  background:rgba(255,255,255,0);
+  transition:background .2s;
+}
+.btn-login:hover::after { background:rgba(255,255,255,.08); }
+.btn-login:active { transform:scale(.98); }
+.btn-login:disabled { opacity:.6; cursor:not-allowed; }
+
+.login-error {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: rgba(185,28,28,.15);
+  border: 1px solid rgba(185,28,28,.3);
+  border-radius: var(--radius-sm);
+  color: #fca5a5;
+  font-size: .84rem;
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PANTALLA PRINCIPAL (portal)
+═══════════════════════════════════════════════════════════════ */
+#screen-portal { display: none; }
+
+/* ─── Top bar ─── */
+.topbar {
+  background: var(--teal-dk);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 62px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.18);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar-brand .t-icon { font-size: 22px; }
+.topbar-brand .t-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar-user .u-doc {
+  font-size: .78rem;
+  opacity: .65;
+}
+.topbar-user .u-name {
+  font-size: .88rem;
+  font-weight: 600;
+}
+.btn-logout {
+  padding: 6px 16px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-logout:hover { background: rgba(255,255,255,.18); }
+
+/* ─── Hero info card ─── */
+.hero-wrap {
+  background: linear-gradient(135deg, var(--teal-dk) 0%, var(--teal) 100%);
+  padding: 32px 32px 0;
+  position: relative;
+  overflow: hidden;
+}
+.hero-wrap::after {
+  content:'';
+  position:absolute;top:-60px;right:-80px;
+  width:320px;height:320px;
+  border-radius:50%;
+  background:rgba(255,255,255,.04);
+}
+
+.group-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 28px;
+}
+.g-chip {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 40px;
+  padding: 6px 16px;
+  color: rgba(255,255,255,.9);
+  font-size: .78rem;
+}
+.g-chip strong { color: #fff; display: block; font-size: .88rem; }
+
+/* ─── Tabs ─── */
+.tabs-nav {
+  background: var(--teal-dk);
+  display: flex;
+  gap: 2px;
+  padding: 0 32px;
+  border-bottom: 2px solid var(--teal-bg);
+}
+.tab-btn {
+  padding: 14px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: rgba(255,255,255,.55);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -2px;
+}
+.tab-btn:hover { color: rgba(255,255,255,.85); }
+.tab-btn.active {
+  color: #fff;
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+.tab-icon { font-size: 1rem; }
+
+/* ─── Content panels ─── */
+.panel-content {
+  padding: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn .3s ease; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ─── Section headings ─── */
+.sec-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--teal-dk);
+  border-left: 4px solid var(--gold);
+  padding-left: 12px;
+  margin-bottom: 18px;
+}
+
+/* ─── Generic table ─── */
+.data-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .84rem;
+}
+.data-table thead tr { background: var(--teal); }
+.data-table th {
+  padding: 11px 16px;
+  text-align: left;
+  color: #fff;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-weight: 600;
+}
+.data-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid #eef5f4;
+  color: var(--ink);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:nth-child(even) td { background: #fafefe; }
+.data-table tr:hover td { background: var(--teal-bg); }
+
+/* badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.badge-score-hi  { background:#d4f0e5;color:var(--pass); }
+.badge-score-md  { background:#fff3cd;color:#7a5b00; }
+.badge-score-lo  { background:#fde8d8;color:var(--warn); }
+.badge-area      { background:#e3eefe;color:#2a56a8; }
+.badge-asist     { background:#d4f0e5;color:var(--pass); }
+.badge-ausent    { background:#fde8d8;color:var(--warn); }
+
+/* ─── Totalizador pagos ─── */
+.total-bar {
+  background: linear-gradient(135deg, var(--teal-dk), var(--teal));
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-md);
+}
+.total-bar .t-label { font-size: .78rem; opacity: .7; text-transform: uppercase; letter-spacing: .06em; }
+.total-bar .t-amount { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--gold-lt); }
+
+/* ─── Spinner / empty ─── */
+.loading-msg, .empty-msg {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+  font-size: .88rem;
+}
+.spinner {
+  display: inline-block;
+  width: 32px; height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes spin { to{ transform:rotate(360deg); } }
+
+/* ─── Config banner ─── */
+.config-notice {
+  background: #fffbeb;
+  border: 1.5px dashed var(--gold);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: .82rem;
+  color: #78450a;
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+.config-notice code {
+  background: rgba(212,160,23,.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: .8rem;
+}
+.config-notice strong { color: #5a3208; }
+
+/* ─── Responsive ─── */
+@media(max-width:640px){
+  .topbar{ padding:0 16px; }
+  .hero-wrap, .tabs-nav, .panel-content{ padding-left:16px;padding-right:16px; }
+  .login-card{ padding:36px 24px 32px; }
+  .tabs-nav{ overflow-x:auto; gap:0; }
+  .tab-btn{ padding:14px 16px;font-size:.8rem; }
+  .total-bar{ flex-direction:column;gap:8px;text-align:center; }
+}
+</style>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body>
 
-    <div id="loginSection" class="no-print flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-blue-900">
-            <h2 class="text-2xl font-black text-center text-blue-900 mb-6 uppercase tracking-tight">Portal de Consultas</h2>
-            <div class="space-y-5">
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                    <label class="block text-[10px] font-bold text-blue-800 mb-2 uppercase">1. Cargar asenorte.sql</label>
-                    <input type="file" id="sqlFile" accept=".sql" class="w-full text-xs">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-2 uppercase">2. Documento de Identidad</label>
-                    <input type="text" id="studentDoc" placeholder="Ej: 1004375362" class="w-full px-4 py-3 border-2 rounded-xl focus:border-blue-900 outline-none font-mono text-lg">
-                </div>
-                <button onclick="generarReporte()" class="w-full bg-blue-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg uppercase tracking-widest">
-                    Consultar Pagos
-                </button>
-            </div>
-            <div id="status" class="mt-4 text-center text-xs font-bold text-blue-600"></div>
-        </div>
+<!-- ═══════════════════════════════════════════════════════
+     CONFIGURACIÓN — EDITAR AQUÍ
+═══════════════════════════════════════════════════════════ -->
+<script>
+/*
+ ╔═══════════════════════════════════════════════════════╗
+ ║  ⚙️  CONFIGURACIÓN  —  CAMBIAR ANTES DE PUBLICAR     ║
+ ╠═══════════════════════════════════════════════════════╣
+ ║                                                       ║
+ ║  PHP_API_URL   →  URL de tu ASENORTE.php publicado   ║
+ ║                   como Google Apps Script Web App     ║
+ ║                   (Implementar > App web > Cualq.)    ║
+ ║                                                       ║
+ ║  XLSX_DRIVE_ID →  ID del archivo ASISTENCIA.XLSX     ║
+ ║                   en Google Drive (parte de la URL:   ║
+ ║                   .../file/d/ ▶ID◀ /view)            ║
+ ║                   El archivo debe ser público.        ║
+ ╚═══════════════════════════════════════════════════════╝
+*/
+const CONFIG = {
+  PHP_API_URL:   'https://script.google.com/macros/s/PEGA_AQUI_TU_URL_DE_APPS_SCRIPT/exec',
+  XLSX_DRIVE_ID: 'PEGA_AQUI_EL_ID_DE_ASISTENCIA_XLSX',
+
+  // Columnas esperadas en ASISTENCIA.XLSX
+  // Ajusta los nombres de columna exactamente como están en tu Excel
+  XLSX_COL_DOC:    'DOCUMENTO',   // columna con cédula/ID del estudiante
+  XLSX_COL_FECHA:  'FECHA',       // columna con fecha de clase
+  XLSX_COL_ESTADO: 'ASISTENCIA',  // valores esperados: 'ASISTIÓ' / 'FALTÓ' (o similar)
+};
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     PANTALLA LOGIN
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-login">
+  <div class="login-bg-circle lbc1"></div>
+  <div class="login-bg-circle lbc2"></div>
+  <div class="login-bg-circle lbc3"></div>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🏥</div>
+      <h1>ASENORTE</h1>
+      <p>Portal Estudiantil</p>
     </div>
 
-    <div id="reportSection" class="hidden max-w-5xl mx-auto my-10 bg-white p-12 shadow-2xl border">
-        <div class="no-print flex justify-between mb-8">
-            <button onclick="location.reload()" class="text-blue-700 font-bold hover:underline">← Volver</button>
-            <button onclick="window.print()" class="bg-gray-800 text-white px-8 py-2 rounded text-[10px] font-bold uppercase">Imprimir Reporte</button>
-        </div>
+    <div class="login-divider"></div>
 
-        <div class="navy-asenorte text-white p-10 rounded-t-lg flex justify-between items-center">
-            <div>
-                <h1 class="text-5xl font-black italic tracking-tighter">ASENORTE</h1>
-                <p class="text-blue-300 text-xs uppercase tracking-widest mt-1">Extracto de Cuenta Estudiantil</p>
-            </div>
-            <div class="text-right">
-                <p class="text-xl font-bold uppercase" id="outDocTitle">---</p>
-                <p class="text-[10px] opacity-70">SISTEMA DE GESTIÓN 2026</p>
-            </div>
-        </div>
+    <label class="form-label" for="inp-doc">Número de Cédula / ID Estudiante</label>
+    <input
+      type="text"
+      id="inp-doc"
+      class="form-input"
+      placeholder="Ej: 1080424929"
+      inputmode="numeric"
+      autocomplete="off"
+      autofocus
+    >
 
-        <div class="grid grid-cols-2 border-x border-b bg-slate-50 divide-x divide-gray-200 mb-8">
-            <div class="p-6">
-                <span class="text-[9px] font-bold text-gray-400 uppercase">Nombre del Estudiante:</span>
-                <p class="text-2xl font-bold text-blue-900 uppercase" id="outNombre">---</p>
-            </div>
-            <div class="p-6 text-right">
-                <span class="text-[9px] font-bold text-gray-400 uppercase">ID Interno (CLIENTE_RECIBO):</span>
-                <p class="text-2xl font-bold text-gray-800" id="outIdInterno">---</p>
-            </div>
-        </div>
+    <button class="btn-login" id="btn-entrar" onclick="doLogin()">
+      Ingresar al Portal
+    </button>
 
-        <div class="mt-5">
-            <h3 class="bg-blue-900 text-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-t flex justify-between">
-                <span>Historial Detallado de Recibos</span>
-                <span id="pagoCounter">0 Registros</span>
-            </h3>
-            <table class="w-full table-oficial">
-                <thead>
-                    <tr>
-                        <th class="text-center">No. Recibo</th>
-                        <th class="text-center">Fecha</th>
-                        <th class="text-left">Concepto del Pago</th>
-                        <th class="text-right">Valor</th>
-                    </tr>
-                </thead>
-                <tbody id="finanzasBody"></tbody>
-                <tfoot>
-                    <tr class="bg-blue-50 font-black">
-                        <td colspan="3" class="text-right p-4 text-xs uppercase border">Total Recaudado:</td>
-                        <td id="outTotal" class="text-right p-4 text-blue-900 text-lg border">---</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
 
-        <div class="mt-20 pt-8 border-t border-dashed text-[10px] text-gray-400 flex justify-between italic">
-            <p>Validación: CLIENTE_RECIBO = ID_ESTUDIANTE</p>
-            <p>ASENORTE - Mayo 2026</p>
+<!-- ═══════════════════════════════════════════════════════
+     PANTALLA PORTAL
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-portal">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span class="t-icon">🏥</span>
+      <span class="t-name">ASENORTE</span>
+    </div>
+    <div class="topbar-user">
+      <div>
+        <div class="u-name" id="bar-nombre">—</div>
+        <div class="u-doc" id="bar-doc">—</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <!-- HERO: info de grupo -->
+  <div class="hero-wrap">
+    <div class="group-chips" id="group-chips">
+      <div class="loading-msg"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('notas',this)">
+      <span class="tab-icon">📋</span> Notas
+    </button>
+    <button class="tab-btn" onclick="switchTab('pagos',this)">
+      <span class="tab-icon">💳</span> Pagos
+    </button>
+    <button class="tab-btn" onclick="switchTab('asistencia',this)">
+      <span class="tab-icon">📅</span> Asistencia
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="panel-content">
+
+    <!-- ── NOTAS ── -->
+    <div class="tab-panel active" id="panel-notas">
+      <h2 class="sec-title">Historial de Notas</h2>
+      <div class="data-wrap">
+        <div class="loading-msg" id="notas-loading">
+          <div class="spinner"></div><br>Cargando notas…
         </div>
+        <table class="data-table" id="notas-table" style="display:none">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Módulo / Curso</th>
+              <th>Código Curso</th>
+              <th>Área</th>
+              <th>Calificación</th>
+              <th>Fecha</th>
+              <th>Docente</th>
+            </tr>
+          </thead>
+          <tbody id="notas-body"></tbody>
+        </table>
+        <div class="empty-msg" id="notas-empty" style="display:none">
+          No se encontraron notas para este estudiante.
+        </div>
+      </div>
     </div>
 
-    <script>
-        function generarReporte() {
-            const file = document.getElementById('sqlFile').files[0];
-            const docBusqueda = document.getElementById('studentDoc').value.trim();
-            const status = document.getElementById('status');
+    <!-- ── PAGOS ── -->
+    <div class="tab-panel" id="panel-pagos">
+      <h2 class="sec-title">Recibos de Pago</h2>
+      <div class="total-bar">
+        <div>
+          <div class="t-label">Total pagado</div>
+          <div class="t-amount" id="pagos-total">$ —</div>
+        </div>
+        <div style="opacity:.6;font-size:.82rem;" id="pagos-count">— recibos</div>
+      </div>
+      <div class="data-wrap">
+        <div class="loading-msg" id="pagos-loading">
+          <div class="spinner"></div><br>Cargando pagos…
+        </div>
+        <table class="data-table" id="pagos-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Consecutivo</th>
+              <th>Fecha</th>
+              <th>Valor</th>
+              <th>Concepto</th>
+              <th>Forma de pago</th>
+            </tr>
+          </thead>
+          <tbody id="pagos-body"></tbody>
+        </table>
+        <div class="empty-msg" id="pagos-empty" style="display:none">
+          No se encontraron recibos de pago para este estudiante.
+        </div>
+      </div>
+    </div>
 
-            if (!file || !docBusqueda) {
-                alert("Por favor cargue el SQL e ingrese el documento.");
-                return;
-            }
+    <!-- ── ASISTENCIA ── -->
+    <div class="tab-panel" id="panel-asistencia">
+      <h2 class="sec-title">Reporte de Asistencia</h2>
 
-            status.innerText = "Escaneando registros financieros...";
-            const reader = new FileReader();
+      <div class="config-notice" id="asist-config-notice">
+        ⚠️ <strong>Administrador:</strong> sube el archivo <code>ASISTENCIA.XLSX</code> a Google Drive
+        en la carpeta <em>Asenorte</em>, configura su visibilidad como <strong>Público</strong>
+        y actualiza <code>CONFIG.XLSX_DRIVE_ID</code> con su ID en este archivo HTML.
+      </div>
 
-            reader.onload = function(e) {
-                const content = e.target.result;
-                
-                let idEstudiante = null;
-                let nombreEst = "";
-                let htmlRows = "";
-                let totalSuma = 0;
-                let count = 0;
+      <div id="asist-summary" style="display:none;margin-bottom:18px;">
+        <div class="total-bar" style="background:linear-gradient(135deg,#1b4f45,var(--teal-dk));">
+          <div>
+            <div class="t-label">Días asistidos</div>
+            <div class="t-amount" id="asist-count" style="color:#6ee7b7;">0</div>
+          </div>
+          <div>
+            <div class="t-label">Faltas</div>
+            <div class="t-amount" id="asist-faltas" style="color:#fca5a5;">0</div>
+          </div>
+          <div>
+            <div class="t-label">% Asistencia</div>
+            <div class="t-amount" id="asist-pct" style="color:var(--gold-lt);">—%</div>
+          </div>
+        </div>
+      </div>
 
-                // 1. OBTENER EL ID_ESTUDIANTE (EJ: 6544) DESDE TBL_ESTUDIANTES
-                const bloqueEst = content.match(/INSERT INTO `tbl_estudiantes`[\s\S]*?;/g);
-                if (bloqueEst) {
-                    bloqueEst.forEach(bloque => {
-                        const filas = bloque.match(/\((.*?)\)/g);
-                        filas?.forEach(fila => {
-                            const campos = fila.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(s => s.replace(/[()']/g, "").trim());
-                            // Comprobamos si el documento (posición 4) coincide
-                            if (campos[4] === docBusqueda) {
-                                idEstudiante = campos[0]; // El ID 6544
-                                nombreEst = campos[1] + " " + campos[2];
-                            }
-                        });
-                    });
-                }
+      <div class="data-wrap">
+        <div class="loading-msg" id="asist-loading">
+          <div class="spinner"></div><br>Cargando ASISTENCIA.XLSX desde Google Drive…
+        </div>
+        <table class="data-table" id="asist-table" style="display:none">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="asist-body"></tbody>
+        </table>
+        <div class="empty-msg" id="asist-empty" style="display:none">
+          No se encontraron registros de asistencia para este documento.
+        </div>
+      </div>
+    </div>
 
-                if (!idEstudiante) {
-                    status.innerText = "Error: Estudiante no encontrado.";
-                    return;
-                }
+  </div><!-- /panel-content -->
+</div><!-- /screen-portal -->
 
-                // 2. BUSCAR TODOS LOS RECIBOS ASOCIADOS AL ID EN FAC_RECIBOS
-                const bloquesRecibos = content.match(/INSERT INTO `fac_recibos`[\s\S]*?;/g);
-                if (bloquesRecibos) {
-                    bloquesRecibos.forEach(bloque => {
-                        const filas = bloque.match(/\((.*?)\)/g);
-                        filas?.forEach(fila => {
-                            // Limpieza profunda de la fila para evitar errores de caracteres
-                            const p = fila.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(s => s.replace(/[()']/g, "").trim());
-                            
-                            // CLIENTE_RECIBO suele ser la columna 4 (índice 4)
-                            // Hacemos una validación estricta para el ID encontrado (ej: 6544)
-                            if (p[4] === idEstudiante) {
-                                const valor = parseFloat(p[5]) || 0;
-                                totalSuma += valor;
-                                count++;
 
-                                htmlRows += `
-                                    <tr>
-                                        <td class="text-center border font-mono font-bold text-blue-700">${p[3] || p[0]}</td>
-                                        <td class="text-center border">${p[1]}</td>
-                                        <td class="border uppercase text-[10px] font-semibold text-gray-600">${p[6] || 'RECIBO DE CAJA'}</td>
-                                        <td class="text-right border font-black text-green-700">$${valor.toLocaleString()}</td>
-                                    </tr>`;
-                            }
-                        });
-                    });
-                }
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT PRINCIPAL
+═══════════════════════════════════════════════════════════ -->
+<script>
+/* ───────────────────────────────────────────────────────
+   Estado global
+─────────────────────────────────────────────────────── */
+let CURRENT_DOC = '';
+let API_DATA    = null;   // respuesta completa de ASENORTE.php
 
-                // 3. RENDERIZAR RESULTADOS
-                document.getElementById('outNombre').innerText = nombreEst;
-                document.getElementById('outIdInterno').innerText = idEstudiante;
-                document.getElementById('outDocTitle').innerText = "DOC: " + docBusqueda;
-                document.getElementById('outTotal').innerText = "$" + totalSuma.toLocaleString();
-                document.getElementById('pagoCounter').innerText = count + " Recibos encontrados";
-                
-                document.getElementById('finanzasBody').innerHTML = htmlRows || `<tr><td colspan="4" class="p-10 text-center italic text-gray-400">No se encontraron pagos asociados al ID ${idEstudiante} en fac_recibos.</td></tr>`;
-                
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('reportSection').classList.remove('hidden');
-            };
+/* ───────────────────────────────────────────────────────
+   LOGIN
+─────────────────────────────────────────────────────── */
+document.getElementById('inp-doc').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
 
-            // Lectura con codificación para español
-            reader.readAsText(file, 'ISO-8859-1');
-        }
-    </script>
+async function doLogin() {
+  const doc = document.getElementById('inp-doc').value.trim();
+  if (!doc) return showLoginError('Ingresa tu número de documento.');
+
+  const btn = document.getElementById('btn-entrar');
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+  hideLoginError();
+
+  try {
+    const data = await fetchAPI(doc);
+
+    if (!data || data.error) {
+      showLoginError(data?.error || 'Estudiante no encontrado. Verifica tu documento.');
+      return;
+    }
+
+    CURRENT_DOC = doc;
+    API_DATA    = data;
+    renderPortal(data);
+    showPortal();
+
+  } catch(err) {
+    showLoginError('Error de conexión. Verifica la URL del API en CONFIG.');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ingresar al Portal';
+  }
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideLoginError() {
+  document.getElementById('login-error').style.display = 'none';
+}
+
+/* ───────────────────────────────────────────────────────
+   LOGOUT
+─────────────────────────────────────────────────────── */
+function doLogout() {
+  CURRENT_DOC = '';
+  API_DATA    = null;
+  document.getElementById('inp-doc').value = '';
+  document.getElementById('screen-portal').style.display = 'none';
+  document.getElementById('screen-login').style.display  = 'flex';
+  switchTab('notas', document.querySelector('.tab-btn'));
+}
+
+function showPortal() {
+  document.getElementById('screen-login').style.display  = 'none';
+  document.getElementById('screen-portal').style.display = 'block';
+}
+
+/* ───────────────────────────────────────────────────────
+   FETCH API (ASENORTE.php / Apps Script)
+─────────────────────────────────────────────────────── */
+async function fetchAPI(doc) {
+  const url = `${CONFIG.PHP_API_URL}?documento=${encodeURIComponent(doc)}`;
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+/*
+  Estructura JSON esperada de ASENORTE.php:
+  {
+    "estudiante": {
+      "nombre":   "...",
+      "apellidos":"...",
+      "documento":"..."
+    },
+    "grupo": {
+      "id":      344,
+      "codigo":  "AE29012026T",
+      "ano":     "2026",
+      "semestre":"I",
+      "programa":"Técnico Laboral en Auxiliar en Enfermería",
+      "inicio":  "2026-01-26",
+      "fin":     "2027-06-30"
+    },
+    "notas": [
+      {
+        "id_nota":      48516,
+        "curso_nota":   3456,
+        "codigo_curso": "II260120226T",
+        "modulo":       "Inducción a la institución educativa",
+        "calificacion": "5.0",
+        "area":         "PRIMER",
+        "fecha":        "2026-02-25",
+        "docente":      "JHON JADER BONET CANTILLO"
+      },
+      ...
+    ],
+    "pagos": [
+      {
+        "consecutivo":  "001",
+        "fecha":        "2026-01-28",
+        "valor":        150000,
+        "concepto":     "Matrícula primer semestre",
+        "forma_pago":   "Consignación"
+      },
+      ...
+    ]
+  }
+*/
+
+/* ───────────────────────────────────────────────────────
+   RENDER PORTAL
+─────────────────────────────────────────────────────── */
+function renderPortal(data) {
+  const est = data.estudiante || {};
+  const grp = data.grupo      || {};
+
+  /* top bar */
+  document.getElementById('bar-nombre').textContent =
+    `${est.nombre || ''} ${est.apellidos || ''}`.trim() || '(sin nombre)';
+  document.getElementById('bar-doc').textContent = `Doc: ${est.documento || CURRENT_DOC}`;
+
+  /* chips de grupo */
+  const chips = document.getElementById('group-chips');
+  chips.innerHTML = '';
+  const chipData = [
+    { label:'ID Grupo',    val: grp.id        || '—' },
+    { label:'Código Grupo',val: grp.codigo     || '—' },
+    { label:'Año',         val: grp.ano        || '—' },
+    { label:'Semestre',    val: grp.semestre   || '—' },
+    { label:'Programa',    val: grp.programa   || '—' },
+    { label:'Inicio',      val: fmtFecha(grp.inicio) },
+    { label:'Fin',         val: fmtFecha(grp.fin)    },
+  ];
+  chipData.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'g-chip';
+    d.innerHTML = `<span style="opacity:.6;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;">${c.label}</span>
+                   <strong>${c.val}</strong>`;
+    chips.appendChild(d);
+  });
+
+  renderNotas(data.notas   || []);
+  renderPagos(data.pagos   || []);
+  loadAsistencia();           // carga independiente desde XLSX
+}
+
+/* ─── Notas ─── */
+function renderNotas(notas) {
+  document.getElementById('notas-loading').style.display = 'none';
+
+  if (!notas.length) {
+    document.getElementById('notas-empty').style.display = 'block';
+    return;
+  }
+
+  const tbody = document.getElementById('notas-body');
+  tbody.innerHTML = '';
+  notas.forEach(n => {
+    const cal  = parseFloat(n.calificacion);
+    const cls  = cal >= 4.5 ? 'badge-score-hi' : cal >= 3.5 ? 'badge-score-md' : 'badge-score-lo';
+    const tr   = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:.78rem;">${n.id_nota || ''}</td>
+      <td><strong>${n.modulo || n.curso_nota || '—'}</strong></td>
+      <td style="font-family:monospace;font-size:.8rem;">${n.codigo_curso || '—'}</td>
+      <td><span class="badge badge-area">${n.area || '—'}</span></td>
+      <td><span class="badge ${cls}">${n.calificacion || '—'}</span></td>
+      <td>${fmtFecha(n.fecha)}</td>
+      <td style="font-size:.82rem;color:var(--muted);">${n.docente || '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('notas-table').style.display = 'table';
+}
+
+/* ─── Pagos ─── */
+function renderPagos(pagos) {
+  document.getElementById('pagos-loading').style.display = 'none';
+
+  if (!pagos.length) {
+    document.getElementById('pagos-empty').style.display = 'block';
+    document.getElementById('pagos-total').textContent = '$ 0';
+    document.getElementById('pagos-count').textContent = '0 recibos';
+    return;
+  }
+
+  let total = 0;
+  const tbody = document.getElementById('pagos-body');
+  tbody.innerHTML = '';
+  pagos.forEach(p => {
+    total += Number(p.valor) || 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:600;">${p.consecutivo || '—'}</td>
+      <td>${fmtFecha(p.fecha)}</td>
+      <td style="font-weight:700;color:var(--pass);">${fmtMoney(p.valor)}</td>
+      <td style="font-size:.82rem;color:var(--muted);">${p.concepto   || '—'}</td>
+      <td style="font-size:.82rem;">${p.forma_pago || '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  /* fila total */
+  const tf = document.createElement('tr');
+  tf.innerHTML = `
+    <td colspan="2" style="font-weight:700;color:var(--teal-dk);text-align:right;">TOTAL</td>
+    <td style="font-weight:800;font-size:1rem;color:var(--teal-dk);">${fmtMoney(total)}</td>
+    <td colspan="2"></td>
+  `;
+  tbody.appendChild(tf);
+
+  document.getElementById('pagos-total').textContent = fmtMoney(total);
+  document.getElementById('pagos-count').textContent = `${pagos.length} recibos`;
+  document.getElementById('pagos-table').style.display = 'table';
+}
+
+/* ───────────────────────────────────────────────────────
+   ASISTENCIA — leer XLSX desde Google Drive con SheetJS
+─────────────────────────────────────────────────────── */
+async function loadAsistencia() {
+  document.getElementById('asist-loading').style.display = 'block';
+  document.getElementById('asist-table').style.display   = 'none';
+  document.getElementById('asist-empty').style.display   = 'none';
+  document.getElementById('asist-summary').style.display = 'none';
+
+  const fileId = CONFIG.XLSX_DRIVE_ID;
+
+  /* Si no está configurado aún, mostrar aviso */
+  if (!fileId || fileId === 'PEGA_AQUI_EL_ID_DE_ASISTENCIA_XLSX') {
+    document.getElementById('asist-loading').style.display = 'none';
+    document.getElementById('asist-empty').style.display = 'block';
+    document.getElementById('asist-empty').textContent =
+      'ASISTENCIA.XLSX aún no configurado. Ver aviso de administrador arriba.';
+    return;
+  }
+
+  /*
+    Google Drive bloquea fetch directo por CORS.
+    Usamos un proxy público para desarrollo, o configura un
+    Apps Script que devuelva el binario del XLSX.
+
+    Opción A (simple – funciona con archivos públicos):
+      URL: https://drive.google.com/uc?export=download&id=FILE_ID
+      Nota: Google redirige a un captcha para archivos grandes.
+
+    Opción B (recomendada): Agrega al Apps Script una función
+      que sirva el XLSX en base64 y llámala desde aquí.
+  */
+
+  try {
+    const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+    /* Intentamos con el proxy cors.sh para superar restricciones CORS
+       (solo para desarrollo; en producción usa tu propio backend) */
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(driveUrl)}`;
+
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const arrayBuffer = await res.arrayBuffer();
+    const wb = XLSX.read(arrayBuffer, { type:'array' });
+
+    /* Primera hoja */
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
+
+    renderAsistencia(rows);
+
+  } catch(err) {
+    document.getElementById('asist-loading').style.display = 'none';
+    document.getElementById('asist-empty').style.display = 'block';
+    document.getElementById('asist-empty').innerHTML =
+      `⚠️ No se pudo cargar el archivo de asistencia.<br>
+       <small style="color:var(--muted);">${err.message}</small><br><br>
+       <small>Verifica que el archivo sea público en Drive y que el ID sea correcto.</small>`;
+    console.error('XLSX error:', err);
+  }
+}
+
+function renderAsistencia(rows) {
+  document.getElementById('asist-loading').style.display = 'none';
+  document.getElementById('asist-config-notice').style.display = 'none';
+
+  /* Filtra por documento del estudiante */
+  const docCol   = CONFIG.XLSX_COL_DOC;
+  const fechaCol = CONFIG.XLSX_COL_FECHA;
+  const estadoCol= CONFIG.XLSX_COL_ESTADO;
+
+  const miRows = rows.filter(r => {
+    const val = String(r[docCol] || '').trim();
+    return val === CURRENT_DOC;
+  });
+
+  if (!miRows.length) {
+    document.getElementById('asist-empty').style.display = 'block';
+    return;
+  }
+
+  /* Ordena por fecha */
+  miRows.sort((a,b) => {
+    const da = parseFechaExcel(a[fechaCol]);
+    const db = parseFechaExcel(b[fechaCol]);
+    return da - db;
+  });
+
+  let asistio = 0, falta = 0;
+  const tbody = document.getElementById('asist-body');
+  tbody.innerHTML = '';
+
+  miRows.forEach((r, i) => {
+    const estado  = String(r[estadoCol] || '').trim().toUpperCase();
+    const presente= estado.includes('ASIST') || estado === 'P' || estado === 'PRESENTE' || estado === '1';
+    if (presente) asistio++; else falta++;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:.78rem;">${i+1}</td>
+      <td>${fmtFechaExcel(r[fechaCol])}</td>
+      <td><span class="badge ${presente ? 'badge-asist':'badge-ausent'}">${presente ? 'Asistió':'Faltó'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const total  = asistio + falta;
+  const pct    = total ? Math.round(asistio/total*100) : 0;
+  document.getElementById('asist-count').textContent  = asistio;
+  document.getElementById('asist-faltas').textContent = falta;
+  document.getElementById('asist-pct').textContent    = `${pct}%`;
+
+  document.getElementById('asist-summary').style.display = 'block';
+  document.getElementById('asist-table').style.display   = 'table';
+}
+
+/* ───────────────────────────────────────────────────────
+   TABS
+─────────────────────────────────────────────────────── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b  => b.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+/* ───────────────────────────────────────────────────────
+   UTILIDADES
+─────────────────────────────────────────────────────── */
+function fmtFecha(s) {
+  if (!s) return '—';
+  try {
+    const d = new Date(s);
+    if (isNaN(d)) return s;
+    return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' });
+  } catch { return s; }
+}
+
+function fmtFechaExcel(v) {
+  if (!v) return '—';
+  /* SheetJS puede devolver número serial de Excel o string */
+  if (typeof v === 'number') {
+    const d = XLSX.SSF.parse_date_code(v);
+    if (d) return `${String(d.d).padStart(2,'0')}/${String(d.m).padStart(2,'0')}/${d.y}`;
+  }
+  return fmtFecha(v);
+}
+
+function parseFechaExcel(v) {
+  if (!v) return 0;
+  if (typeof v === 'number') return v;
+  return new Date(v).getTime() || 0;
+}
+
+function fmtMoney(n) {
+  const num = Number(n) || 0;
+  return '$ ' + num.toLocaleString('es-CO');
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+  NOTA PARA EL DESARROLLADOR / ADMINISTRADOR
+  ════════════════════════════════════════════════════════
+
+  PASO 1 — ASENORTE.php como Google Apps Script
+  ─────────────────────────────────────────────
+  En Google Drive crea un proyecto Apps Script (Tools > Script editor)
+  con el siguiente código y publícalo como "Aplicación web" (Deploy > Web app)
+  con acceso "Cualquier persona":
+
+  ─────────────────────────────────────────────
+  function doGet(e) {
+    const doc  = e.parameter.documento || '';
+    const sheet= SpreadsheetApp.openById('ID_DE_TU_HOJA_ASENORTE'); // ajusta
+    // O usa tu lógica PHP / conexión MySQL aquí
+    // Devuelve JSON con la estructura documentada en el código
+    const resultado = consultarEstudiante(doc, sheet);
+    return ContentService
+      .createTextOutput(JSON.stringify(resultado))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  ─────────────────────────────────────────────
+
+  PASO 2 — ASISTENCIA.XLSX
+  ────────────────────────
+  • Sube ASISTENCIA.XLSX a Google Drive > carpeta Asenorte
+  • Click derecho > Compartir > "Cualquier persona con el enlace puede ver"
+  • Copia el ID (la parte larga entre /d/ y /view en la URL)
+  • Pégalo en CONFIG.XLSX_DRIVE_ID
+
+  PASO 3 — Columnas de ASISTENCIA.XLSX
+  ─────────────────────────────────────
+  El archivo debe tener al menos estas columnas (fila 1 = encabezados):
+    DOCUMENTO   → cédula o ID del estudiante
+    FECHA       → fecha de la clase (formato DD/MM/YYYY o similar)
+    ASISTENCIA  → texto: "ASISTIÓ", "FALTÓ", "P", "F", "1", "0"
+
+  Ajusta CONFIG.XLSX_COL_* si los nombres de columna son diferentes.
+
+  PASO 4 — GitHub Pages
+  ──────────────────────
+  • Crea un repositorio en GitHub
+  • Sube este archivo como index.html en la raíz
+  • Activa GitHub Pages: Settings > Pages > Deploy from branch > main / root
+  • Tu portal quedará en: https://<usuario>.github.io/<repo>/
+═══════════════════════════════════════════════════════ -->
+
 </body>
 </html>
