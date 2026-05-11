@@ -1,225 +1,353 @@
-// API de autenticación - Versión corregida para la estructura de la base de datos asenorte.sql
+// ============================================
+// autenticacion.js - Versión para GitHub Pages
+// Lee el archivo SQL directamente desde Google Drive
+// ============================================
 
-export default async function handler(req, res) {
-    // Configuración de CORS
-    const allowedOrigins = ['http://localhost', 'http://localhost:3000', 'https://tu-dominio.com'];
-    const origin = req.headers.origin;
+// Configuración - URL del archivo SQL en Google Drive
+// NOTA: Usa el ID del archivo de tu Google Drive
+// El ID está en la URL: drive.google.com/file/d/[ID_AQUI]/view
+const ARCHIVO_SQL_URL = 'https://drive.google.com/uc?export=download&id=TU_ID_DEL_ARCHIVO';
+
+// Configuración de caché para evitar múltiples descargas
+let datosCache = null;
+let ultimaDescarga = null;
+const TIEMPO_CACHE = 5 * 60 * 1000; // 5 minutos
+
+// ============================================
+// Función principal de autenticación
+// ============================================
+async function autenticarEstudiante(documento, tipoDocumento, programa) {
+    console.log('🔍 Iniciando autenticación para documento:', documento);
     
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-    // Manejar preflight
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    // Solo permitir POST para login
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Método no permitido' });
-    }
-
-    const { documento, tipoDocumento, programa } = req.body;
-
-    // Validaciones básicas
-    if (!documento) {
-        return res.status(400).json({ error: 'El número de documento es requerido' });
-    }
-
-    if (!programa) {
-        return res.status(400).json({ error: 'Debe seleccionar un programa' });
+    if (!documento || documento.trim() === '') {
+        throw new Error('El número de documento es requerido');
     }
 
     try {
-        // Configuración de la conexión a MySQL
-        const mysql = require('mysql2/promise');
+        // 1. Obtener y parsear el archivo SQL
+        const datosSQL = await obtenerDatosSQL();
         
-        // Crear conexión a la base de datos - Ajusta estos valores a tu configuración local
-        const connection = await mysql.createConnection({
-            host: 'localhost',
-            port: 3306,
-            user: 'root',           // Cambia por tu usuario de MySQL
-            password: '',           // Cambia por tu contraseña de MySQL
-            database: 'asenorte'    // Nombre de tu base de datos
-        });
-
-        // PRIMERA ESTRATEGIA: Buscar en la tabla fac_facturas (la más completa)
-        // ya que contiene CLIENTE_FACTURA que es el ID del estudiante
-        let query = `
-            SELECT 
-                ff.ID_FACTURA,
-                ff.CLIENTE_FACTURA as documento,
-                ff.TIPO_FACTURA,
-                ff.CONSECUTIVO_FACTURA,
-                ff.FECHA_FACTURA,
-                ff.SUBTOTAL_FACTURA,
-                ff.TOTAL_FACTURA,
-                ff.DESCRIPCION_FACTURA,
-                ff.VENDEDOR_FACTURA,
-                ff.TERMINO_FACTURA,
-                ff.VENCIMIENTO_FACTURA,
-                ff.TIPOPAGO_FACTURA,
-                'FACTURA' as tipo_registro
-            FROM fac_facturas ff
-            WHERE ff.CLIENTE_FACTURA = ?
-            
-            UNION ALL
-            
-            SELECT 
-                fc.ID_CREDITO as ID_FACTURA,
-                fc.CLIENTE_CREDITO as documento,
-                'CREDITO' as TIPO_FACTURA,
-                fc.CONSECUTIVO_CREDITO as CONSECUTIVO_FACTURA,
-                fc.FECHA_CREDITO as FECHA_FACTURA,
-                fc.VALOR_CREDITO as SUBTOTAL_FACTURA,
-                fc.VALOR_CREDITO as TOTAL_FACTURA,
-                fc.CONCEPTO_CREDITO as DESCRIPCION_FACTURA,
-                fc.VENDEDOR_CREDITO as VENDEDOR_FACTURA,
-                NULL as TERMINO_FACTURA,
-                NULL as VENCIMIENTO_FACTURA,
-                NULL as TIPOPAGO_FACTURA,
-                'CREDITO' as tipo_registro
-            FROM fac_creditos fc
-            WHERE fc.CLIENTE_CREDITO = ?
-            
-            UNION ALL
-            
-            SELECT 
-                fr.ID_RECIBO as ID_FACTURA,
-                fr.CLIENTE_RECIBO as documento,
-                'RECIBO' as TIPO_FACTURA,
-                fr.CONSECUTIVO_RECIBO as CONSECUTIVO_FACTURA,
-                fr.FECHA_RECIBO as FECHA_FACTURA,
-                fr.VALOR_RECIBO as SUBTOTAL_FACTURA,
-                fr.VALOR_RECIBO as TOTAL_FACTURA,
-                fr.CONCEPTO_RECIBO as DESCRIPCION_FACTURA,
-                fr.VENDEDOR_RECIBO as VENDEDOR_FACTURA,
-                NULL as TERMINO_FACTURA,
-                NULL as VENCIMIENTO_FACTURA,
-                NULL as TIPOPAGO_FACTURA,
-                'RECIBO' as tipo_registro
-            FROM fac_recibos fr
-            WHERE fr.CLIENTE_RECIBO = ?
-            
-            ORDER BY FECHA_FACTURA DESC
-            LIMIT 50
-        `;
-
-        const [rows] = await connection.execute(query, [documento, documento, documento]);
+        // 2. Buscar el estudiante en los datos
+        const estudiante = buscarEstudianteEnDatos(datosSQL, documento);
         
-        // Cerrar conexión
-        await connection.end();
-
-        // Si encontró registros, el estudiante existe
-        if (rows && rows.length > 0) {
-            // Obtener información adicional del primer registro encontrado
-            const primerRegistro = rows[0];
-            
-            // Construir objeto de respuesta con información del estudiante
-            const estudianteInfo = {
+        // 3. Si no se encuentra, retornar error
+        if (!estudiante.encontrado) {
+            throw new Error(`No se encontraron registros para el documento ${documento}`);
+        }
+        
+        // 4. Construir respuesta completa
+        return {
+            success: true,
+            message: 'Autenticación exitosa',
+            estudiante: {
                 documento: documento,
                 tipoDocumento: tipoDocumento || 'Cédula',
                 programa: programa,
-                nombre: `Estudiante ${documento}`, // Nombre por defecto si no está en BD
-                tieneRegistros: true,
-                totalRegistros: rows.length,
-                ciudad: 'Santa Marta',
+                nombre: estudiante.nombre || `Estudiante ${documento}`,
+                ciudad: estudiante.ciudad || 'Santa Marta',
                 institucion: 'ASENORTE - Asesorías del Norte',
-                ultimosRegistros: rows.slice(0, 10).map(row => ({
-                    tipo: row.tipo_registro,
-                    consecutivo: row.CONSECUTIVO_FACTURA,
-                    fecha: row.FECHA_FACTURA,
-                    valor: row.SUBTOTAL_FACTURA || row.TOTAL_FACTURA,
-                    descripcion: row.DESCRIPCION_FACTURA,
-                    vendedor: row.VENDEDOR_FACTURA
-                }))
-            };
-
-            // Intentar obtener el nombre del estudiante desde fac_recibos
-            // (podría estar en VENDEDOR_RECIBO cuando es un registro de pago)
-            const registroConNombre = rows.find(r => r.VENDEDOR_FACTURA && 
-                r.VENDEDOR_FACTURA !== 'Administrador' && 
-                r.VENDEDOR_FACTURA !== 'NELLY MARIA ÁLVAREZ BORREGO' &&
-                r.VENDEDOR_FACTURA !== 'Lucila Isabel Fernandez de Castro Dangond');
-            
-            if (registroConNombre && registroConNombre.VENDEDOR_FACTURA) {
-                estudianteInfo.nombre = registroConNombre.VENDEDOR_FACTURA;
+                totalFacturas: estudiante.facturas.length,
+                totalCreditos: estudiante.creditos.length,
+                totalRecibos: estudiante.recibos.length,
+                facturas: estudiante.facturas.slice(0, 10),
+                creditos: estudiante.creditos.slice(0, 10),
+                recibos: estudiante.recibos.slice(0, 10),
+                ultimoPago: estudiante.ultimoPago,
+                saldoPendiente: estudiante.saldoPendiente
             }
+        };
+        
+    } catch (error) {
+        console.error('❌ Error en autenticación:', error);
+        throw error;
+    }
+}
 
-            return res.status(200).json({
-                success: true,
-                message: 'Autenticación exitosa',
-                estudiante: estudianteInfo,
-                registros: rows
-            });
-        } else {
-            // SEGUNDA ESTRATEGIA: Buscar en recibos específicos para confirmar existencia
-            const connection2 = await mysql.createConnection({
-                host: 'localhost',
-                port: 3306,
-                user: 'root',
-                password: '',
-                database: 'asenorte'
-            });
+// ============================================
+// Obtener y parsear el archivo SQL desde Google Drive
+// ============================================
+async function obtenerDatosSQL() {
+    // Verificar caché
+    if (datosCache && ultimaDescarga && (Date.now() - ultimaDescarga < TIEMPO_CACHE)) {
+        console.log('📦 Usando datos en caché');
+        return datosCache;
+    }
+    
+    console.log('📥 Descargando archivo SQL desde Google Drive...');
+    
+    try {
+        // Descargar el archivo
+        const response = await fetch(ARCHIVO_SQL_URL);
+        
+        if (!response.ok) {
+            throw new Error(`Error al descargar el archivo: ${response.status}`);
+        }
+        
+        const sqlText = await response.text();
+        console.log('✅ Archivo descargado, tamaño:', sqlText.length, 'bytes');
+        
+        // Parsear el SQL
+        console.log('🔧 Parseando estructura SQL...');
+        const datosParseados = parsearSQL(sqlText);
+        
+        // Guardar en caché
+        datosCache = datosParseados;
+        ultimaDescarga = Date.now();
+        
+        console.log('✅ Datos parseados exitosamente');
+        console.log(`   - Facturas: ${datosParseados.facturas.length}`);
+        console.log(`   - Créditos: ${datosParseados.creditos.length}`);
+        console.log(`   - Recibos: ${datosParseados.recibos.length}`);
+        
+        return datosParseados;
+        
+    } catch (error) {
+        console.error('❌ Error al obtener datos SQL:', error);
+        throw new Error('No se pudo cargar la base de datos. Por favor, verifica la conexión.');
+    }
+}
 
-            // Buscar en recibos
-            const [recibos] = await connection2.execute(
-                `SELECT COUNT(*) as total FROM fac_recibos WHERE CLIENTE_RECIBO = ?`,
-                [documento]
-            );
-            
-            // Buscar en créditos
-            const [creditos] = await connection2.execute(
-                `SELECT COUNT(*) as total FROM fac_creditos WHERE CLIENTE_CREDITO = ?`,
-                [documento]
-            );
-            
-            // Buscar en facturas
-            const [facturas] = await connection2.execute(
-                `SELECT COUNT(*) as total FROM fac_facturas WHERE CLIENTE_FACTURA = ?`,
-                [documento]
-            );
-            
-            await connection2.end();
-
-            const existe = (recibos[0]?.total || 0) > 0 || 
-                          (creditos[0]?.total || 0) > 0 || 
-                          (facturas[0]?.total || 0) > 0;
-
-            if (existe) {
-                // El estudiante existe pero no tiene facturas visibles en la primera consulta
-                return res.status(200).json({
-                    success: true,
-                    message: 'Autenticación exitosa - Estudiante registrado',
-                    estudiante: {
-                        documento: documento,
-                        tipoDocumento: tipoDocumento || 'Cédula',
-                        programa: programa,
-                        tieneRegistros: true,
-                        totalRecibos: recibos[0]?.total || 0,
-                        totalCreditos: creditos[0]?.total || 0,
-                        totalFacturas: facturas[0]?.total || 0
-                    }
-                });
-            } else {
-                return res.status(401).json({ 
-                    error: 'Documento no encontrado',
-                    message: 'No se encontraron registros para este número de documento en el sistema.'
+// ============================================
+// Parsear el archivo SQL y extraer datos relevantes
+// ============================================
+function parsearSQL(sqlText) {
+    const facturas = [];
+    const creditos = [];
+    const recibos = [];
+    
+    // Expresiones regulares para extraer INSERTS
+    // Patrón para INSERT INTO fac_facturas
+    const facturasPattern = /INSERT INTO `fac_facturas` \(.*?\) VALUES\s*\((.*?)\);?/gs;
+    const creditosPattern = /INSERT INTO `fac_creditos` \(.*?\) VALUES\s*\((.*?)\);?/gs;
+    const recibosPattern = /INSERT INTO `fac_recibos` \(.*?\) VALUES\s*\((.*?)\);?/gs;
+    
+    // Extraer facturas
+    let match;
+    while ((match = facturasPattern.exec(sqlText)) !== null) {
+        const valores = parsearValoresSQL(match[1]);
+        if (valores && valores.length > 0) {
+            // Extraer CLIENTE_FACTURA (índice 5 según estructura)
+            const clienteId = parseInt(valores[5]);
+            if (!isNaN(clienteId) && clienteId > 0) {
+                facturas.push({
+                    id: parseInt(valores[0]) || 0,
+                    cliente: clienteId,
+                    fecha: valores[6] || '',
+                    total: parseFloat(valores[11]) || 0,
+                    descripcion: valores[14] || '',
+                    vendedor: valores[7] || ''
                 });
             }
         }
-    } catch (error) {
-        console.error('Error en autenticación:', error);
-        
-        // En caso de error, devolver respuesta de diagnóstico
-        return res.status(500).json({ 
-            error: 'Error interno del servidor',
-            message: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
     }
+    
+    // Extraer créditos
+    while ((match = creditosPattern.exec(sqlText)) !== null) {
+        const valores = parsearValoresSQL(match[1]);
+        if (valores && valores.length > 0) {
+            const clienteId = parseInt(valores[4]);
+            if (!isNaN(clienteId) && clienteId > 0) {
+                creditos.push({
+                    id: parseInt(valores[0]) || 0,
+                    cliente: clienteId,
+                    fecha: valores[1] || '',
+                    valor: parseFloat(valores[5]) || 0,
+                    concepto: valores[6] || '',
+                    observaciones: valores[7] || ''
+                });
+            }
+        }
+    }
+    
+    // Extraer recibos
+    while ((match = recibosPattern.exec(sqlText)) !== null) {
+        const valores = parsearValoresSQL(match[1]);
+        if (valores && valores.length > 0) {
+            const clienteId = parseInt(valores[3]);
+            if (!isNaN(clienteId) && clienteId > 0) {
+                recibos.push({
+                    id: parseInt(valores[0]) || 0,
+                    cliente: clienteId,
+                    fecha: valores[2] || '',
+                    valor: parseFloat(valores[5]) || 0,
+                    concepto: valores[8] || '',
+                    formaPago: valores[6] || ''
+                });
+            }
+        }
+    }
+    
+    return {
+        facturas,
+        creditos,
+        recibos,
+        // Extraer todos los IDs de clientes únicos
+        clientes: [...new Set([
+            ...facturas.map(f => f.cliente),
+            ...creditos.map(c => c.cliente),
+            ...recibos.map(r => r.cliente)
+        ])].filter(id => id > 0).sort((a, b) => a - b)
+    };
+}
+
+// ============================================
+// Parsear una línea de valores SQL
+// ============================================
+function parsearValoresSQL(linea) {
+    const valores = [];
+    let actual = '';
+    let dentroComillas = false;
+    let i = 0;
+    
+    while (i < linea.length) {
+        const char = linea[i];
+        
+        if (char === "'" && linea[i-1] !== '\\') {
+            dentroComillas = !dentroComillas;
+            actual += char;
+        } else if (char === ',' && !dentroComillas) {
+            // Limpiar y agregar valor
+            let valor = actual.trim();
+            if (valor === 'NULL' || valor === 'null' || valor === '') {
+                valores.push(null);
+            } else if (valor.startsWith("'") && valor.endsWith("'")) {
+                valores.push(valor.slice(1, -1));
+            } else if (!isNaN(valor) && valor !== '') {
+                valores.push(parseFloat(valor));
+            } else {
+                valores.push(valor);
+            }
+            actual = '';
+        } else {
+            actual += char;
+        }
+        i++;
+    }
+    
+    // Agregar último valor
+    if (actual.trim()) {
+        let valor = actual.trim();
+        if (valor === 'NULL' || valor === 'null' || valor === '') {
+            valores.push(null);
+        } else if (valor.startsWith("'") && valor.endsWith("'")) {
+            valores.push(valor.slice(1, -1));
+        } else if (!isNaN(valor) && valor !== '') {
+            valores.push(parseFloat(valor));
+        } else {
+            valores.push(valor);
+        }
+    }
+    
+    return valores;
+}
+
+// ============================================
+// Buscar estudiante por documento en los datos parseados
+// ============================================
+function buscarEstudianteEnDatos(datos, documento) {
+    const documentoNum = parseInt(documento);
+    
+    if (isNaN(documentoNum)) {
+        return { encontrado: false, razon: 'Documento inválido' };
+    }
+    
+    // Filtrar registros del estudiante
+    const facturasEstudiante = datos.facturas.filter(f => f.cliente === documentoNum);
+    const creditosEstudiante = datos.creditos.filter(c => c.cliente === documentoNum);
+    const recibosEstudiante = datos.recibos.filter(r => r.cliente === documentoNum);
+    
+    const encontrado = facturasEstudiante.length > 0 || 
+                       creditosEstudiante.length > 0 || 
+                       recibosEstudiante.length > 0;
+    
+    if (!encontrado) {
+        return { encontrado: false, razon: 'Documento no registrado' };
+    }
+    
+    // Ordenar por fecha (más reciente primero)
+    const ordenarPorFecha = (a, b) => new Date(b.fecha) - new Date(a.fecha);
+    
+    facturasEstudiante.sort(ordenarPorFecha);
+    creditosEstudiante.sort(ordenarPorFecha);
+    recibosEstudiante.sort(ordenarPorFecha);
+    
+    // Calcular saldo pendiente (créditos - pagos)
+    const totalCreditos = creditosEstudiante.reduce((sum, c) => sum + (c.valor || 0), 0);
+    const totalPagos = recibosEstudiante.reduce((sum, r) => sum + (r.valor || 0), 0);
+    const saldoPendiente = totalCreditos - totalPagos;
+    
+    // Obtener último pago
+    let ultimoPago = null;
+    if (recibosEstudiante.length > 0) {
+        ultimoPago = {
+            fecha: recibosEstudiante[0].fecha,
+            valor: recibosEstudiante[0].valor,
+            concepto: recibosEstudiante[0].concepto
+        };
+    }
+    
+    // Intentar extraer nombre de alguna observación o concepto
+    let nombre = `Estudiante ${documento}`;
+    
+    // Buscar nombre en recibos
+    for (const recibo of recibosEstudiante) {
+        if (recibo.concepto && recibo.concepto.length > 0 && recibo.concepto.length < 100) {
+            nombre = recibo.concepto.split(' ').slice(0, 3).join(' ');
+            break;
+        }
+    }
+    
+    // Buscar ciudad en observaciones
+    let ciudad = 'Santa Marta';
+    const ciudades = ['Santa Marta', 'Barranquilla', 'Cartagena', 'Sincelejo', 'Riohacha', 'Valledupar'];
+    for (const credito of creditosEstudiante) {
+        if (credito.observaciones) {
+            for (const city of ciudades) {
+                if (credito.observaciones.toLowerCase().includes(city.toLowerCase())) {
+                    ciudad = city;
+                    break;
+                }
+            }
+        }
+    }
+    
+    return {
+        encontrado: true,
+        nombre: nombre,
+        ciudad: ciudad,
+        facturas: facturasEstudiante,
+        creditos: creditosEstudiante,
+        recibos: recibosEstudiante,
+        ultimoPago: ultimoPago,
+        saldoPendiente: saldoPendiente
+    };
+}
+
+// ============================================
+// Función para verificar estado de la conexión
+// ============================================
+async function verificarConexion() {
+    try {
+        const datos = await obtenerDatosSQL();
+        return {
+            conectado: true,
+            totalFacturas: datos.facturas.length,
+            totalCreditos: datos.creditos.length,
+            totalRecibos: datos.recibos.length,
+            totalClientes: datos.clientes.length,
+            fechaActualizacion: ultimaDescarga ? new Date(ultimaDescarga) : null
+        };
+    } catch (error) {
+        return {
+            conectado: false,
+            error: error.message
+        };
+    }
+}
+
+// ============================================
+// EXPORTAR FUNCIONES (para uso en otros archivos)
+// ============================================
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { autenticarEstudiante, verificarConexion, obtenerDatosSQL };
 }
