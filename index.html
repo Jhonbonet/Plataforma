@@ -6,136 +6,143 @@
     <title>Portal Estudiantil - ASENORTE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #0d7a6e; --accent: #d4a017; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        :root { --primary: #0d7a6e; --accent: #d4a017; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); }
         .header { text-align: center; border-bottom: 4px solid var(--primary); margin-bottom: 25px; padding-bottom: 15px; }
-        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #eee; padding: 20px; border-radius: 8px; }
-        input { flex: 1; max-width: 300px; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; }
-        button { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #085a52; }
+        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #e9ecef; padding: 25px; border-radius: 10px; }
+        input { flex: 1; max-width: 350px; padding: 14px; border: 2px solid #ced4da; border-radius: 8px; font-size: 16px; }
+        button { padding: 14px 28px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .result-card { display: none; }
-        .user-info { background: var(--primary); color: white; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
-        th { background: #f4f4f4; color: var(--primary); }
-        .loader { display: none; text-align: center; margin: 20px; color: var(--primary); font-weight: bold; }
-        h3 { color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; margin-top: 25px; }
+        .profile-banner { background: linear-gradient(135deg, var(--primary), #13a392); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 14px; border: 1px solid #dee2e6; text-align: left; }
+        th { background: #f8f9fa; color: var(--primary); font-weight: bold; }
+        .loader { display: none; text-align: center; padding: 30px; font-size: 18px; color: var(--primary); }
+        h3 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 12px; margin-top: 35px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1 style="margin:0; color: var(--primary);">ASENORTE</h1>
-        <p style="margin:5px 0 0 0;">Portal de Consulta Académica y Financiera</p>
+        <h1 style="margin:0; color: var(--primary); font-size: 2.2em;">ASENORTE</h1>
+        <p style="margin:5px 0 0 0; color: #555;">Consulta de Calificaciones y Estado Financiero</p>
     </div>
 
     <div class="search-box">
-        <input type="text" id="inputCedula" placeholder="Número de Documento">
-        <button onclick="ejecutarConsulta()"><i class="fas fa-search"></i> CONSULTAR</button>
+        <input type="text" id="docInput" placeholder="Ingrese su Cédula / Documento">
+        <button onclick="iniciarConsulta()"><i class="fas fa-search"></i> CONSULTAR</button>
     </div>
 
-    <div id="loading" class="loader"><i class="fas fa-spinner fa-spin"></i> Conectando con la base de datos...</div>
+    <div id="loader" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Procesando Base de Datos SQL...</div>
 
     <div id="resultArea" class="result-card">
-        <div class="user-info">
-            <h2 id="userName" style="margin:0;"></h2>
-            <p id="userDoc" style="margin:5px 0 0 0; opacity: 0.9;"></p>
+        <div class="profile-banner">
+            <h2 id="stName" style="margin:0;"></h2>
+            <p id="stId" style="margin:8px 0 0 0; font-size: 1.1em; opacity: 0.9;"></p>
         </div>
 
-        <h3><i class="fas fa-graduation-cap"></i> Calificaciones</h3>
-        <div id="tablaNotas"></div>
+        <h3><i class="fas fa-graduation-cap"></i> Mis Calificaciones</h3>
+        <div id="areaNotas"></div>
 
-        <h3><i class="fas fa-wallet"></i> Registro de Pagos</h3>
-        <div id="tablaPagos"></div>
+        <h3><i class="fas fa-file-invoice-dollar"></i> Registro de Pagos y Créditos</h3>
+        <div id="areaPagos"></div>
     </div>
 </div>
 
 <script>
-    // URL de descarga directa de tu archivo en Drive
-    const DB_URL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
+    // URL de descarga del archivo SQL de Google Drive
+    const SQL_FILE_URL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
 
-    async function ejecutarConsulta() {
-        const cedula = document.getElementById('inputCedula').value.trim();
-        if (!cedula) return alert("Ingrese un documento válido");
+    async function iniciarConsulta() {
+        const cedula = document.getElementById('docInput').value.trim();
+        if (!cedula) return alert("Por favor, escriba su documento.");
 
-        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loader').style.display = 'block';
         document.getElementById('resultArea').style.display = 'none';
 
         try {
-            const res = await fetch(DB_URL);
-            if (!res.ok) throw new Error("Error al descargar el archivo");
-            const rawSql = await res.text();
+            const resp = await fetch(SQL_FILE_URL);
+            const fullText = await resp.text();
 
-            // 1. Localizar Usuario (tbl_usuarios)
-            // Estructura detectada: (ID, login, pass, nombre, apellido, correo, IDENTIFICACION...)
-            const userMatch = buscarEnSQL(rawSql, 'tbl_usuarios', cedula);
-            if (!userMatch) {
-                alert("Estudiante no encontrado.");
+            // Segmentar el archivo por tablas usando los delimitadores de phpMyAdmin
+            const secciones = fullText.split('-- Volcado de datos para la tabla');
+
+            // 1. Obtener datos del Estudiante en `tbl_usuarios`
+            const secUsuarios = secciones.find(s => s.includes('`tbl_usuarios`'));
+            const userRow = buscarFila(secUsuarios, cedula);
+
+            if (!userRow) {
+                alert("No se encontró ningún estudiante con esa identificación.");
                 return;
             }
 
-            const uData = limpiarValores(userMatch);
-            const idInterno = uData[0]; // El ID que relaciona las notas
+            const uData = limpiarValores(userRow);
+            const idInterno = uData[0]; // ID Primario para vincular resultados
 
-            document.getElementById('userName').innerText = `${uData[3]} ${uData[4]}`;
-            document.getElementById('userDoc').innerText = `ID: ${uData[6]} | ${uData[5]}`;
+            document.getElementById('stName').innerText = `${uData[3]} ${uData[4]}`;
+            document.getElementById('stId').innerText = `Documento: ${uData[6]} | Correo: ${uData[5]}`;
 
-            // 2. Localizar Notas (tbl_resultados) usando el idInterno
-            const notasLines = buscarLineasMultiples(rawSql, 'tbl_resultados', idInterno);
-            const notasData = notasLines.map(line => {
+            // 2. Obtener Calificaciones en `tbl_resultados` usando el idInterno
+            const secResultados = secciones.find(s => s.includes('`tbl_resultados`'));
+            const notasLines = buscarLineasMultiples(secResultados, idInterno);
+            const notas = notasLines.map(line => {
                 const n = limpiarValores(line);
-                return { ref: 'Módulo ' + n[2], nota: n[3], fecha: n[4] };
+                return { modulo: 'Módulo Ref: ' + n[2], nota: n[3], fecha: n[4] };
             });
-            generarTabla('tablaNotas', notasData, ["Módulo", "Nota", "Fecha"], ["ref", "nota", "fecha"]);
+            pintarTabla('areaNotas', notas, ["Referencia", "Nota", "Fecha"], ["modulo", "nota", "fecha"]);
 
-            // 3. Localizar Pagos (fac_creditos) usando la Cédula
-            const pagosLines = buscarLineasMultiples(rawSql, 'fac_creditos', cedula);
-            const pagosData = pagosLines.map(line => {
+            // 3. Obtener Pagos en `fac_creditos` usando la Cédula
+            const secPagos = secciones.find(s => s.includes('`fac_creditos`'));
+            const pagosLines = buscarLineasMultiples(secPagos, cedula);
+            const pagos = pagosLines.map(line => {
                 const p = limpiarValores(line);
                 return { fecha: p[1], concepto: p[6], valor: '$' + p[5] };
             });
-            generarTabla('tablaPagos', pagosData, ["Fecha", "Concepto", "Valor"], ["fecha", "concepto", "valor"]);
+            pintarTabla('areaPagos', pagos, ["Fecha", "Concepto", "Monto"], ["fecha", "concepto", "valor"]);
 
             document.getElementById('resultArea').style.display = 'block';
 
-        } catch (error) {
-            console.error(error);
-            alert("Error: No se pudo procesar la base de datos. Verifique su conexión.");
+        } catch (err) {
+            console.error(err);
+            alert("Error al cargar los datos. Verifique que el archivo SQL en Drive sea público.");
         } finally {
-            document.getElementById('loading').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
         }
     }
 
-    // Funciones de búsqueda precisas para volcados MySQL
-    function buscarEnSQL(texto, tabla, criterio) {
-        const regex = new RegExp(`INSERT INTO \`${tabla}\` VALUES\\s*\\([^;]*'${criterio}'[^;]*\\);`, 'i');
-        const m = texto.match(regex);
-        return m ? m[0] : null;
+    // Funciones de procesamiento de texto SQL
+    function buscarFila(seccion, criterio) {
+        if (!seccion) return null;
+        const lineas = seccion.split('\n');
+        return lineas.find(l => l.includes(`'${criterio}'`)) || null;
     }
 
-    function buscarLineasMultiples(texto, tabla, criterio) {
-        const regex = new RegExp(`INSERT INTO \`${tabla}\` VALUES\\s*\\([^;]*'${criterio}'[^;]*\\);`, 'gi');
-        return texto.match(regex) || [];
+    function buscarLineasMultiples(seccion, criterio) {
+        if (!seccion) return [];
+        const lineas = seccion.split('\n');
+        return lineas.filter(l => l.includes(`'${criterio}'`) || l.includes(`, ${criterio},`));
     }
 
     function limpiarValores(linea) {
-        const content = linea.substring(linea.indexOf('(') + 1, linea.lastIndexOf(')'));
-        // Separador inteligente que respeta comas dentro de textos
-        return content.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(v => v.trim().replace(/^'|'$/g, ""));
+        // Extrae el contenido entre los paréntesis de VALUES(...)
+        const match = linea.match(/\((.*)\)/);
+        if (!match) return [];
+        // Divide por comas pero protege las que están dentro de comillas
+        return match[1].split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(v => v.trim().replace(/^'|'$/g, ""));
     }
 
-    function generarTabla(id, data, heads, keys) {
-        let html = '<table><tr>' + heads.map(h => `<th>${h}</th>`).join('') + '</tr>';
-        if (data.length > 0) {
-            data.forEach(row => {
-                html += '<tr>' + keys.map(k => `<td>${row[k] || '---'}</td>`).join('') + '</tr>';
+    function pintarTabla(divId, datos, cabeceras, keys) {
+        let h = '<table><thead><tr>' + cabeceras.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+        if (datos.length > 0) {
+            datos.forEach(d => {
+                h += '<tr>' + keys.map(k => `<td>${d[k] || '---'}</td>`).join('') + '</tr>';
             });
         } else {
-            html += '<tr><td colspan="' + heads.length + '" style="text-align:center;">Sin registros.</td></tr>';
+            h += `<tr><td colspan="${cabeceras.length}" style="text-align:center;">No se encontraron registros.</td></tr>`;
         }
-        document.getElementById(id).innerHTML = html + '</table>';
+        document.getElementById(divId).innerHTML = h + '</tbody></table>';
     }
 </script>
 </body>
