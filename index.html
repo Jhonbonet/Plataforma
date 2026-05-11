@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ASENORTE - Portal Estudiantil</title>
+<title>ASENORTE - Portal Inteligente</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -31,7 +31,7 @@ body{
 }
 
 .container{
-    max-width:1200px;
+    max-width:1300px;
     margin:auto;
 }
 
@@ -43,7 +43,7 @@ body{
 }
 
 .header{
-    background:linear-gradient(135deg,var(--primary),#13a391);
+    background:linear-gradient(135deg,var(--primary),#16a596);
     color:white;
     text-align:center;
     padding:35px;
@@ -55,14 +55,13 @@ body{
 
 .header p{
     margin-top:10px;
-    opacity:.95;
 }
 
 .search-box{
+    background:#fafafa;
     padding:25px;
-    background:#f9f9f9;
     display:flex;
-    gap:12px;
+    gap:10px;
     flex-wrap:wrap;
 }
 
@@ -87,8 +86,8 @@ body{
     padding:15px 25px;
     border-radius:10px;
     cursor:pointer;
-    font-weight:bold;
     font-size:16px;
+    font-weight:bold;
 }
 
 .search-box button:hover{
@@ -97,10 +96,27 @@ body{
 
 .loader{
     display:none;
-    text-align:center;
     padding:25px;
+    text-align:center;
     color:var(--primary);
     font-weight:bold;
+}
+
+.alert{
+    margin:15px 25px;
+    padding:15px;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+.error{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+.success{
+    background:#d4edda;
+    color:#155724;
 }
 
 .result{
@@ -109,14 +125,42 @@ body{
 }
 
 .profile{
-    background:linear-gradient(135deg,var(--primary),#13a391);
+    background:linear-gradient(135deg,var(--primary),#16a596);
     color:white;
-    padding:25px;
     border-radius:15px;
+    padding:25px;
+    margin-bottom:25px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:25px;
+}
+
+.profile h2{
+    margin-bottom:10px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+    margin-bottom:30px;
+}
+
+.stat{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 3px 12px rgba(0,0,0,.05);
+}
+
+.stat h4{
+    color:#666;
+    margin-bottom:10px;
+}
+
+.stat strong{
+    color:var(--primary);
+    font-size:24px;
 }
 
 .section{
@@ -150,8 +194,8 @@ table th,
 table td{
     padding:12px;
     border-bottom:1px solid #eee;
-    text-align:left;
     font-size:14px;
+    text-align:left;
 }
 
 .badge{
@@ -171,47 +215,6 @@ table td{
     color:#721c24;
 }
 
-.alert{
-    margin:15px 25px;
-    padding:14px;
-    border-radius:10px;
-    font-weight:bold;
-}
-
-.error{
-    background:#f8d7da;
-    color:#721c24;
-}
-
-.success{
-    background:#d4edda;
-    color:#155724;
-}
-
-.stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:15px;
-    margin-bottom:25px;
-}
-
-.stat{
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 3px 10px rgba(0,0,0,.05);
-}
-
-.stat h4{
-    color:#777;
-    margin-bottom:10px;
-}
-
-.stat strong{
-    color:var(--primary);
-    font-size:24px;
-}
-
 .footer{
     text-align:center;
     padding:20px;
@@ -229,7 +232,7 @@ table td{
 
 <div class="header">
     <h1>ASENORTE</h1>
-    <p>Portal Académico y Financiero</p>
+    <p>Portal Académico Inteligente</p>
 </div>
 
 <div class="search-box">
@@ -237,7 +240,7 @@ table td{
     <input
         type="text"
         id="docInput"
-        placeholder="Ingrese número de documento"
+        placeholder="Ingrese documento del estudiante"
     >
 
     <button onclick="consultar()">
@@ -249,7 +252,7 @@ table td{
 
 <div id="loader" class="loader">
     <i class="fas fa-sync fa-spin"></i>
-    Procesando base SQL...
+    Analizando base de datos SQL...
 </div>
 
 <div id="alerts"></div>
@@ -260,9 +263,9 @@ table td{
 
         <div>
             <h2 id="nombre"></h2>
-            <p id="doc"></p>
+            <p id="documento"></p>
             <p id="correo"></p>
-            <p id="idinterno"></p>
+            <p id="codigo"></p>
         </div>
 
         <i class="fas fa-user-graduate fa-4x"></i>
@@ -348,7 +351,7 @@ table td{
 </div>
 
 <div class="footer">
-    Sistema SQL phpMyAdmin
+    Sistema generado desde asenorte.sql
 </div>
 
 </div>
@@ -358,14 +361,7 @@ table td{
 
 /*
 |--------------------------------------------------------------------------
-| URL SQL GITHUB RAW
-|--------------------------------------------------------------------------
-|
-| IMPORTANTE:
-| El archivo asenorte.sql debe estar en el root del repo
-|
-| https://github.com/Jhonbonet/Plataforma
-|
+| SQL RAW GITHUB
 |--------------------------------------------------------------------------
 */
 
@@ -383,7 +379,7 @@ let TABLES = {};
 
 /*
 |--------------------------------------------------------------------------
-| UI
+| HELPERS UI
 |--------------------------------------------------------------------------
 */
 
@@ -401,13 +397,13 @@ function alertMsg(msg,type='error'){
 
 /*
 |--------------------------------------------------------------------------
-| SANITIZE SQL
+| CLEAN SQL
 |--------------------------------------------------------------------------
 */
 
 function clean(v){
 
-    if(v === null || v === undefined){
+    if(v === undefined || v === null){
         return '';
     }
 
@@ -415,7 +411,7 @@ function clean(v){
         .replace(/\\'/g,"'")
         .replace(/\\"/g,'"')
         .replace(/\\\\/g,'\\')
-        .replace(/\r/g,'')
+        .replace(/\r/g,' ')
         .replace(/\n/g,' ')
         .trim();
 }
@@ -443,17 +439,12 @@ async function loadSQL(){
 
     SQL_TEXT = await response.text();
 
-    /*
-    VALIDACIÓN REAL SQL
-    */
-
     if(
-        !SQL_TEXT.includes('INSERT INTO') &&
-        !SQL_TEXT.includes('CREATE TABLE')
+        !SQL_TEXT.includes('INSERT INTO')
     ){
 
         throw new Error(
-            'El archivo descargado no es un SQL válido'
+            'El archivo no es SQL válido'
         );
     }
 
@@ -468,11 +459,6 @@ async function loadSQL(){
 
 function splitTables(){
 
-    /*
-    phpMyAdmin:
-    -- Volcado de datos para la tabla `tabla`
-    */
-
     const regex =
 /-- Volcado de datos para la tabla `([^`]+)`([\s\S]*?)(?=(-- Volcado de datos para la tabla|$))/g;
 
@@ -483,12 +469,12 @@ function splitTables(){
         TABLES[match[1]] = match[2];
     }
 
-    console.log('TABLAS:',Object.keys(TABLES));
+    console.log('TABLAS SQL:',Object.keys(TABLES));
 }
 
 /*
 |--------------------------------------------------------------------------
-| EXTRAER INSERTS
+| INSERTS
 |--------------------------------------------------------------------------
 */
 
@@ -515,7 +501,7 @@ function getInsertBlocks(section){
 
 /*
 |--------------------------------------------------------------------------
-| PARSER SQL
+| PARSER SQL MULTILINE
 |--------------------------------------------------------------------------
 */
 
@@ -530,7 +516,9 @@ function parseRows(block){
 
     while((match = regex.exec(block)) !== null){
 
-        rows.push(splitFields(match[1]));
+        rows.push(
+            splitFields(match[1])
+        );
     }
 
     return rows;
@@ -570,10 +558,6 @@ function splitFields(row){
 
 function cleanField(v){
 
-    if(v === null || v === undefined){
-        return '';
-    }
-
     return clean(
         v
         .trim()
@@ -584,56 +568,136 @@ function cleanField(v){
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR USUARIO
+| BUSCAR ESTUDIANTE
+|--------------------------------------------------------------------------
+|
+| IMPORTANTE:
+| El documento NO es la llave real.
+|
+| Debemos encontrar:
+|
+| documento -> id interno
+|
 |--------------------------------------------------------------------------
 */
 
-function findUser(documento){
+function findStudent(documento){
 
-    const sec = TABLES['tbl_usuarios'];
+    /*
+    TABLAS POSIBLES
+    */
 
-    if(!sec){
+    const posibles = [
 
-        console.error('No existe tbl_usuarios');
+        'tbl_usuarios',
+        'tbl_estudiantes',
+        'admisiones',
+        'matriculas'
 
-        return null;
+    ];
+
+    for(const tabla of posibles){
+
+        const sec = TABLES[tabla];
+
+        if(!sec){
+            continue;
+        }
+
+        const inserts =
+            getInsertBlocks(sec);
+
+        for(const block of inserts){
+
+            const rows =
+                parseRows(block);
+
+            for(const r of rows){
+
+                /*
+                Buscar documento en cualquier campo
+                */
+
+                const found =
+                    r.find(v =>
+                        String(v).trim() ===
+                        String(documento).trim()
+                    );
+
+                if(found){
+
+                    /*
+                    ID interno
+                    */
+
+                    const id = r[0];
+
+                    return {
+
+                        id:id,
+
+                        nombre:
+                            (
+                                (r[3] || '') +
+                                ' ' +
+                                (r[4] || '')
+                            ).trim(),
+
+                        documento:documento,
+
+                        correo:
+                            r.find(v =>
+                                String(v).includes('@')
+                            ) || ''
+                    };
+                }
+            }
+        }
     }
 
-    const inserts = getInsertBlocks(sec);
+    /*
+    BÚSQUEDA GLOBAL
+    */
 
-    for(const block of inserts){
+    for(const tabla in TABLES){
 
-        const rows = parseRows(block);
+        const inserts =
+            getInsertBlocks(TABLES[tabla]);
 
-        for(const r of rows){
+        for(const block of inserts){
 
-            /*
-            AJUSTE ESTRUCTURA REAL SQL
-            */
+            const rows =
+                parseRows(block);
 
-            const id = r[0];
+            for(const r of rows){
 
-            const nombre = r[3] || '';
+                const found =
+                    r.find(v =>
+                        String(v).trim() ===
+                        String(documento).trim()
+                    );
 
-            const apellido = r[4] || '';
+                if(found){
 
-            const email = r[5] || '';
+                    return {
 
-            const doc = r[6] || r[2];
+                        id:r[0],
 
-            if(String(doc) === String(documento)){
+                        nombre:
+                            (
+                                (r[3] || '') +
+                                ' ' +
+                                (r[4] || '')
+                            ).trim(),
 
-                return {
+                        documento,
 
-                    id,
-
-                    nombre:
-                        `${nombre} ${apellido}`,
-
-                    documento:doc,
-
-                    email
-                };
+                        correo:
+                            r.find(v =>
+                                String(v).includes('@')
+                            ) || ''
+                    };
+                }
             }
         }
     }
@@ -643,54 +707,146 @@ function findUser(documento){
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR NOTAS
+| IDs RELACIONADOS
+|--------------------------------------------------------------------------
+|
+| El estudiante puede cambiar:
+|
+| ESTUDIANTE_NOTA
+| ESTUDIANTE_MATRICULA
+| ID_ESTUDIANTE
+| CLIENTE_CREDITO
+| CLIENTE_RECIBO
+|
 |--------------------------------------------------------------------------
 */
 
-function findGrades(userId){
+function relatedIds(student){
 
-    const sec = TABLES['tbl_resultados'];
+    const ids = new Set();
 
-    if(!sec){
+    ids.add(String(student.id));
+    ids.add(String(student.documento));
 
-        console.error('No existe tbl_resultados');
+    /*
+    Buscar referencias cruzadas
+    */
 
-        return [];
+    for(const tabla in TABLES){
+
+        const inserts =
+            getInsertBlocks(TABLES[tabla]);
+
+        for(const block of inserts){
+
+            const rows =
+                parseRows(block);
+
+            for(const r of rows){
+
+                const found =
+                    r.find(v =>
+                        String(v).trim() ===
+                        String(student.documento).trim()
+                    );
+
+                if(found){
+
+                    ids.add(String(r[0]));
+
+                    r.forEach(v=>{
+
+                        if(
+                            /^\d+$/.test(v)
+                        ){
+                            ids.add(String(v));
+                        }
+                    });
+                }
+            }
+        }
     }
 
-    const inserts = getInsertBlocks(sec);
+    console.log('IDS RELACIONADOS:',ids);
+
+    return [...ids];
+}
+
+/*
+|--------------------------------------------------------------------------
+| NOTAS
+|--------------------------------------------------------------------------
+*/
+
+function findGrades(ids){
 
     const data = [];
 
-    for(const block of inserts){
+    const posibles = [
 
-        const rows = parseRows(block);
+        'tbl_resultados',
+        'tbl_notas',
+        'notas',
+        'calificaciones'
 
-        for(const r of rows){
+    ];
 
-            /*
-            ID usuario = campo 1
-            */
+    for(const tabla of posibles){
 
-            if(String(r[1]) === String(userId)){
+        const sec = TABLES[tabla];
 
-                data.push({
+        if(!sec){
+            continue;
+        }
 
-                    modulo:
-                        r[2] || 'N/A',
+        const inserts =
+            getInsertBlocks(sec);
 
-                    nota:
-                        parseFloat(r[3]) || 0,
+        for(const block of inserts){
 
-                    fecha:
-                        r[4] || '---',
+            const rows =
+                parseRows(block);
 
-                    profesor:
-                        r[5] || '---',
+            for(const r of rows){
 
-                    grupo:
-                        r[6] || '---'
-                });
+                const found =
+                    r.find(v =>
+                        ids.includes(
+                            String(v)
+                        )
+                    );
+
+                if(found){
+
+                    const nota =
+                        parseFloat(
+                            r.find(v =>
+                                /^[0-5](\.\d+)?$/.test(v)
+                            )
+                        ) || 0;
+
+                    data.push({
+
+                        modulo:
+                            r[2] ||
+                            r[1] ||
+                            'Módulo',
+
+                        nota,
+
+                        fecha:
+                            r.find(v =>
+                                /\d{4}-\d{2}-\d{2}/
+                                .test(v)
+                            ) || '---',
+
+                        profesor:
+                            r[5] || '---',
+
+                        grupo:
+                            r[6] || '---'
+                    });
+                }
             }
         }
     }
@@ -700,48 +856,73 @@ function findGrades(userId){
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR PAGOS
+| PAGOS
 |--------------------------------------------------------------------------
 */
 
-function findPayments(documento){
-
-    const sec = TABLES['fac_creditos'];
-
-    if(!sec){
-
-        console.error('No existe fac_creditos');
-
-        return [];
-    }
-
-    const inserts = getInsertBlocks(sec);
+function findPayments(ids){
 
     const data = [];
 
-    for(const block of inserts){
+    const posibles = [
 
-        const rows = parseRows(block);
+        'fac_creditos',
+        'fac_recibos',
+        'pagos',
+        'creditos'
 
-        for(const r of rows){
+    ];
 
-            /*
-            CLIENTE_CREDITO
-            */
+    for(const tabla of posibles){
 
-            if(String(r[4]) === String(documento)){
+        const sec = TABLES[tabla];
 
-                data.push({
+        if(!sec){
+            continue;
+        }
 
-                    fecha:
-                        r[1] || '---',
+        const inserts =
+            getInsertBlocks(sec);
 
-                    concepto:
-                        r[6] || 'Pago',
+        for(const block of inserts){
 
-                    valor:
-                        parseFloat(r[5]) || 0
-                });
+            const rows =
+                parseRows(block);
+
+            for(const r of rows){
+
+                const found =
+                    r.find(v =>
+                        ids.includes(
+                            String(v)
+                        )
+                    );
+
+                if(found){
+
+                    const valor =
+                        parseFloat(
+                            r.find(v =>
+                                /^\d{4,}$/.test(v)
+                            )
+                        ) || 0;
+
+                    data.push({
+
+                        fecha:
+                            r.find(v =>
+                                /\d{4}-\d{2}-\d{2}/
+                                .test(v)
+                            ) || '---',
+
+                        concepto:
+                            r[6] ||
+                            r[5] ||
+                            'Pago',
+
+                        valor
+                    });
+                }
             }
         }
     }
@@ -775,17 +956,21 @@ function money(v){
 
 function renderUser(u){
 
-    document.getElementById('nombre').innerText =
-        u.nombre;
+    document.getElementById('nombre')
+        .innerText =
+        u.nombre || 'ESTUDIANTE';
 
-    document.getElementById('doc').innerText =
+    document.getElementById('documento')
+        .innerText =
         'Documento: ' + u.documento;
 
-    document.getElementById('correo').innerText =
-        'Correo: ' + u.email;
+    document.getElementById('correo')
+        .innerText =
+        'Correo: ' + (u.correo || '---');
 
-    document.getElementById('idinterno').innerText =
-        'ID Interno: ' + u.id;
+    document.getElementById('codigo')
+        .innerText =
+        'ID Relacional: ' + u.id;
 }
 
 /*
@@ -850,7 +1035,8 @@ function renderGrades(grades){
         (total / grades.length).toFixed(2);
 
     document.getElementById('materias')
-        .innerText = grades.length;
+        .innerText =
+        grades.length;
 }
 
 /*
@@ -878,9 +1064,6 @@ function renderPayments(payments){
         </tr>
         `;
 
-        document.getElementById('pagado')
-            .innerText = '$0';
-
         return;
     }
 
@@ -902,7 +1085,8 @@ function renderPayments(payments){
     });
 
     document.getElementById('pagado')
-        .innerText = money(total);
+        .innerText =
+        money(total);
 }
 
 /*
@@ -921,7 +1105,7 @@ async function consultar(){
     if(!documento){
 
         alertMsg(
-            'Ingrese un documento'
+            'Ingrese documento'
         );
 
         return;
@@ -941,13 +1125,13 @@ async function consultar(){
         await loadSQL();
 
         /*
-        PASO 1
+        ESTUDIANTE
         */
 
-        const user =
-            findUser(documento);
+        const student =
+            findStudent(documento);
 
-        if(!user){
+        if(!student){
 
             alertMsg(
                 'Estudiante no encontrado'
@@ -959,24 +1143,31 @@ async function consultar(){
         }
 
         /*
-        PASO 2
+        IDs RELACIONADOS
+        */
+
+        const ids =
+            relatedIds(student);
+
+        /*
+        NOTAS
         */
 
         const grades =
-            findGrades(user.id);
+            findGrades(ids);
 
         /*
-        PASO 3
+        PAGOS
         */
 
         const payments =
-            findPayments(documento);
+            findPayments(ids);
 
         /*
         RENDER
         */
 
-        renderUser(user);
+        renderUser(student);
 
         renderGrades(grades);
 
@@ -995,7 +1186,8 @@ async function consultar(){
         console.error(err);
 
         alertMsg(
-            err.message || 'Error procesando SQL'
+            err.message ||
+            'Error procesando SQL'
         );
     }
 
