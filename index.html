@@ -7,19 +7,23 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #0d7a6e; --accent: #d4a017; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); }
         .header { text-align: center; border-bottom: 4px solid var(--primary); margin-bottom: 25px; padding-bottom: 15px; }
         .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #e9ecef; padding: 25px; border-radius: 10px; }
-        input { flex: 1; max-width: 350px; padding: 14px; border: 2px solid #ced4da; border-radius: 8px; font-size: 16px; }
-        button { padding: 14px 28px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .result-card { display: none; }
+        input { flex: 1; max-width: 350px; padding: 14px; border: 2px solid #ced4da; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary); }
+        button { padding: 14px 28px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        button:hover { background: #085a52; }
+        .result-card { display: none; animation: fadeIn 0.5s ease; }
         .profile-banner { background: linear-gradient(135deg, var(--primary), #13a392); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 14px; border: 1px solid #dee2e6; text-align: left; }
         th { background: #f8f9fa; color: var(--primary); font-weight: bold; }
-        .loader { display: none; text-align: center; padding: 30px; font-size: 18px; color: var(--primary); }
+        tr:nth-child(even) { background: #fafafa; }
+        .loader { display: none; text-align: center; padding: 30px; font-size: 18px; color: var(--primary); font-weight: bold; }
         h3 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 12px; margin-top: 35px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -52,7 +56,7 @@
 </div>
 
 <script>
-    // URL de descarga del archivo SQL de Google Drive
+    // URL de descarga directa del archivo SQL
     const SQL_FILE_URL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
 
     async function iniciarConsulta() {
@@ -66,83 +70,91 @@
             const resp = await fetch(SQL_FILE_URL);
             const fullText = await resp.text();
 
-            // Segmentar el archivo por tablas usando los delimitadores de phpMyAdmin
+            // Segmentamos por tabla para asegurar que buscamos en el bloque correcto
             const secciones = fullText.split('-- Volcado de datos para la tabla');
 
-            // 1. Obtener datos del Estudiante en `tbl_usuarios`
+            // 1. LOCALIZAR USUARIO en tbl_usuarios
             const secUsuarios = secciones.find(s => s.includes('`tbl_usuarios`'));
-            const userRow = buscarFila(secUsuarios, cedula);
+            if (!secUsuarios) throw new Error("No se encontró la sección de usuarios.");
+
+            // Buscamos la línea que contiene la cédula
+            const lineasUser = secUsuarios.split('\n');
+            const userRow = lineasUser.find(l => l.includes(`'${cedula}'`) && l.startsWith('INSERT INTO'));
 
             if (!userRow) {
-                alert("No se encontró ningún estudiante con esa identificación.");
+                alert("No se encontró el estudiante con la identificación proporcionada.");
                 return;
             }
 
             const uData = limpiarValores(userRow);
-            const idInterno = uData[0]; // ID Primario para vincular resultados
+            const idInterno = uData[0]; // El primer valor es el ID_USUARIO
 
-            document.getElementById('stName').innerText = `${uData[3]} ${uData[4]}`;
-            document.getElementById('stId').innerText = `Documento: ${uData[6]} | Correo: ${uData[5]}`;
+            document.getElementById('stName').innerText = `${uData[3]} ${uData[4]}`.toUpperCase();
+            document.getElementById('stId').innerText = `ID: ${uData[6]} | Correo: ${uData[5]}`;
 
-            // 2. Obtener Calificaciones en `tbl_resultados` usando el idInterno
+            // 2. LOCALIZAR NOTAS en tbl_resultados (Relacionado por el ID interno del usuario)
             const secResultados = secciones.find(s => s.includes('`tbl_resultados`'));
-            const notasLines = buscarLineasMultiples(secResultados, idInterno);
-            const notas = notasLines.map(line => {
-                const n = limpiarValores(line);
-                return { modulo: 'Módulo Ref: ' + n[2], nota: n[3], fecha: n[4] };
-            });
-            pintarTabla('areaNotas', notas, ["Referencia", "Nota", "Fecha"], ["modulo", "nota", "fecha"]);
+            const notas = [];
+            if (secResultados) {
+                const lineasNotas = secResultados.split('\n');
+                lineasNotas.forEach(line => {
+                    if (line.startsWith('INSERT INTO')) {
+                        // En tbl_resultados, el segundo o tercer valor suele ser el ID_USUARIO
+                        // Revisamos si la línea contiene el ID interno entre comas o paréntesis
+                        if (line.includes(`, ${idInterno},`) || line.includes(`(${idInterno},`)) {
+                            const n = limpiarValores(line);
+                            // Ajustar índices según estructura: [2]unidad/modulo, [3]nota, [4]fecha
+                            notas.push({ modulo: 'Unidad ' + n[1], nota: n[3], fecha: n[4] });
+                        }
+                    }
+                });
+            }
+            pintarTabla('areaNotas', notas, ["Referencia", "Calificación", "Fecha"], ["modulo", "nota", "fecha"]);
 
-            // 3. Obtener Pagos en `fac_creditos` usando la Cédula
+            // 3. LOCALIZAR PAGOS en fac_creditos (Relacionado por la cédula directamente)
             const secPagos = secciones.find(s => s.includes('`fac_creditos`'));
-            const pagosLines = buscarLineasMultiples(secPagos, cedula);
-            const pagos = pagosLines.map(line => {
-                const p = limpiarValores(line);
-                return { fecha: p[1], concepto: p[6], valor: '$' + p[5] };
-            });
-            pintarTabla('areaPagos', pagos, ["Fecha", "Concepto", "Monto"], ["fecha", "concepto", "valor"]);
+            const pagos = [];
+            if (secPagos) {
+                const lineasPagos = secPagos.split('\n');
+                lineasPagos.forEach(line => {
+                    if (line.startsWith('INSERT INTO') && line.includes(`'${cedula}'`)) {
+                        const p = limpiarValores(line);
+                        // Estructura fac_creditos: [1]fecha, [6]concepto, [5]valor
+                        pagos.push({ fecha: p[1], concepto: p[6], valor: '$ ' + parseInt(p[5]).toLocaleString() });
+                    }
+                });
+            }
+            pintarTabla('areaPagos', pagos, ["Fecha de Pago", "Concepto", "Monto"], ["fecha", "concepto", "valor"]);
 
             document.getElementById('resultArea').style.display = 'block';
 
         } catch (err) {
             console.error(err);
-            alert("Error al cargar los datos. Verifique que el archivo SQL en Drive sea público.");
+            alert("Error al procesar la solicitud. Asegúrese de que el archivo en Drive sea público.");
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     }
 
-    // Funciones de procesamiento de texto SQL
-    function buscarFila(seccion, criterio) {
-        if (!seccion) return null;
-        const lineas = seccion.split('\n');
-        return lineas.find(l => l.includes(`'${criterio}'`)) || null;
-    }
-
-    function buscarLineasMultiples(seccion, criterio) {
-        if (!seccion) return [];
-        const lineas = seccion.split('\n');
-        return lineas.filter(l => l.includes(`'${criterio}'`) || l.includes(`, ${criterio},`));
-    }
-
     function limpiarValores(linea) {
-        // Extrae el contenido entre los paréntesis de VALUES(...)
+        // Extrae lo que está dentro de los paréntesis de VALUES(...)
         const match = linea.match(/\((.*)\)/);
         if (!match) return [];
-        // Divide por comas pero protege las que están dentro de comillas
-        return match[1].split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(v => v.trim().replace(/^'|'$/g, ""));
+        // Separador por coma que respeta los textos entre comillas simples
+        const campos = match[1].split(/,(?=(?:(?:[^']*'){2})*[^']*$)/);
+        return campos.map(v => v.trim().replace(/^'|'$/g, "").replace(/\\'/g, "'"));
     }
 
     function pintarTabla(divId, datos, cabeceras, keys) {
-        let h = '<table><thead><tr>' + cabeceras.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+        let html = '<table><thead><tr>' + cabeceras.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
         if (datos.length > 0) {
             datos.forEach(d => {
-                h += '<tr>' + keys.map(k => `<td>${d[k] || '---'}</td>`).join('') + '</tr>';
+                html += '<tr>' + keys.map(k => `<td>${d[k] || '---'}</td>`).join('') + '</tr>';
             });
         } else {
-            h += `<tr><td colspan="${cabeceras.length}" style="text-align:center;">No se encontraron registros.</td></tr>`;
+            html += `<tr><td colspan="${cabeceras.length}" style="text-align:center;">No hay registros disponibles para mostrar.</td></tr>`;
         }
-        document.getElementById(divId).innerHTML = h + '</tbody></table>';
+        document.getElementById(divId).innerHTML = html + '</tbody></table>';
     }
 </script>
 </body>
