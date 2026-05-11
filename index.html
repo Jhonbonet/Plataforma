@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Portal Estudiantil - ASENORTE</title>
+<title>ASENORTE - Portal Estudiantil</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -15,10 +15,6 @@
     --secondary:#085a52;
     --accent:#d4a017;
     --bg:#f4f7f6;
-    --card:#ffffff;
-    --danger:#c62828;
-    --success:#2e7d32;
-    --warning:#ef6c00;
 }
 
 *{
@@ -28,8 +24,8 @@
 }
 
 body{
-    font-family:'Segoe UI',Tahoma,sans-serif;
     background:var(--bg);
+    font-family:'Segoe UI',Tahoma,sans-serif;
     padding:15px;
     color:#333;
 }
@@ -41,46 +37,43 @@ body{
 
 .card{
     background:white;
-    border-radius:14px;
-    box-shadow:0 8px 25px rgba(0,0,0,.08);
+    border-radius:15px;
     overflow:hidden;
+    box-shadow:0 8px 30px rgba(0,0,0,.1);
 }
 
 .header{
-    background:linear-gradient(135deg,var(--primary),#0aa18f);
+    background:linear-gradient(135deg,var(--primary),#13a391);
     color:white;
-    padding:30px;
     text-align:center;
+    padding:35px;
 }
 
 .header h1{
-    margin:0;
-    font-size:34px;
+    font-size:42px;
 }
 
 .header p{
-    margin-top:8px;
-    opacity:.9;
+    margin-top:10px;
+    opacity:.95;
 }
 
 .search-box{
     padding:25px;
+    background:#f9f9f9;
     display:flex;
     gap:12px;
     flex-wrap:wrap;
-    background:#f9f9f9;
-    border-bottom:1px solid #eee;
 }
 
 .search-box input{
     flex:1;
     min-width:250px;
-    padding:14px;
-    border:2px solid #ddd;
+    padding:15px;
     border-radius:10px;
+    border:2px solid #ddd;
     font-size:16px;
     outline:none;
-    transition:.3s;
 }
 
 .search-box input:focus{
@@ -91,12 +84,11 @@ body{
     background:var(--primary);
     color:white;
     border:none;
+    padding:15px 25px;
     border-radius:10px;
-    padding:14px 24px;
-    font-size:16px;
     cursor:pointer;
     font-weight:bold;
-    transition:.3s;
+    font-size:16px;
 }
 
 .search-box button:hover{
@@ -105,81 +97,53 @@ body{
 
 .loader{
     display:none;
-    padding:25px;
     text-align:center;
+    padding:25px;
     color:var(--primary);
     font-weight:bold;
-    font-size:16px;
 }
 
-.loader i{
-    margin-right:10px;
-}
-
-.result-area{
+.result{
     display:none;
     padding:25px;
-    animation:fade .4s ease;
-}
-
-@keyframes fade{
-    from{
-        opacity:0;
-        transform:translateY(10px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
 }
 
 .profile{
-    background:linear-gradient(135deg,var(--primary),#0aa18f);
+    background:linear-gradient(135deg,var(--primary),#13a391);
     color:white;
-    border-radius:14px;
     padding:25px;
+    border-radius:15px;
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:25px;
 }
 
-.profile h2{
-    margin-bottom:8px;
-}
-
-.profile p{
-    margin:4px 0;
-    opacity:.95;
-}
-
 .section{
     margin-top:30px;
 }
 
-.section-title{
-    margin-bottom:15px;
+.section h3{
     color:var(--primary);
+    margin-bottom:15px;
     border-left:5px solid var(--accent);
-    padding-left:12px;
+    padding-left:10px;
 }
 
-.table-container{
+.table-wrap{
     overflow:auto;
-    border-radius:12px;
     border:1px solid #ddd;
+    border-radius:10px;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
-    background:white;
 }
 
 table th{
     background:#f5f5f5;
     color:var(--primary);
-    font-weight:bold;
 }
 
 table th,
@@ -190,79 +154,68 @@ table td{
     font-size:14px;
 }
 
-table tr:hover{
-    background:#fafafa;
-}
-
 .badge{
-    display:inline-block;
     padding:6px 10px;
     border-radius:20px;
     font-size:12px;
     font-weight:bold;
 }
 
-.badge-success{
-    background:#dff5e1;
-    color:var(--success);
+.ok{
+    background:#d4edda;
+    color:#155724;
 }
 
-.badge-warning{
-    background:#fff3cd;
-    color:var(--warning);
-}
-
-.badge-danger{
-    background:#f8d7da;
-    color:var(--danger);
-}
-
-.alert{
-    padding:14px;
-    border-radius:10px;
-    margin-top:15px;
-    font-weight:bold;
-}
-
-.alert-error{
+.bad{
     background:#f8d7da;
     color:#721c24;
 }
 
-.alert-success{
+.alert{
+    margin:15px 25px;
+    padding:14px;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+.error{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+.success{
     background:#d4edda;
     color:#155724;
 }
 
 .stats{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
     gap:15px;
     margin-bottom:25px;
 }
 
-.stat-box{
-    background:#fff;
-    border-radius:12px;
+.stat{
+    background:white;
     padding:20px;
-    box-shadow:0 4px 12px rgba(0,0,0,.05);
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.05);
 }
 
-.stat-box h4{
+.stat h4{
     color:#777;
-    margin-bottom:8px;
+    margin-bottom:10px;
 }
 
-.stat-box strong{
-    font-size:22px;
+.stat strong{
     color:var(--primary);
+    font-size:24px;
 }
 
 .footer{
     text-align:center;
     padding:20px;
     color:#888;
-    font-size:13px;
 }
 
 </style>
@@ -272,135 +225,133 @@ table tr:hover{
 
 <div class="container">
 
-    <div class="card">
+<div class="card">
 
-        <div class="header">
-            <h1>ASENORTE</h1>
-            <p>Portal Académico y Financiero</p>
+<div class="header">
+    <h1>ASENORTE</h1>
+    <p>Portal Académico y Financiero</p>
+</div>
+
+<div class="search-box">
+
+    <input
+        type="text"
+        id="docInput"
+        placeholder="Ingrese número de documento"
+    >
+
+    <button onclick="consultar()">
+        <i class="fas fa-search"></i>
+        CONSULTAR
+    </button>
+
+</div>
+
+<div id="loader" class="loader">
+    <i class="fas fa-sync fa-spin"></i>
+    Procesando base SQL...
+</div>
+
+<div id="alerts"></div>
+
+<div id="result" class="result">
+
+    <div class="profile">
+
+        <div>
+            <h2 id="nombre"></h2>
+            <p id="doc"></p>
+            <p id="correo"></p>
+            <p id="idinterno"></p>
         </div>
 
-        <div class="search-box">
+        <i class="fas fa-user-graduate fa-4x"></i>
 
-            <input
-                type="text"
-                id="docInput"
-                placeholder="Ingrese número de documento"
-            >
+    </div>
 
-            <button onclick="consultar()">
-                <i class="fas fa-search"></i>
-                CONSULTAR
-            </button>
+    <div class="stats">
 
+        <div class="stat">
+            <h4>Promedio</h4>
+            <strong id="promedio">0</strong>
         </div>
 
-        <div id="loader" class="loader">
-            <i class="fas fa-sync fa-spin"></i>
-            Procesando base de datos SQL...
+        <div class="stat">
+            <h4>Total Cursos</h4>
+            <strong id="materias">0</strong>
         </div>
 
-        <div id="alertArea"></div>
-
-        <div id="resultArea" class="result-area">
-
-            <div class="profile">
-
-                <div>
-                    <h2 id="studentName"></h2>
-
-                    <p id="studentDoc"></p>
-
-                    <p id="studentEmail"></p>
-
-                    <p id="studentId"></p>
-                </div>
-
-                <div>
-                    <i class="fas fa-user-graduate fa-4x"></i>
-                </div>
-
-            </div>
-
-            <div class="stats">
-
-                <div class="stat-box">
-                    <h4>Promedio Académico</h4>
-                    <strong id="avgGrade">0.0</strong>
-                </div>
-
-                <div class="stat-box">
-                    <h4>Total Cursos</h4>
-                    <strong id="totalCourses">0</strong>
-                </div>
-
-                <div class="stat-box">
-                    <h4>Total Pagado</h4>
-                    <strong id="totalPaid">$0</strong>
-                </div>
-
-            </div>
-
-            <div class="section">
-
-                <h3 class="section-title">
-                    <i class="fas fa-book"></i>
-                    Historial Académico
-                </h3>
-
-                <div class="table-container">
-                    <table>
-
-                        <thead>
-                        <tr>
-                            <th>Módulo</th>
-                            <th>Nota</th>
-                            <th>Fecha</th>
-                            <th>Profesor</th>
-                            <th>Grupo</th>
-                            <th>Estado</th>
-                        </tr>
-                        </thead>
-
-                        <tbody id="tableNotas"></tbody>
-
-                    </table>
-                </div>
-
-            </div>
-
-            <div class="section">
-
-                <h3 class="section-title">
-                    <i class="fas fa-money-check-alt"></i>
-                    Historial Financiero
-                </h3>
-
-                <div class="table-container">
-                    <table>
-
-                        <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Concepto</th>
-                            <th>Valor</th>
-                        </tr>
-                        </thead>
-
-                        <tbody id="tablePagos"></tbody>
-
-                    </table>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="footer">
-            Sistema generado desde archivo SQL phpMyAdmin
+        <div class="stat">
+            <h4>Total Pagado</h4>
+            <strong id="pagado">$0</strong>
         </div>
 
     </div>
 
+    <div class="section">
+
+        <h3>
+            <i class="fas fa-book"></i>
+            Historial Académico
+        </h3>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                <tr>
+                    <th>Módulo</th>
+                    <th>Nota</th>
+                    <th>Fecha</th>
+                    <th>Profesor</th>
+                    <th>Grupo</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+
+                <tbody id="notasBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="section">
+
+        <h3>
+            <i class="fas fa-money-bill-wave"></i>
+            Historial Financiero
+        </h3>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Valor</th>
+                </tr>
+                </thead>
+
+                <tbody id="pagosBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="footer">
+    Sistema SQL phpMyAdmin
+</div>
+
+</div>
 </div>
 
 <script>
@@ -411,11 +362,16 @@ table tr:hover{
 |--------------------------------------------------------------------------
 */
 
-const URL_SQL =
-'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
+const SQL_URLS = [
 
-let sqlRaw = '';
-let tablas = {};
+'https://drive.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z',
+
+'https://drive.usercontent.google.com/download?id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z&export=download&confirm=t'
+
+];
+
+let SQL_TEXT = '';
+let TABLES = {};
 
 /*
 |--------------------------------------------------------------------------
@@ -423,40 +379,31 @@ let tablas = {};
 |--------------------------------------------------------------------------
 */
 
-function showLoader(show=true){
+function loader(show=true){
 
     document.getElementById('loader').style.display =
         show ? 'block' : 'none';
 }
 
-function showAlert(message,type='error'){
+function alertMsg(msg,type='error'){
 
-    const area = document.getElementById('alertArea');
-
-    area.innerHTML = `
-        <div class="alert alert-${type}">
-            ${message}
-        </div>
-    `;
-
-    setTimeout(()=>{
-        area.innerHTML = '';
-    },5000);
+    document.getElementById('alerts').innerHTML =
+    `<div class="alert ${type}">${msg}</div>`;
 }
 
 /*
 |--------------------------------------------------------------------------
-| SANITIZE SQL
+| SANITIZE
 |--------------------------------------------------------------------------
 */
 
-function sanitize(value){
+function clean(v){
 
-    if(value === null || value === undefined){
+    if(v === null || v === undefined){
         return '';
     }
 
-    return String(value)
+    return String(v)
         .replace(/\\'/g,"'")
         .replace(/\\"/g,'"')
         .replace(/\\\\/g,'\\')
@@ -473,47 +420,69 @@ function sanitize(value){
 
 async function loadSQL(){
 
-    if(sqlRaw){
+    if(SQL_TEXT){
         return;
     }
 
-    const response = await fetch(URL_SQL);
+    let success = false;
 
-    if(!response.ok){
-        throw new Error(
-            'No se pudo descargar el archivo SQL'
-        );
+    for(const url of SQL_URLS){
+
+        try{
+
+            const response = await fetch(url);
+
+            const text = await response.text();
+
+            /*
+            VALIDAR SI REALMENTE ES SQL
+            */
+
+            if(
+                text.includes('INSERT INTO') ||
+                text.includes('CREATE TABLE')
+            ){
+
+                SQL_TEXT = text;
+                success = true;
+                break;
+            }
+
+        }catch(err){
+
+            console.log('Intento fallido:',url);
+        }
     }
 
-    sqlRaw = await response.text();
+    if(!success){
+
+        throw new Error(
+            'Google Drive bloqueó el acceso al SQL'
+        );
+    }
 
     splitTables();
 }
 
 /*
 |--------------------------------------------------------------------------
-| SEGMENTACIÓN
+| SEGMENTAR TABLAS
 |--------------------------------------------------------------------------
 */
 
 function splitTables(){
-
-    /*
-    Compatible phpMyAdmin:
-    -- Volcado de datos para la tabla
-    */
 
     const regex =
 /-- Volcado de datos para la tabla `([^`]+)`([\s\S]*?)(?=(-- Volcado de datos para la tabla|$))/g;
 
     let match;
 
-    while((match = regex.exec(sqlRaw)) !== null){
+    while((match = regex.exec(SQL_TEXT)) !== null){
 
-        tablas[match[1]] = match[2];
+        TABLES[match[1]] = match[2];
     }
 
-    console.log('Tablas detectadas:',Object.keys(tablas));
+    console.log(TABLES);
 }
 
 /*
@@ -522,16 +491,16 @@ function splitTables(){
 |--------------------------------------------------------------------------
 */
 
-function extractInsertBlocks(section){
+function getInsertBlocks(section){
 
     if(!section){
         return [];
     }
 
     const regex =
-        /INSERT INTO[\s\S]*?VALUES\s*([\s\S]*?);/gi;
+/INSERT INTO[\s\S]*?VALUES\s*([\s\S]*?);/gi;
 
-    const blocks = [];
+    let blocks = [];
 
     let match;
 
@@ -545,16 +514,16 @@ function extractInsertBlocks(section){
 
 /*
 |--------------------------------------------------------------------------
-| PARSER TUPLAS
+| PARSE TUPLAS
 |--------------------------------------------------------------------------
 */
 
-function parseTuples(block){
+function parseRows(block){
 
     const rows = [];
 
     const regex =
-        /\(([\s\S]*?)\)(?=,?\s*(\(|$))/g;
+/\(([\s\S]*?)\)(?=,?\s*(\(|$))/g;
 
     let match;
 
@@ -566,18 +535,12 @@ function parseTuples(block){
     return rows;
 }
 
-/*
-|--------------------------------------------------------------------------
-| SPLIT ROBUSTO SQL
-|--------------------------------------------------------------------------
-*/
-
 function splitFields(row){
 
-    const fields = [];
+    const result = [];
 
     let current = '';
-    let inString = false;
+    let inside = false;
 
     for(let i=0;i<row.length;i++){
 
@@ -585,77 +548,69 @@ function splitFields(row){
         const prev = row[i-1];
 
         if(c === "'" && prev !== "\\"){
-            inString = !inString;
+            inside = !inside;
         }
 
-        if(c === ',' && !inString){
+        if(c === ',' && !inside){
 
-            fields.push(cleanField(current));
-            current = '';
+            result.push(
+                current.trim()
+                .replace(/^'/,'')
+                .replace(/'$/,'')
+            );
+
+            current='';
 
         }else{
             current += c;
         }
     }
 
-    fields.push(cleanField(current));
-
-    return fields;
-}
-
-function cleanField(value){
-
-    value = value.trim();
-
-    if(value === 'NULL'){
-        return null;
-    }
-
-    return sanitize(
-        value.replace(/^'/,'').replace(/'$/,'')
+    result.push(
+        current.trim()
+        .replace(/^'/,'')
+        .replace(/'$/,'')
     );
+
+    return result.map(clean);
 }
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR ESTUDIANTE
+| USUARIO
 |--------------------------------------------------------------------------
 */
 
-function findStudent(documento){
+function findUser(documento){
 
-    const section = tablas['tbl_usuarios'];
+    const sec = TABLES['tbl_usuarios'];
 
-    if(!section){
+    if(!sec){
         return null;
     }
 
-    const inserts = extractInsertBlocks(section);
+    const inserts = getInsertBlocks(sec);
 
     for(const block of inserts){
 
-        const rows = parseTuples(block);
+        const rows = parseRows(block);
 
-        for(const row of rows){
+        for(const r of rows){
 
-            /*
-            AJUSTAR SI LA ESTRUCTURA CAMBIA
-            */
-
-            const id = row[0];
-            const nombre = row[3] || '';
-            const apellido = row[4] || '';
-            const email = row[5] || '';
-            const doc = row[6] || row[2];
+            const id = r[0];
+            const doc = r[6] || r[2];
 
             if(String(doc) === String(documento)){
 
                 return {
-                    id,
-                    nombreCompleto:
-                        `${nombre} ${apellido}`.trim(),
+
+                    id:id,
+                    nombre:
+                        `${r[3]||''} ${r[4]||''}`,
+
                     documento:doc,
-                    email
+
+                    email:r[5] || ''
                 };
             }
         }
@@ -666,222 +621,82 @@ function findStudent(documento){
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR NOTAS
+| NOTAS
 |--------------------------------------------------------------------------
 */
 
-function findGrades(studentId){
+function findGrades(userId){
 
-    const section = tablas['tbl_resultados'];
+    const sec = TABLES['tbl_resultados'];
 
-    if(!section){
+    if(!sec){
         return [];
     }
 
-    const inserts = extractInsertBlocks(section);
+    const inserts = getInsertBlocks(sec);
 
-    const result = [];
+    const data = [];
 
     for(const block of inserts){
 
-        const rows = parseTuples(block);
+        const rows = parseRows(block);
 
-        for(const row of rows){
+        for(const r of rows){
 
-            /*
-            row[1] = id_usuario
-            */
+            if(String(r[1]) === String(userId)){
 
-            if(String(row[1]) === String(studentId)){
+                data.push({
 
-                result.push({
-
-                    modulo:
-                        row[2] || 'Sin módulo',
-
-                    nota:
-                        parseFloat(row[3]) || 0,
-
-                    fecha:
-                        row[4] || '---',
-
-                    profesor:
-                        row[5] || 'No asignado',
-
-                    grupo:
-                        row[6] || '---'
+                    modulo:r[2] || 'N/A',
+                    nota:parseFloat(r[3]) || 0,
+                    fecha:r[4] || '---',
+                    profesor:r[5] || '---',
+                    grupo:r[6] || '---'
                 });
             }
         }
     }
 
-    return result;
+    return data;
 }
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR PAGOS
+| PAGOS
 |--------------------------------------------------------------------------
 */
 
 function findPayments(documento){
 
-    const section = tablas['fac_creditos'];
+    const sec = TABLES['fac_creditos'];
 
-    if(!section){
+    if(!sec){
         return [];
     }
 
-    const inserts = extractInsertBlocks(section);
+    const inserts = getInsertBlocks(sec);
 
-    const pagos = [];
+    const data = [];
 
     for(const block of inserts){
 
-        const rows = parseTuples(block);
+        const rows = parseRows(block);
 
-        for(const row of rows){
+        for(const r of rows){
 
-            /*
-            CLIENTE_CREDITO = row[4]
-            */
+            if(String(r[4]) === String(documento)){
 
-            if(String(row[4]) === String(documento)){
+                data.push({
 
-                pagos.push({
-
-                    fecha:
-                        row[1] || '---',
-
-                    valor:
-                        parseFloat(row[5]) || 0,
-
-                    concepto:
-                        row[6] || 'Pago'
+                    fecha:r[1],
+                    concepto:r[6],
+                    valor:parseFloat(r[5]) || 0
                 });
             }
         }
     }
 
-    return pagos;
-}
-
-/*
-|--------------------------------------------------------------------------
-| RENDER
-|--------------------------------------------------------------------------
-*/
-
-function renderStudent(student){
-
-    document.getElementById('studentName')
-        .innerText = student.nombreCompleto;
-
-    document.getElementById('studentDoc')
-        .innerText = 'Documento: ' + student.documento;
-
-    document.getElementById('studentEmail')
-        .innerText = 'Correo: ' + student.email;
-
-    document.getElementById('studentId')
-        .innerText = 'ID Interno: ' + student.id;
-}
-
-function renderGrades(grades){
-
-    const tbody =
-        document.getElementById('tableNotas');
-
-    tbody.innerHTML = '';
-
-    if(!grades.length){
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    No hay notas registradas
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-    let total = 0;
-
-    grades.forEach(g=>{
-
-        total += Number(g.nota);
-
-        const estado =
-            g.nota >= 3
-            ? '<span class="badge badge-success">APROBADO</span>'
-            : '<span class="badge badge-danger">REPROBADO</span>';
-
-        tbody.innerHTML += `
-            <tr>
-                <td>${g.modulo}</td>
-                <td>${g.nota}</td>
-                <td>${g.fecha}</td>
-                <td>${g.profesor}</td>
-                <td>${g.grupo}</td>
-                <td>${estado}</td>
-            </tr>
-        `;
-    });
-
-    const promedio =
-        (total / grades.length).toFixed(2);
-
-    document.getElementById('avgGrade')
-        .innerText = promedio;
-
-    document.getElementById('totalCourses')
-        .innerText = grades.length;
-}
-
-function renderPayments(payments){
-
-    const tbody =
-        document.getElementById('tablePagos');
-
-    tbody.innerHTML = '';
-
-    if(!payments.length){
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="3">
-                    No hay pagos registrados
-                </td>
-            </tr>
-        `;
-
-        document.getElementById('totalPaid')
-            .innerText = '$0';
-
-        return;
-    }
-
-    let total = 0;
-
-    payments.forEach(p=>{
-
-        total += Number(p.valor);
-
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.fecha}</td>
-                <td>${p.concepto}</td>
-                <td>
-                    ${formatMoney(p.valor)}
-                </td>
-            </tr>
-        `;
-    });
-
-    document.getElementById('totalPaid')
-        .innerText = formatMoney(total);
+    return data;
 }
 
 /*
@@ -890,9 +705,9 @@ function renderPayments(payments){
 |--------------------------------------------------------------------------
 */
 
-function formatMoney(value){
+function money(v){
 
-    return Number(value).toLocaleString(
+    return Number(v).toLocaleString(
         'es-CO',
         {
             style:'currency',
@@ -904,7 +719,106 @@ function formatMoney(value){
 
 /*
 |--------------------------------------------------------------------------
-| CONSULTA PRINCIPAL
+| RENDER
+|--------------------------------------------------------------------------
+*/
+
+function renderUser(u){
+
+    document.getElementById('nombre').innerText =
+        u.nombre;
+
+    document.getElementById('doc').innerText =
+        'Documento: ' + u.documento;
+
+    document.getElementById('correo').innerText =
+        'Correo: ' + u.email;
+
+    document.getElementById('idinterno').innerText =
+        'ID Interno: ' + u.id;
+}
+
+function renderGrades(grades){
+
+    const body =
+        document.getElementById('notasBody');
+
+    body.innerHTML='';
+
+    let total = 0;
+
+    grades.forEach(g=>{
+
+        total += Number(g.nota);
+
+        body.innerHTML += `
+        <tr>
+
+            <td>${g.modulo}</td>
+
+            <td>${g.nota}</td>
+
+            <td>${g.fecha}</td>
+
+            <td>${g.profesor}</td>
+
+            <td>${g.grupo}</td>
+
+            <td>
+                ${
+                    g.nota >= 3
+                    ? '<span class="badge ok">APROBADO</span>'
+                    : '<span class="badge bad">REPROBADO</span>'
+                }
+            </td>
+
+        </tr>
+        `;
+    });
+
+    document.getElementById('promedio')
+        .innerText =
+        grades.length
+        ? (total/grades.length).toFixed(2)
+        : '0';
+
+    document.getElementById('materias')
+        .innerText = grades.length;
+}
+
+function renderPayments(payments){
+
+    const body =
+        document.getElementById('pagosBody');
+
+    body.innerHTML='';
+
+    let total = 0;
+
+    payments.forEach(p=>{
+
+        total += Number(p.valor);
+
+        body.innerHTML += `
+        <tr>
+
+            <td>${p.fecha}</td>
+
+            <td>${p.concepto}</td>
+
+            <td>${money(p.valor)}</td>
+
+        </tr>
+        `;
+    });
+
+    document.getElementById('pagado')
+        .innerText = money(total);
+}
+
+/*
+|--------------------------------------------------------------------------
+| CONSULTAR
 |--------------------------------------------------------------------------
 */
 
@@ -917,8 +831,8 @@ async function consultar(){
 
     if(!documento){
 
-        showAlert(
-            'Ingrese un número de documento'
+        alertMsg(
+            'Ingrese un documento'
         );
 
         return;
@@ -926,78 +840,69 @@ async function consultar(){
 
     try{
 
-        showLoader(true);
+        loader(true);
 
-        document.getElementById('resultArea')
-            .style.display = 'none';
+        document.getElementById('result')
+            .style.display='none';
 
         await loadSQL();
 
         /*
-        ---------------------------------------------------------------
         PASO 1
-        tbl_usuarios
-        ---------------------------------------------------------------
         */
 
-        const student =
-            findStudent(documento);
+        const user =
+            findUser(documento);
 
-        if(!student){
+        if(!user){
 
-            showAlert(
-                'No se encontró el estudiante'
+            alertMsg(
+                'Estudiante no encontrado'
             );
 
-            showLoader(false);
+            loader(false);
 
             return;
         }
 
         /*
-        ---------------------------------------------------------------
         PASO 2
-        tbl_resultados
-        ---------------------------------------------------------------
         */
 
         const grades =
-            findGrades(student.id);
+            findGrades(user.id);
 
         /*
-        ---------------------------------------------------------------
         PASO 3
-        fac_creditos
-        ---------------------------------------------------------------
         */
 
         const payments =
             findPayments(documento);
 
-        renderStudent(student);
+        renderUser(user);
+
         renderGrades(grades);
+
         renderPayments(payments);
 
-        document.getElementById('resultArea')
-            .style.display = 'block';
+        document.getElementById('result')
+            .style.display='block';
 
-        showAlert(
+        alertMsg(
             'Consulta realizada correctamente',
             'success'
         );
 
-    }catch(error){
+    }catch(err){
 
-        console.error(error);
+        console.error(err);
 
-        showAlert(
-            'Error procesando el archivo SQL'
+        alertMsg(
+            'Error leyendo el SQL desde Google Drive'
         );
-
-    }finally{
-
-        showLoader(false);
     }
+
+    loader(false);
 }
 
 /*
@@ -1008,7 +913,7 @@ async function consultar(){
 
 document
 .getElementById('docInput')
-.addEventListener('keypress',function(e){
+.addEventListener('keypress',e=>{
 
     if(e.key === 'Enter'){
         consultar();
