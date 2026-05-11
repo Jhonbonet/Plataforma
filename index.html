@@ -4,138 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Estudiantil - ASENORTE</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #003366; --accent: #ffcc00; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; padding-bottom: 10px; }
         .search-box { display: flex; gap: 10px; margin-bottom: 30px; }
         input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; }
         button { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .card { display: none; border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-top: 20px; animation: fadeIn 0.5s; }
+        .card { display: none; border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
         th { background: var(--primary); color: white; }
-        .loader { display: none; text-align: center; font-weight: bold; color: var(--primary); margin: 20px 0; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .loader { display: none; text-align: center; margin: 20px 0; color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <img src="https://via.placeholder.com/150x50?text=ASENORTE" alt="Logo ASENORTE" style="max-width: 200px; margin-bottom: 10px;">
-        <h1>PORTAL ESTUDIANTIL</h1>
-        <p>Consulta de Notas y Pagos</p>
+        <h1>PORTAL ESTUDIANTIL ASENORTE</h1>
+        <p>Consulta de Calificaciones y Pagos</p>
     </div>
 
     <div class="search-box">
-        <input type="text" id="studentDoc" placeholder="Número de Documento (Ej: 123456)">
-        <button onclick="consultarSQL()"><i class="fas fa-search"></i> CONSULTAR</button>
+        <input type="text" id="studentDoc" placeholder="Número de Cédula">
+        <button onclick="consultarDatos()"><i class="fas fa-search"></i> CONSULTAR</button>
     </div>
 
-    <div id="loader" class="loader">
-        <i class="fas fa-spinner fa-spin"></i> Conectando con la base de datos...
-    </div>
+    <div id="loader" class="loader"><i class="fas fa-sync fa-spin"></i> Cargando información...</div>
 
     <div id="resultCard" class="card">
         <h2 id="studentName" style="color: var(--primary);"></h2>
+        <p><strong>Programa:</strong> <span id="studentProg"></span></p>
         
         <h3><i class="fas fa-graduation-cap"></i> Calificaciones</h3>
         <div id="tablaNotas"></div>
 
-        <h3><i class="fas fa-wallet"></i> Historial de Pagos</h3>
+        <h3><i class="fas fa-wallet"></i> Registro de Pagos</h3>
         <div id="tablaPagos"></div>
     </div>
 </div>
 
 <script>
-    let db = null;
-    // URL de descarga directa de tu archivo en Google Drive
+    // URL de tu archivo SQL en Drive (Modo export)
     const SQL_URL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
 
-    async function initSql() {
-        try {
-            const sqlPromise = initSqlJs({
-                locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
-            });
-            
-            // Descargamos el archivo asenorte.sql desde Drive
-            const dataPromise = fetch(SQL_URL).then(res => {
-                if (!res.ok) throw new Error("Error al descargar el archivo SQL desde Drive");
-                return res.arrayBuffer();
-            });
-            
-            const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
-            db = new SQL.Database(new Uint8Array(buf));
-            console.log("Base de datos cargada correctamente");
-        } catch (err) {
-            console.error(err);
-            alert("Error crítico: No se pudo cargar la base de datos. Verifica tu conexión.");
-        }
-    }
-
-    // Inicializar al cargar
-    initSql();
-
-    async function consultarSQL() {
-        const doc = document.getElementById('studentDoc').value.trim();
-        if (!doc) return alert("Por favor, ingresa un número de documento.");
-        if (!db) return alert("La base de datos aún se está cargando. Intenta de nuevo en 3 segundos.");
+    async function consultarDatos() {
+        const cedula = document.getElementById('studentDoc').value.trim();
+        if (!cedula) return alert("Ingresa la cédula");
 
         document.getElementById('loader').style.display = 'block';
         document.getElementById('resultCard').style.display = 'none';
 
         try {
-            // CONSULTA 1: Nombre del Estudiante
-            // NOTA: Ajusta 'estudiantes' y 'nombre' según las tablas de tu archivo .sql
-            const resEst = db.exec(`SELECT nombre FROM estudiantes WHERE documento = '${doc}' LIMIT 1`);
+            const response = await fetch(SQL_URL);
+            const sqlText = await response.text();
+
+            // Función para extraer datos del texto SQL (Simulando base de datos)
+            const infoEst = extraerFila(sqlText, 'estudiantes', cedula);
             
-            if (resEst.length === 0 || resEst[0].values.length === 0) {
-                alert("No se encontró ningún estudiante con ese documento.");
+            if (!infoEst) {
+                alert("No se encontró estudiante con esa cédula.");
                 return;
             }
 
-            document.getElementById('studentName').innerText = "Bienvenido, " + resEst[0].values[0][0];
+            document.getElementById('studentName').innerText = `${infoEst.nombre} ${infoEst.apellido}`;
+            document.getElementById('studentProg').innerText = infoEst.programa;
 
-            // CONSULTA 2: Notas
-            const resNotas = db.exec(`SELECT materia, nota FROM notas WHERE documento = '${doc}'`);
-            renderTable('tablaNotas', resNotas, ["Materia", "Nota"]);
+            // Extraer Notas
+            const notas = extraerMultiplesFilas(sqlText, 'notas', cedula);
+            renderTable('tablaNotas', notas, ["Materia", "Nota 1", "Nota 2", "Nota 3", "Promedio"], ["materia", "nota1", "nota2", "nota3", "promedio"]);
 
-            // CONSULTA 3: Pagos
-            const resPagos = db.exec(`SELECT fecha, concepto, valor FROM pagos WHERE documento = '${doc}'`);
-            renderTable('tablaPagos', resPagos, ["Fecha", "Concepto", "Valor"]);
+            // Extraer Pagos
+            const pagos = extraerMultiplesFilas(sqlText, 'pagos', cedula);
+            renderTable('tablaPagos', pagos, ["Concepto", "Fecha", "Valor"], ["concepto", "fecha", "valor"]);
 
             document.getElementById('resultCard').style.display = 'block';
-
         } catch (error) {
             console.error(error);
-            alert("Error en la consulta. Asegúrate de que las tablas en asenorte.sql se llamen 'estudiantes', 'notas' y 'pagos'.");
+            alert("Error al conectar con la base de datos en Drive. Verifica los permisos.");
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     }
 
-    function renderTable(elementId, result, headers) {
-        let html = '<table><tr>';
-        headers.forEach(h => html += `<th>${h}</th>`);
-        html += '</tr>';
+    // Buscador manual en el archivo SQL
+    function extraerFila(texto, tabla, id) {
+        const regex = new RegExp(`INSERT INTO \`${tabla}\` .*?VALUES.*?\\('${id}',\\s*'(.*?)'\\);`, 'i');
+        const match = texto.match(new RegExp(`INSERT INTO \`${tabla}\` [^;]*'${id}'[^;]*;`, 'g'));
+        if (!match) return null;
+        
+        // Procesamos la línea encontrada
+        const valores = match[0].match(/'([^']*)'/g).map(v => v.replace(/'/g, ''));
+        if (tabla === 'estudiantes') return { cedula: valores[0], nombre: valores[1], apellido: valores[2], programa: valores[3] };
+        return null;
+    }
 
-        if (result.length > 0 && result[0].values.length > 0) {
-            result[0].values.forEach(row => {
-                html += '<tr>';
-                row.forEach(cell => html += `<td>${cell}</td>`);
-                html += '</tr>';
+    function extraerMultiplesFilas(texto, tabla, id) {
+        const regex = new RegExp(`INSERT INTO \`${tabla}\` [^;]*'${id}'[^;]*;`, 'g');
+        const matches = texto.match(regex);
+        if (!matches) return [];
+
+        return matches.map(linea => {
+            const v = linea.match(/'([^']*)'/g).map(val => val.replace(/'/g, ''));
+            if (tabla === 'notas') return { materia: v[1], nota1: v[2], nota2: v[3], nota3: v[4], promedio: v[5] };
+            if (tabla === 'pagos') return { concepto: v[1], fecha: v[2], valor: v[3] };
+            return {};
+        });
+    }
+
+    function renderTable(id, datos, encabezados, campos) {
+        let html = '<table><tr>' + encabezados.map(h => `<th>${h}</th>`).join('') + '</tr>';
+        if (datos.length > 0) {
+            datos.forEach(d => {
+                html += '<tr>' + campos.map(c => `<td>${d[c] || '-'}</td>`).join('') + '</tr>';
             });
         } else {
-            html += `<tr><td colspan="${headers.length}">Sin registros encontrados.</td></tr>`;
+            html += `<tr><td colspan="${encabezados.length}">No hay registros</td></tr>`;
         }
-        
-        document.getElementById(elementId).innerHTML = html + '</table>';
+        document.getElementById(id).innerHTML = html + '</table>';
     }
 </script>
-
 </body>
 </html>
