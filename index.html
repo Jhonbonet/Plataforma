@@ -3,1213 +3,990 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ASENORTE - Portal Inteligente</title>
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
+<title>Portal Estudiantil — ASENORTE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-
+/* ═══ TOKENS ═══════════════════════════════════════════ */
 :root{
-    --primary:#0d7a6e;
-    --secondary:#085a52;
-    --accent:#d4a017;
-    --bg:#f4f7f6;
+  --teal:#0b7a6e;--teal-dk:#074f47;--teal-lt:#13a392;--teal-bg:#e5f4f2;
+  --gold:#c8940f;--ink:#0c1a19;--muted:#456360;--soft:#6b8f8c;
+  --border:#bcd9d6;--paper:#f5fbfa;--white:#fff;
+  --pass:#177a46;--pass-bg:#d2f0e2;
+  --warn:#b84808;--warn-bg:#fde4d2;
+  --mid:#7a5e00;--mid-bg:#fff7dc;
+  --info:#1a5ca8;--info-bg:#ddeeff;
+  --purp-bg:#ede8fe;--purp:#5a35a8;
+  --gold-bg:#fff3cd;--gold-c:#7a5800;
+  --shadow:0 4px 20px rgba(11,122,110,.09);
+  --shadow-lg:0 12px 40px rgba(11,122,110,.15);
+  --r:12px;--tr:.2s ease;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:15px}
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+/* ═══ LOADER ═══════════════════════════════════════════ */
+#gl{position:fixed;inset:0;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 60%,#17b8a4 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
+  transition:opacity .5s,visibility .5s}
+#gl.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.ll{font-size:52px;margin-bottom:14px;animation:pu 2s ease-in-out infinite}
+@keyframes pu{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.lt{color:#fff;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.ls{color:rgba(255,255,255,.65);font-size:.82rem;margin-bottom:28px}
+.pb-wrap{width:300px;background:rgba(255,255,255,.2);border-radius:50px;height:6px;overflow:hidden}
+.pb{height:100%;background:#fff;border-radius:50px;transition:width .3s ease;width:0%}
+.pbs{color:rgba(255,255,255,.8);font-size:.74rem;margin-top:10px;min-height:18px;text-align:center}
+
+/* ═══ LOGIN ════════════════════════════════════════════ */
+#ls{display:none;min-height:100vh;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 55%,#18b8a4 100%);
+  align-items:center;justify-content:center;padding:20px}
+#ls.v{display:flex}
+.lc{background:var(--white);border-radius:20px;padding:48px 44px 40px;width:100%;max-width:430px;
+  box-shadow:var(--shadow-lg);animation:su .4s cubic-bezier(.23,1,.32,1)}
+@keyframes su{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.l-logo{width:80px;height:80px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;
+  margin:0 auto 16px;box-shadow:0 8px 24px rgba(11,122,110,.28)}
+.lc h1{font-size:1.55rem;font-weight:800;color:var(--teal-dk);letter-spacing:-.02em;text-align:center}
+.lc .sub{color:var(--muted);font-size:.83rem;text-align:center;margin:6px 0 24px}
+.notice{background:var(--teal-bg);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;font-size:.74rem;color:var(--muted);margin-bottom:20px;
+  display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.notice span{font-size:1rem;flex-shrink:0;margin-top:1px}
+.fg{margin-bottom:18px}
+.fg label{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:6px}
+.fg input{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:10px;
+  font-size:1rem;color:var(--ink);background:var(--paper);
+  transition:border-color var(--tr),box-shadow var(--tr);outline:none}
+.fg input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(11,122,110,.12)}
+.btn-p{width:100%;padding:14px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
+  color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;
+  letter-spacing:.02em;transition:transform var(--tr),box-shadow var(--tr);
+  box-shadow:0 4px 16px rgba(11,122,110,.28)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(11,122,110,.38)}
+.btn-p:active{transform:translateY(0)}
+.btn-p:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.err{display:none;background:var(--warn-bg);color:var(--warn);border-radius:8px;
+  padding:10px 14px;font-size:.82rem;margin-top:12px;font-weight:500}
+.lnote{margin-top:18px;font-size:.7rem;color:#a0c5c2;text-align:center}
+
+/* ═══ PORTAL ════════════════════════════════════════════ */
+#p{display:none;flex-direction:column;min-height:100vh}
+#p.v{display:flex}
+
+/* topbar */
+.tb{background:var(--teal-dk);color:#fff;padding:0 24px;display:flex;align-items:center;
+  justify-content:space-between;height:58px;position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 16px rgba(0,0,0,.22)}
+.tbl{display:flex;align-items:center;gap:10px}
+.tbi{font-size:22px}
+.tbt{font-size:.98rem;font-weight:800;letter-spacing:-.01em}
+.tbt span{font-size:.62rem;opacity:.6;display:block;margin-top:-2px;text-transform:uppercase;letter-spacing:.05em}
+.sbadge{background:rgba(255,255,255,.13);border-radius:50px;padding:5px 14px 5px 7px;
+  display:flex;align-items:center;gap:8px}
+.av{width:30px;height:30px;background:var(--gold);border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+.si .sn{font-size:.82rem;font-weight:700;line-height:1.2}
+.si .sd{font-size:.65rem;opacity:.65}
+.tbr{display:flex;align-items:center;gap:8px}
+.btn-o{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);color:#fff;
+  border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:600;cursor:pointer;
+  transition:background var(--tr);white-space:nowrap}
+.btn-o:hover{background:rgba(255,255,255,.22)}
+
+/* group strip */
+.gs{background:var(--teal-bg);border-bottom:1px solid var(--border);
+  padding:9px 24px;display:flex;flex-wrap:wrap;gap:18px}
+.gc .gl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);font-weight:700;display:block}
+.gc .gv{font-size:.82rem;font-weight:700;color:var(--ink)}
+
+/* tabs */
+.tnav{display:flex;background:var(--white);border-bottom:2px solid var(--border);
+  padding:0 24px;overflow-x:auto}
+.tbtn{padding:13px 20px;font-size:.84rem;font-weight:600;color:var(--muted);border:none;
+  background:none;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+  margin-bottom:-2px;display:flex;align-items:center;gap:7px;
+  transition:color var(--tr),border-color var(--tr)}
+.tbtn:hover{color:var(--teal)}
+.tbtn.active{color:var(--teal);border-bottom-color:var(--teal)}
+
+/* panels */
+.tc{padding:24px;flex:1}
+.tp{display:none;animation:fi .22s ease}
+.tp.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ COMPONENTS ════════════════════════════════════════ */
+.sttl{font-size:1rem;font-weight:800;color:var(--teal-dk);border-left:4px solid var(--gold);
+  padding-left:11px;margin-bottom:16px;letter-spacing:-.01em}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.tw{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-size:.81rem}
+table.dt thead tr{background:var(--teal);color:#fff}
+table.dt th{padding:10px 14px;text-align:left;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:700;white-space:nowrap}
+table.dt td{padding:10px 14px;border-bottom:1px solid #edf5f4;vertical-align:middle}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tr:nth-child(even) td{background:#fafefe}
+table.dt tr:hover td{background:var(--teal-bg)}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.69rem;font-weight:700;
+  letter-spacing:.04em;white-space:nowrap}
+.bp{background:var(--pass-bg);color:var(--pass)}
+.bw{background:var(--warn-bg);color:var(--warn)}
+.bm{background:var(--mid-bg);color:var(--mid)}
+.bb{background:var(--info-bg);color:var(--info)}
+.bpu{background:var(--purp-bg);color:var(--purp)}
+.bg{background:var(--gold-bg);color:var(--gold-c)}
+.bt{background:var(--teal-bg);color:var(--teal-dk)}
+.sp{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.83rem;font-weight:800}
+.sh{background:var(--pass-bg);color:var(--pass)}
+.sm{background:var(--mid-bg);color:var(--mid)}
+.sl{background:var(--warn-bg);color:var(--warn)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty .ei{font-size:2.2rem;margin-bottom:8px}
+.empty p{font-size:.84rem}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin-bottom:20px}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;box-shadow:var(--shadow)}
+.sc .scl{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:4px}
+.sc .scv{font-size:1.45rem;font-weight:900;letter-spacing:-.02em;color:var(--teal-dk)}
+.sc .scv.c-pass{color:var(--pass)}
+.sc .scv.c-warn{color:var(--warn)}
+.sc .scv.c-gold{color:var(--gold)}
+.spin-i{display:inline-block;width:16px;height:16px;border:3px solid rgba(11,122,110,.18);
+  border-top-color:var(--teal);border-radius:50%;animation:sp .7s linear infinite;
+  vertical-align:middle;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* inicio */
+.pbanner{background:linear-gradient(135deg,var(--teal-dk),var(--teal));border-radius:var(--r);
+  padding:28px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.bav{width:68px;height:68px;background:rgba(255,255,255,.2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;
+  border:3px solid rgba(255,255,255,.3);flex-shrink:0}
+.binfo h2{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.binfo p{font-size:.79rem;opacity:.75;margin-bottom:2px}
+.bchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.bchip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:4px 12px;font-size:.7rem;font-weight:600}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+.qcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;box-shadow:var(--shadow);cursor:pointer;
+  transition:transform var(--tr),box-shadow var(--tr);display:flex;align-items:center;gap:12px}
+.qcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.qicon{font-size:26px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  background:var(--teal-bg);border-radius:10px;flex-shrink:0}
+.qt{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.qv{font-size:1.2rem;font-weight:900;color:var(--teal-dk);letter-spacing:-.02em}
+
+/* asistencia */
+.uz{border:2px dashed var(--border);border-radius:var(--r);padding:30px 20px;text-align:center;
+  background:var(--teal-bg);margin-bottom:18px;cursor:pointer;
+  transition:border-color var(--tr),background var(--tr)}
+.uz:hover,.uz.do{border-color:var(--teal);background:#d6eee9}
+.ui-i{font-size:2.2rem;margin-bottom:8px}
+.uz p{color:var(--muted);font-size:.82rem;line-height:1.6}
+.uz strong{color:var(--teal)}
+#xi{display:none}
+.achips{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.ac{background:var(--white);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;box-shadow:var(--shadow);text-align:center;min-width:100px}
+.ac .an{font-size:1.45rem;font-weight:900;color:var(--teal)}
+.ac .al{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.calm{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;margin-top:18px}
+.cmo{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow)}
+.cmo h4{font-size:.83rem;font-weight:700;color:var(--teal-dk);text-transform:capitalize;margin-bottom:8px}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cdh{text-align:center;font-size:.57rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--soft);padding:3px 0}
+.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:6px;font-size:.7rem;font-weight:600;color:var(--muted)}
+.cd.present{background:var(--pass-bg);color:var(--pass);font-weight:800}
+.cd.absent{background:var(--warn-bg);color:var(--warn)}
+.cd.noc{color:#c0d5d3}
+
+@media(max-width:640px){
+  .tb,.tc,.gs,.tnav{padding-left:14px;padding-right:14px}
+  .tb{height:52px}.lc{padding:32px 20px 28px}
+  .pbanner{padding:18px}.bav{width:54px;height:54px;font-size:22px}
+  .binfo h2{font-size:1.05rem}
 }
-
-body{
-    background:var(--bg);
-    font-family:'Segoe UI',Tahoma,sans-serif;
-    padding:15px;
-    color:#333;
+@media print{
+  .tb,.tnav,.uz{display:none!important}
+  .tp{display:block!important}
 }
-
-.container{
-    max-width:1300px;
-    margin:auto;
-}
-
-.card{
-    background:white;
-    border-radius:15px;
-    overflow:hidden;
-    box-shadow:0 8px 30px rgba(0,0,0,.1);
-}
-
-.header{
-    background:linear-gradient(135deg,var(--primary),#16a596);
-    color:white;
-    text-align:center;
-    padding:35px;
-}
-
-.header h1{
-    font-size:42px;
-}
-
-.header p{
-    margin-top:10px;
-}
-
-.search-box{
-    background:#fafafa;
-    padding:25px;
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.search-box input{
-    flex:1;
-    min-width:250px;
-    padding:15px;
-    border-radius:10px;
-    border:2px solid #ddd;
-    font-size:16px;
-    outline:none;
-}
-
-.search-box input:focus{
-    border-color:var(--primary);
-}
-
-.search-box button{
-    background:var(--primary);
-    color:white;
-    border:none;
-    padding:15px 25px;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:bold;
-}
-
-.search-box button:hover{
-    background:var(--secondary);
-}
-
-.loader{
-    display:none;
-    padding:25px;
-    text-align:center;
-    color:var(--primary);
-    font-weight:bold;
-}
-
-.alert{
-    margin:15px 25px;
-    padding:15px;
-    border-radius:10px;
-    font-weight:bold;
-}
-
-.error{
-    background:#f8d7da;
-    color:#721c24;
-}
-
-.success{
-    background:#d4edda;
-    color:#155724;
-}
-
-.result{
-    display:none;
-    padding:25px;
-}
-
-.profile{
-    background:linear-gradient(135deg,var(--primary),#16a596);
-    color:white;
-    border-radius:15px;
-    padding:25px;
-    margin-bottom:25px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.profile h2{
-    margin-bottom:10px;
-}
-
-.stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:15px;
-    margin-bottom:30px;
-}
-
-.stat{
-    background:white;
-    border-radius:12px;
-    padding:20px;
-    box-shadow:0 3px 12px rgba(0,0,0,.05);
-}
-
-.stat h4{
-    color:#666;
-    margin-bottom:10px;
-}
-
-.stat strong{
-    color:var(--primary);
-    font-size:24px;
-}
-
-.section{
-    margin-top:30px;
-}
-
-.section h3{
-    color:var(--primary);
-    margin-bottom:15px;
-    border-left:5px solid var(--accent);
-    padding-left:10px;
-}
-
-.table-wrap{
-    overflow:auto;
-    border:1px solid #ddd;
-    border-radius:10px;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-table th{
-    background:#f5f5f5;
-    color:var(--primary);
-}
-
-table th,
-table td{
-    padding:12px;
-    border-bottom:1px solid #eee;
-    font-size:14px;
-    text-align:left;
-}
-
-.badge{
-    padding:6px 10px;
-    border-radius:20px;
-    font-size:12px;
-    font-weight:bold;
-}
-
-.ok{
-    background:#d4edda;
-    color:#155724;
-}
-
-.bad{
-    background:#f8d7da;
-    color:#721c24;
-}
-
-.footer{
-    text-align:center;
-    padding:20px;
-    color:#888;
-}
-
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
-<div class="card">
-
-<div class="header">
-    <h1>ASENORTE</h1>
-    <p>Portal Académico Inteligente</p>
+<!-- ═══ LOADER ═══════════════════════════════════════════ -->
+<div id="gl">
+  <div class="ll">🏥</div>
+  <div class="lt">ASENORTE</div>
+  <div class="ls">Cargando base de datos académica…</div>
+  <div class="pb-wrap"><div class="pb" id="pb"></div></div>
+  <div class="pbs" id="pbs">Iniciando…</div>
 </div>
 
-<div class="search-box">
-
-    <input
-        type="text"
-        id="docInput"
-        placeholder="Ingrese documento del estudiante"
-    >
-
-    <button onclick="consultar()">
-        <i class="fas fa-search"></i>
-        CONSULTAR
-    </button>
-
+<!-- ═══ LOGIN ════════════════════════════════════════════ -->
+<div id="ls">
+  <div class="lc">
+    <div class="l-logo">🏥</div>
+    <h1>Portal Estudiantil</h1>
+    <p class="sub">ASENORTE — Corporación Educativa del Norte</p>
+    <div class="notice">
+      <span>🔒</span>
+      <span>Datos procesados localmente en tu navegador. Ninguna información sale de tu dispositivo.</span>
+    </div>
+    <div class="fg">
+      <label>Número de Cédula / Documento</label>
+      <input id="di" type="text" inputmode="numeric" placeholder="Ej: 1083467400"
+             autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-p" id="bl" onclick="doLogin()">Consultar mi información</button>
+    <div class="err" id="em">⚠ Documento no encontrado. Verifique e intente nuevamente.</div>
+    <p class="lnote">Portal de consulta académica · ASENORTE 2026</p>
+  </div>
 </div>
 
-<div id="loader" class="loader">
-    <i class="fas fa-sync fa-spin"></i>
-    Analizando base de datos SQL...
-</div>
+<!-- ═══ PORTAL ════════════════════════════════════════════ -->
+<div id="p">
 
-<div id="alerts"></div>
+  <div class="tb">
+    <div class="tbl">
+      <span class="tbi">🏥</span>
+      <div class="tbt">ASENORTE<span>Portal Estudiantil</span></div>
+    </div>
+    <div class="tbr">
+      <div class="sbadge">
+        <div class="av" id="avl">?</div>
+        <div class="si"><div class="sn" id="pn">—</div><div class="sd" id="pd">—</div></div>
+      </div>
+      <button class="btn-o" onclick="doLogout()">↩ Salir</button>
+    </div>
+  </div>
 
-<div id="result" class="result">
+  <div class="gs">
+    <div class="gc"><span class="gl">Grupo</span><span class="gv" id="g-cod">—</span></div>
+    <div class="gc"><span class="gl">Año</span><span class="gv" id="g-ano">—</span></div>
+    <div class="gc"><span class="gl">Programa</span><span class="gv" id="g-prog">—</span></div>
+    <div class="gc"><span class="gl">Inicio / Fin</span><span class="gv" id="g-f">—</span></div>
+    <div class="gc"><span class="gl">Jornada</span><span class="gv" id="g-j">—</span></div>
+    <div class="gc"><span class="gl">Docente</span><span class="gv" id="g-d">—</span></div>
+  </div>
 
-    <div class="profile">
+  <div class="tnav">
+    <button class="tbtn active" onclick="ST('inicio',this)">🏠 Inicio</button>
+    <button class="tbtn" onclick="ST('notas',this)">📝 Académico</button>
+    <button class="tbtn" onclick="ST('fin',this)">💳 Financiero</button>
+    <button class="tbtn" onclick="ST('asist',this)">📅 Asistencia</button>
+    <button class="tbtn" onclick="ST('perfil',this)">👤 Perfil</button>
+  </div>
 
-        <div>
-            <h2 id="nombre"></h2>
-            <p id="documento"></p>
-            <p id="correo"></p>
-            <p id="codigo"></p>
+  <div class="tc">
+
+    <!-- ── INICIO ── -->
+    <div id="tp-inicio" class="tp active">
+      <div class="pbanner">
+        <div class="bav" id="bav">?</div>
+        <div class="binfo">
+          <h2 id="bn">—</h2>
+          <p id="bd">Documento: —</p>
+          <p id="bpr">Programa: —</p>
+          <div class="bchips">
+            <span class="bchip" id="bc-g">—</span>
+            <span class="bchip" id="bc-a">—</span>
+            <span class="bchip" id="bc-e">Activo</span>
+          </div>
         </div>
-
-        <i class="fas fa-user-graduate fa-4x"></i>
-
+      </div>
+      <div class="qgrid">
+        <div class="qcard" onclick="ST('notas',document.querySelectorAll('.tbtn')[1])">
+          <div class="qicon">📝</div><div><div class="qt">Promedio</div><div class="qv" id="q-prom">—</div></div>
+        </div>
+        <div class="qcard" onclick="ST('fin',document.querySelectorAll('.tbtn')[2])">
+          <div class="qicon">💳</div><div><div class="qt">Total Pagado</div><div class="qv" id="q-pag">—</div></div>
+        </div>
+        <div class="qcard" onclick="ST('notas',document.querySelectorAll('.tbtn')[1])">
+          <div class="qicon">📚</div><div><div class="qt">Módulos</div><div class="qv" id="q-mod">—</div></div>
+        </div>
+        <div class="qcard" onclick="ST('asist',document.querySelectorAll('.tbtn')[3])">
+          <div class="qicon">📅</div><div><div class="qt">Asistencia</div><div class="qv" id="q-as">Cargar XLS</div></div>
+        </div>
+      </div>
+      <div class="sgrid">
+        <div class="sc"><div class="scl">Recibos de Pago</div><div class="scv c-pass" id="s-r">—</div></div>
+        <div class="sc"><div class="scl">Descuentos/Cred.</div><div class="scv c-gold" id="s-c">—</div></div>
+        <div class="sc"><div class="scl">Notas Registradas</div><div class="scv" id="s-n">—</div></div>
+        <div class="sc"><div class="scl">Cursos Matrículas</div><div class="scv" id="s-m">—</div></div>
+      </div>
+      <h2 class="sttl">Últimas Notas</h2>
+      <div class="card"><div class="tw">
+        <table class="dt"><thead><tr><th>Módulo</th><th>Área</th><th>Nota</th><th>Fecha</th><th>Docente</th></tr></thead>
+        <tbody id="tb-ln"></tbody></table>
+      </div></div>
     </div>
 
-    <div class="stats">
-
-        <div class="stat">
-            <h4>Promedio</h4>
-            <strong id="promedio">0</strong>
-        </div>
-
-        <div class="stat">
-            <h4>Total Cursos</h4>
-            <strong id="materias">0</strong>
-        </div>
-
-        <div class="stat">
-            <h4>Total Pagado</h4>
-            <strong id="pagado">$0</strong>
-        </div>
-
+    <!-- ── ACADÉMICO ── -->
+    <div id="tp-notas" class="tp">
+      <h2 class="sttl">Notas Académicas</h2>
+      <div class="sgrid">
+        <div class="sc"><div class="scl">Promedio General</div><div class="scv c-pass" id="n-prom">—</div></div>
+        <div class="sc"><div class="scl">Módulos Cursados</div><div class="scv" id="n-mod">—</div></div>
+        <div class="sc"><div class="scl">Notas ≥ 4.5</div><div class="scv c-pass" id="n-altas">—</div></div>
+        <div class="sc"><div class="scl">Estado Académico</div><div class="scv c-pass" id="n-est">—</div></div>
+      </div>
+      <h2 class="sttl" style="margin-top:4px">Sistema de Notas Principal (tbl_notas)</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>ID</th><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Área</th><th>Nota</th><th>Docente</th></tr></thead>
+        <tbody id="tb-n1"></tbody></table>
+      </div></div>
+      <h2 class="sttl">Sistema de Notas Histórico (tbl_notas2)</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>ID</th><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Área</th><th>Nota</th><th>Docente</th></tr></thead>
+        <tbody id="tb-n2"></tbody></table>
+      </div></div>
+      <h2 class="sttl">Habilitaciones</h2>
+      <div class="card"><div class="tw">
+        <table class="dt"><thead><tr><th>Módulo</th><th>Nota Habilitación</th><th>Fecha</th></tr></thead>
+        <tbody id="tb-hab"></tbody></table>
+      </div></div>
     </div>
 
-    <div class="section">
-
-        <h3>
-            <i class="fas fa-book"></i>
-            Historial Académico
-        </h3>
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-                <tr>
-                    <th>Módulo</th>
-                    <th>Nota</th>
-                    <th>Fecha</th>
-                    <th>Profesor</th>
-                    <th>Grupo</th>
-                    <th>Estado</th>
-                </tr>
-                </thead>
-
-                <tbody id="notasBody"></tbody>
-
-            </table>
-
-        </div>
-
+    <!-- ── FINANCIERO ── -->
+    <div id="tp-fin" class="tp">
+      <h2 class="sttl">Estado Financiero</h2>
+      <div class="sgrid">
+        <div class="sc"><div class="scl">Total Recibos</div><div class="scv c-pass" id="f-cnt">—</div></div>
+        <div class="sc"><div class="scl">Total Pagado</div><div class="scv c-pass" id="f-tot">—</div></div>
+        <div class="sc"><div class="scl">Total Descuentos</div><div class="scv c-gold" id="f-dsc">—</div></div>
+        <div class="sc"><div class="scl">Último Pago</div><div class="scv" id="f-last" style="font-size:.95rem">—</div></div>
+      </div>
+      <h2 class="sttl" style="margin-top:4px">Recibos de Pago — fac_recibos</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Forma Pago</th><th>N° Transacción</th><th>Valor</th></tr></thead>
+        <tbody id="tb-r1"></tbody></table>
+      </div></div>
+      <h2 class="sttl">Otros Recibos — fac_recibos2</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Forma Pago</th><th>Valor</th></tr></thead>
+        <tbody id="tb-r2"></tbody></table>
+      </div></div>
+      <h2 class="sttl">Descuentos y Créditos — fac_creditos</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Valor Descontado</th></tr></thead>
+        <tbody id="tb-crd"></tbody></table>
+      </div></div>
+      <h2 class="sttl">Facturas — fac_facturas</h2>
+      <div class="card"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Tipo</th><th>Fecha</th><th>Total</th><th>Descripción</th></tr></thead>
+        <tbody id="tb-fac"></tbody></table>
+      </div></div>
     </div>
 
-    <div class="section">
-
-        <h3>
-            <i class="fas fa-money-bill-wave"></i>
-            Historial Financiero
-        </h3>
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Concepto</th>
-                    <th>Valor</th>
-                </tr>
-                </thead>
-
-                <tbody id="pagosBody"></tbody>
-
-            </table>
-
-        </div>
-
+    <!-- ── ASISTENCIA ── -->
+    <div id="tp-asist" class="tp">
+      <h2 class="sttl">Registro de Asistencia</h2>
+      <div class="uz" id="uz"
+           onclick="document.getElementById('xi').click()"
+           ondragover="event.preventDefault();this.classList.add('do')"
+           ondragleave="this.classList.remove('do')"
+           ondrop="hDrop(event)">
+        <div class="ui-i">📂</div>
+        <p><strong>Cargar ASISTENCIA.xlsx</strong></p>
+        <p>Haz clic o arrastra el archivo actualizado desde Google Drive / GitHub.</p>
+        <p style="font-size:.69rem;margin-top:7px;opacity:.55">
+          Columnas: <strong>DOCUMENTO</strong> · <strong>FECHA</strong> · <strong>ESTADO</strong> (P/A) · MATERIA (opcional) · OBSERVACIONES (opcional)
+        </p>
+        <input type="file" id="xi" accept=".xlsx,.xls,.csv" onchange="loadXlsx(this.files[0])">
+      </div>
+      <div id="asist-ok" style="display:none">
+        <div class="achips" id="achips"></div>
+        <h2 class="sttl">Detalle de Asistencia</h2>
+        <div class="card" style="margin-bottom:18px"><div class="tw">
+          <table class="dt"><thead><tr><th>#</th><th>Fecha</th><th>Día</th><th>Materia</th><th>Estado</th><th>Observaciones</th></tr></thead>
+          <tbody id="tb-as"></tbody></table>
+        </div></div>
+        <h2 class="sttl">Calendario</h2>
+        <div class="calm" id="calv"></div>
+      </div>
+      <div id="asist-no" style="display:none">
+        <div class="empty"><div class="ei">🔍</div><p>No se encontraron registros para este documento en el archivo cargado.</p></div>
+      </div>
     </div>
 
-</div>
+    <!-- ── PERFIL ── -->
+    <div id="tp-perfil" class="tp">
+      <h2 class="sttl">Información Personal</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><tbody id="tb-pf"></tbody></table>
+      </div></div>
+      <h2 class="sttl">Matrículas Registradas</h2>
+      <div class="card"><div class="tw">
+        <table class="dt"><thead><tr><th>Módulo / Curso</th><th>Fecha</th><th>Valor</th><th>Saldo</th><th>Estado</th></tr></thead>
+        <tbody id="tb-mat"></tbody></table>
+      </div></div>
+    </div>
 
-<div class="footer">
-    Sistema generado desde asenorte.sql
-</div>
-
-</div>
-</div>
+  </div><!-- /tc -->
+</div><!-- /portal -->
 
 <script>
-
-/*
-|--------------------------------------------------------------------------
-| SQL RAW GITHUB
-|--------------------------------------------------------------------------
-*/
-
-const SQL_URL =
-'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
-
-/*
-|--------------------------------------------------------------------------
-| CACHE
-|--------------------------------------------------------------------------
-*/
-
-let SQL_TEXT = '';
-let TABLES = {};
-
-/*
-|--------------------------------------------------------------------------
-| HELPERS UI
-|--------------------------------------------------------------------------
-*/
-
-function loader(show=true){
-
-    document.getElementById('loader').style.display =
-        show ? 'block' : 'none';
-}
-
-function alertMsg(msg,type='error'){
-
-    document.getElementById('alerts').innerHTML =
-    `<div class="alert ${type}">${msg}</div>`;
-}
-
-/*
-|--------------------------------------------------------------------------
-| CLEAN SQL
-|--------------------------------------------------------------------------
-*/
-
-function clean(v){
-
-    if(v === undefined || v === null){
-        return '';
-    }
-
-    return String(v)
-        .replace(/\\'/g,"'")
-        .replace(/\\"/g,'"')
-        .replace(/\\\\/g,'\\')
-        .replace(/\r/g,' ')
-        .replace(/\n/g,' ')
-        .trim();
-}
-
-/*
-|--------------------------------------------------------------------------
-| LOAD SQL
-|--------------------------------------------------------------------------
-*/
-
-async function loadSQL(){
-
-    if(SQL_TEXT){
-        return;
-    }
-
-    const response = await fetch(SQL_URL);
-
-    if(!response.ok){
-
-        throw new Error(
-            'No se pudo descargar asenorte.sql'
-        );
-    }
-
-    SQL_TEXT = await response.text();
-
-    if(
-        !SQL_TEXT.includes('INSERT INTO')
-    ){
-
-        throw new Error(
-            'El archivo no es SQL válido'
-        );
-    }
-
-    splitTables();
-}
-
-/*
-|--------------------------------------------------------------------------
-| SPLIT TABLES
-|--------------------------------------------------------------------------
-*/
-
-function splitTables(){
-
-    const regex =
-/-- Volcado de datos para la tabla `([^`]+)`([\s\S]*?)(?=(-- Volcado de datos para la tabla|$))/g;
-
-    let match;
-
-    while((match = regex.exec(SQL_TEXT)) !== null){
-
-        TABLES[match[1]] = match[2];
-    }
-
-    console.log('TABLAS SQL:',Object.keys(TABLES));
-}
-
-/*
-|--------------------------------------------------------------------------
-| INSERTS
-|--------------------------------------------------------------------------
-*/
-
-function getInsertBlocks(section){
-
-    if(!section){
-        return [];
-    }
-
-    const regex =
-/INSERT INTO[\s\S]*?VALUES\s*([\s\S]*?);/gi;
-
-    const blocks = [];
-
-    let match;
-
-    while((match = regex.exec(section)) !== null){
-
-        blocks.push(match[1]);
-    }
-
-    return blocks;
-}
-
-/*
-|--------------------------------------------------------------------------
-| PARSER SQL MULTILINE
-|--------------------------------------------------------------------------
-*/
-
-function parseRows(block){
-
-    const rows = [];
-
-    const regex =
-/\(([\s\S]*?)\)(?=,?\s*(\(|$))/g;
-
-    let match;
-
-    while((match = regex.exec(block)) !== null){
-
-        rows.push(
-            splitFields(match[1])
-        );
-    }
-
-    return rows;
-}
-
-function splitFields(row){
-
-    const result = [];
-
-    let current = '';
-    let inside = false;
-
-    for(let i=0;i<row.length;i++){
-
-        const c = row[i];
-        const prev = row[i-1];
-
-        if(c === "'" && prev !== "\\"){
-            inside = !inside;
-        }
-
-        if(c === ',' && !inside){
-
-            result.push(cleanField(current));
-
-            current='';
-
-        }else{
-            current += c;
-        }
-    }
-
-    result.push(cleanField(current));
-
-    return result;
-}
-
-function cleanField(v){
-
-    return clean(
-        v
-        .trim()
-        .replace(/^'/,'')
-        .replace(/'$/,'')
-    );
-}
-
-/*
-|--------------------------------------------------------------------------
-| BUSCAR ESTUDIANTE
-|--------------------------------------------------------------------------
-|
-| IMPORTANTE:
-| El documento NO es la llave real.
-|
-| Debemos encontrar:
-|
-| documento -> id interno
-|
-|--------------------------------------------------------------------------
-*/
-
-function findStudent(documento){
-
-    /*
-    TABLAS POSIBLES
-    */
-
-    const posibles = [
-
-        'tbl_usuarios',
-        'tbl_estudiantes',
-        'admisiones',
-        'matriculas'
-
-    ];
-
-    for(const tabla of posibles){
-
-        const sec = TABLES[tabla];
-
-        if(!sec){
-            continue;
-        }
-
-        const inserts =
-            getInsertBlocks(sec);
-
-        for(const block of inserts){
-
-            const rows =
-                parseRows(block);
-
-            for(const r of rows){
-
-                /*
-                Buscar documento en cualquier campo
-                */
-
-                const found =
-                    r.find(v =>
-                        String(v).trim() ===
-                        String(documento).trim()
-                    );
-
-                if(found){
-
-                    /*
-                    ID interno
-                    */
-
-                    const id = r[0];
-
-                    return {
-
-                        id:id,
-
-                        nombre:
-                            (
-                                (r[3] || '') +
-                                ' ' +
-                                (r[4] || '')
-                            ).trim(),
-
-                        documento:documento,
-
-                        correo:
-                            r.find(v =>
-                                String(v).includes('@')
-                            ) || ''
-                    };
-                }
-            }
-        }
-    }
-
-    /*
-    BÚSQUEDA GLOBAL
-    */
-
-    for(const tabla in TABLES){
-
-        const inserts =
-            getInsertBlocks(TABLES[tabla]);
-
-        for(const block of inserts){
-
-            const rows =
-                parseRows(block);
-
-            for(const r of rows){
-
-                const found =
-                    r.find(v =>
-                        String(v).trim() ===
-                        String(documento).trim()
-                    );
-
-                if(found){
-
-                    return {
-
-                        id:r[0],
-
-                        nombre:
-                            (
-                                (r[3] || '') +
-                                ' ' +
-                                (r[4] || '')
-                            ).trim(),
-
-                        documento,
-
-                        correo:
-                            r.find(v =>
-                                String(v).includes('@')
-                            ) || ''
-                    };
-                }
-            }
-        }
-    }
-
-    return null;
-}
-
-/*
-|--------------------------------------------------------------------------
-| IDs RELACIONADOS
-|--------------------------------------------------------------------------
-|
-| El estudiante puede cambiar:
-|
-| ESTUDIANTE_NOTA
-| ESTUDIANTE_MATRICULA
-| ID_ESTUDIANTE
-| CLIENTE_CREDITO
-| CLIENTE_RECIBO
-|
-|--------------------------------------------------------------------------
-*/
-
-function relatedIds(student){
-
-    const ids = new Set();
-
-    ids.add(String(student.id));
-    ids.add(String(student.documento));
-
-    /*
-    Buscar referencias cruzadas
-    */
-
-    for(const tabla in TABLES){
-
-        const inserts =
-            getInsertBlocks(TABLES[tabla]);
-
-        for(const block of inserts){
-
-            const rows =
-                parseRows(block);
-
-            for(const r of rows){
-
-                const found =
-                    r.find(v =>
-                        String(v).trim() ===
-                        String(student.documento).trim()
-                    );
-
-                if(found){
-
-                    ids.add(String(r[0]));
-
-                    r.forEach(v=>{
-
-                        if(
-                            /^\d+$/.test(v)
-                        ){
-                            ids.add(String(v));
-                        }
-                    });
-                }
-            }
-        }
-    }
-
-    console.log('IDS RELACIONADOS:',ids);
-
-    return [...ids];
-}
-
-/*
-|--------------------------------------------------------------------------
-| NOTAS
-|--------------------------------------------------------------------------
-*/
-
-function findGrades(ids){
-
-    const data = [];
-
-    const posibles = [
-
-        'tbl_resultados',
-        'tbl_notas',
-        'notas',
-        'calificaciones'
-
-    ];
-
-    for(const tabla of posibles){
-
-        const sec = TABLES[tabla];
-
-        if(!sec){
-            continue;
-        }
-
-        const inserts =
-            getInsertBlocks(sec);
-
-        for(const block of inserts){
-
-            const rows =
-                parseRows(block);
-
-            for(const r of rows){
-
-                const found =
-                    r.find(v =>
-                        ids.includes(
-                            String(v)
-                        )
-                    );
-
-                if(found){
-
-                    const nota =
-                        parseFloat(
-                            r.find(v =>
-                                /^[0-5](\.\d+)?$/.test(v)
-                            )
-                        ) || 0;
-
-                    data.push({
-
-                        modulo:
-                            r[2] ||
-                            r[1] ||
-                            'Módulo',
-
-                        nota,
-
-                        fecha:
-                            r.find(v =>
-                                /\d{4}-\d{2}-\d{2}/
-                                .test(v)
-                            ) || '---',
-
-                        profesor:
-                            r[5] || '---',
-
-                        grupo:
-                            r[6] || '---'
-                    });
-                }
-            }
-        }
-    }
-
-    return data;
-}
-
-/*
-|--------------------------------------------------------------------------
-| PAGOS
-|--------------------------------------------------------------------------
-*/
-
-function findPayments(ids){
-
-    const data = [];
-
-    const posibles = [
-
-        'fac_creditos',
-        'fac_recibos',
-        'pagos',
-        'creditos'
-
-    ];
-
-    for(const tabla of posibles){
-
-        const sec = TABLES[tabla];
-
-        if(!sec){
-            continue;
-        }
-
-        const inserts =
-            getInsertBlocks(sec);
-
-        for(const block of inserts){
-
-            const rows =
-                parseRows(block);
-
-            for(const r of rows){
-
-                const found =
-                    r.find(v =>
-                        ids.includes(
-                            String(v)
-                        )
-                    );
-
-                if(found){
-
-                    const valor =
-                        parseFloat(
-                            r.find(v =>
-                                /^\d{4,}$/.test(v)
-                            )
-                        ) || 0;
-
-                    data.push({
-
-                        fecha:
-                            r.find(v =>
-                                /\d{4}-\d{2}-\d{2}/
-                                .test(v)
-                            ) || '---',
-
-                        concepto:
-                            r[6] ||
-                            r[5] ||
-                            'Pago',
-
-                        valor
-                    });
-                }
-            }
-        }
-    }
-
-    return data;
-}
-
-/*
-|--------------------------------------------------------------------------
-| MONEY
-|--------------------------------------------------------------------------
-*/
-
-function money(v){
-
-    return Number(v).toLocaleString(
-        'es-CO',
-        {
-            style:'currency',
-            currency:'COP',
-            minimumFractionDigits:0
-        }
-    );
-}
-
-/*
-|--------------------------------------------------------------------------
-| RENDER USER
-|--------------------------------------------------------------------------
-*/
-
-function renderUser(u){
-
-    document.getElementById('nombre')
-        .innerText =
-        u.nombre || 'ESTUDIANTE';
-
-    document.getElementById('documento')
-        .innerText =
-        'Documento: ' + u.documento;
-
-    document.getElementById('correo')
-        .innerText =
-        'Correo: ' + (u.correo || '---');
-
-    document.getElementById('codigo')
-        .innerText =
-        'ID Relacional: ' + u.id;
-}
-
-/*
-|--------------------------------------------------------------------------
-| RENDER NOTAS
-|--------------------------------------------------------------------------
-*/
-
-function renderGrades(grades){
-
-    const body =
-        document.getElementById('notasBody');
-
-    body.innerHTML='';
-
-    let total = 0;
-
-    if(!grades.length){
-
-        body.innerHTML = `
-        <tr>
-            <td colspan="6">
-                No existen notas registradas
-            </td>
-        </tr>
-        `;
-
-        return;
-    }
-
-    grades.forEach(g=>{
-
-        total += Number(g.nota);
-
-        body.innerHTML += `
-        <tr>
-
-            <td>${g.modulo}</td>
-
-            <td>${g.nota}</td>
-
-            <td>${g.fecha}</td>
-
-            <td>${g.profesor}</td>
-
-            <td>${g.grupo}</td>
-
-            <td>
-                ${
-                    g.nota >= 3
-                    ? '<span class="badge ok">APROBADO</span>'
-                    : '<span class="badge bad">REPROBADO</span>'
-                }
-            </td>
-
-        </tr>
-        `;
-    });
-
-    document.getElementById('promedio')
-        .innerText =
-        (total / grades.length).toFixed(2);
-
-    document.getElementById('materias')
-        .innerText =
-        grades.length;
-}
-
-/*
-|--------------------------------------------------------------------------
-| RENDER PAGOS
-|--------------------------------------------------------------------------
-*/
-
-function renderPayments(payments){
-
-    const body =
-        document.getElementById('pagosBody');
-
-    body.innerHTML='';
-
-    let total = 0;
-
-    if(!payments.length){
-
-        body.innerHTML = `
-        <tr>
-            <td colspan="3">
-                No existen pagos registrados
-            </td>
-        </tr>
-        `;
-
-        return;
-    }
-
-    payments.forEach(p=>{
-
-        total += Number(p.valor);
-
-        body.innerHTML += `
-        <tr>
-
-            <td>${p.fecha}</td>
-
-            <td>${p.concepto}</td>
-
-            <td>${money(p.valor)}</td>
-
-        </tr>
-        `;
-    });
-
-    document.getElementById('pagado')
-        .innerText =
-        money(total);
-}
-
-/*
-|--------------------------------------------------------------------------
-| CONSULTAR
-|--------------------------------------------------------------------------
-*/
-
-async function consultar(){
-
-    const documento =
-        document.getElementById('docInput')
-        .value
-        .trim();
-
-    if(!documento){
-
-        alertMsg(
-            'Ingrese documento'
-        );
-
-        return;
-    }
-
-    try{
-
-        loader(true);
-
-        document.getElementById('result')
-            .style.display='none';
-
-        /*
-        CARGAR SQL
-        */
-
-        await loadSQL();
-
-        /*
-        ESTUDIANTE
-        */
-
-        const student =
-            findStudent(documento);
-
-        if(!student){
-
-            alertMsg(
-                'Estudiante no encontrado'
-            );
-
-            loader(false);
-
-            return;
-        }
-
-        /*
-        IDs RELACIONADOS
-        */
-
-        const ids =
-            relatedIds(student);
-
-        /*
-        NOTAS
-        */
-
-        const grades =
-            findGrades(ids);
-
-        /*
-        PAGOS
-        */
-
-        const payments =
-            findPayments(ids);
-
-        /*
-        RENDER
-        */
-
-        renderUser(student);
-
-        renderGrades(grades);
-
-        renderPayments(payments);
-
-        document.getElementById('result')
-            .style.display='block';
-
-        alertMsg(
-            'Consulta realizada correctamente',
-            'success'
-        );
-
-    }catch(err){
-
-        console.error(err);
-
-        alertMsg(
-            err.message ||
-            'Error procesando SQL'
-        );
-    }
-
-    loader(false);
-}
-
-/*
-|--------------------------------------------------------------------------
-| ENTER
-|--------------------------------------------------------------------------
-*/
-
-document
-.getElementById('docInput')
-.addEventListener('keypress',e=>{
-
-    if(e.key === 'Enter'){
-        consultar();
-    }
+/* ════════════════════════════════════════════════════════
+   CONFIG  ← Ajusta solo esta sección
+════════════════════════════════════════════════════════ */
+// URL del SQL en GitHub Raw. Si el archivo está en la misma raíz del repo, usa './asenorte.sql'
+const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
+
+/* ════════════════════════════════════════════════════════
+   ESTADO GLOBAL
+════════════════════════════════════════════════════════ */
+const DB  = {};      // {tableName: [rows]}
+let cDoc  = null;    // documento activo
+let cEst  = null;    // fila estudiante
+let cIds  = {};      // mapa relacional construido
+let xRows = [];      // filas xlsx asistencia
+
+/* ════════════════════════════════════════════════════════
+   ARRANQUE
+════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async () => {
+  prog(5, 'Conectando con GitHub…');
+  try {
+    const r = await fetch(SQL_URL);
+    if(!r.ok) throw new Error('HTTP ' + r.status + ' — Verifica que asenorte.sql esté en el repositorio Plataforma.');
+    prog(18, 'Archivo recibido. Parseando SQL…');
+    const txt = await r.text();
+    prog(30, 'Segmentando tablas…');
+    await parseSQL(txt);
+    prog(100, '¡Base de datos lista!');
+    await wait(500);
+  } catch(e) {
+    document.getElementById('pbs').innerHTML =
+      '<span style="color:#ffaaaa">⚠ ' + e.message + '</span>';
+    await wait(3000);
+  }
+  document.getElementById('gl').classList.add('hidden');
+  document.getElementById('ls').classList.add('v');
 });
 
-</script>
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function prog(p,m){
+  document.getElementById('pb').style.width=p+'%';
+  if(m) document.getElementById('pbs').textContent=m;
+}
 
+/* ════════════════════════════════════════════════════════
+   SQL PARSER  — robusto, async, soporta 400k líneas
+════════════════════════════════════════════════════════ */
+async function parseSQL(text){
+  // Dividir por secciones de tabla usando el comentario phpMyAdmin
+  const SEC = /--\s*Estructura de tabla para la tabla\s*`([^`]+)`/g;
+  const segs = [], matches = [];
+  let m;
+  while((m=SEC.exec(text))!==null) matches.push({name:m[1],idx:m.index});
+
+  for(let i=0;i<matches.length;i++){
+    const name=matches[i].name;
+    const start=matches[i].idx;
+    const end=(i+1<matches.length)?matches[i+1].idx:text.length;
+    const chunk=text.slice(start,end);
+    parseTableChunk(name,chunk);
+    if(i%8===0){
+      prog(30+Math.round(i/matches.length*65), `Procesando: ${name} (${i+1}/${matches.length})`);
+      await wait(0);
+    }
+  }
+  prog(95,'Indexando…'); await wait(0);
+}
+
+function parseTableChunk(tbl, chunk){
+  // Encuentra INSERT INTO `tbl` (cols) VALUES …;
+  const IR = new RegExp(
+    `INSERT\\s+INTO\\s+\`${tbl.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\`\\s*\\(([^)]+)\\)\\s*VALUES\\s*`,
+    'gi'
+  );
+  let im;
+  while((im=IR.exec(chunk))!==null){
+    const cols = im[1].split(',').map(c=>c.trim().replace(/`/g,''));
+    // Read the VALUES block until ; not inside a string
+    const start = im.index + im[0].length;
+    const block = readValuesBlock(chunk, start);
+    const tuples = parseTuples(block);
+    if(!DB[tbl]) DB[tbl]=[];
+    for(const t of tuples){
+      if(t.length!==cols.length) continue;
+      const row={};
+      cols.forEach((c,i)=>row[c]=t[i]);
+      DB[tbl].push(row);
+    }
+  }
+}
+
+// Extract from position until we find ';' outside of string context
+function readValuesBlock(text, start){
+  let i=start, inStr=false, depth=0, result='';
+  while(i<text.length){
+    const c=text[i];
+    if(!inStr){
+      if(c==="'"){inStr=true;result+=c;i++;continue}
+      if(c===';') break;
+    } else {
+      if(c==='\\'&&i+1<text.length){result+=c+text[i+1];i+=2;continue}
+      if(c==="'"){
+        if(text[i+1]==="'"){result+="''";i+=2;continue}
+        inStr=false;
+      }
+    }
+    result+=c; i++;
+  }
+  return result;
+}
+
+function parseTuples(block){
+  const results=[];
+  let i=0,n=block.length;
+  while(i<n){
+    while(i<n&&/[\s,]/.test(block[i]))i++;
+    if(i>=n||block[i]!=='('){i++;continue}
+    i++;
+    const tuple=[];
+    while(i<n&&block[i]!==')'){
+      while(i<n&&block[i]===' ')i++;
+      if(block[i]===')') break;
+      if(block[i]===','){i++;continue}
+      let val;
+      const up4=block.slice(i,i+4).toUpperCase();
+      if(up4==='NULL'){val=null;i+=4}
+      else if(block[i]==="'"){
+        i++;let s='';
+        while(i<n){
+          if(block[i]==='\\'){
+            const nx=block[i+1]||'';
+            const ESC={"'":"'","\\":"\\",'n':'\n','r':'\r','t':'\t'};
+            s+=ESC[nx]!==undefined?ESC[nx]:nx; i+=2;
+          } else if(block[i]==="'"){
+            if(block[i+1]==="'"){s+="'";i+=2}else{i++;break}
+          } else {s+=block[i];i++}
+        }
+        val=s;
+      } else if(block.slice(i,i+2).toLowerCase()==='0x'){
+        let j=i+2;while(j<n&&/[0-9a-fA-F]/.test(block[j]))j++;
+        val=null;i=j;
+      } else {
+        let j=i;while(j<n&&block[j]!==','&&block[j]!==')'&&block[j]!==' ')j++;
+        const raw=block.slice(i,j).trim();
+        val=raw===''?null:isNaN(raw)?raw:(raw.includes('.')?parseFloat(raw):parseInt(raw,10));
+        i=j;
+      }
+      tuple.push(val);
+      while(i<n&&block[i]===' ')i++;
+      if(i<n&&block[i]===',')i++;
+    }
+    if(i<n)i++;
+    if(tuple.length>0)results.push(tuple);
+  }
+  return results;
+}
+
+/* ════════════════════════════════════════════════════════
+   LOGIN
+════════════════════════════════════════════════════════ */
+function doLogin(){
+  const doc=document.getElementById('di').value.trim().replace(/\s/g,'');
+  if(!doc)return;
+  document.getElementById('em').style.display='none';
+  const btn=document.getElementById('bl');
+  btn.innerHTML='<span class="spin-i"></span>Buscando…';
+  btn.disabled=true;
+  setTimeout(()=>{
+    try{
+      const res=findStudent(doc);
+      if(res){cDoc=doc;cEst=res.est;cIds=res.ids;showPortal();}
+      else{document.getElementById('em').style.display='block';}
+    }catch(e){document.getElementById('em').textContent='⚠ Error: '+e.message;document.getElementById('em').style.display='block';}
+    btn.innerHTML='Consultar mi información';btn.disabled=false;
+  },60);
+}
+
+function doLogout(){
+  cDoc=null;cEst=null;cIds={};xRows=[];
+  document.getElementById('p').classList.remove('v');
+  document.getElementById('ls').classList.add('v');
+  document.getElementById('di').value='';
+  document.getElementById('asist-ok').style.display='none';
+  document.getElementById('asist-no').style.display='none';
+}
+
+/* ════════════════════════════════════════════════════════
+   FIND STUDENT + RELATIONAL MAP
+════════════════════════════════════════════════════════ */
+function findStudent(doc){
+  const dn=String(doc).trim();
+  const est=(DB['tbl_estudiantes']||[]).find(r=>String(r['DOCUMENTO_ESTUDIANTE']||'').trim()===dn);
+  if(!est)return null;
+  const eid=est['ID_ESTUDIANTE'];
+
+  // Lookups
+  const cursos   =idx(DB['tbl_cursos']   ||[],'ID_CURSO');
+  const modulos2 =idx(DB['tbl_modulos2'] ||[],'ID_MODULOPROGRAMA');
+  const docentes =idx(DB['tbl_docentes'] ||[],'ID_DOCENTE');
+  const grupos   =idx(DB['tbl_grupos']   ||[],'ID_GRUPO');
+  const programas=idx(DB['tbl_programas']||[],'ID_PROGRAMA');
+  const estamat  =idx(DB['tbl_estadomatricula']||[],'ID_ESTADOMATRICULA');
+
+  // Relations
+  const mats  =(DB['tbl_matriculas']   ||[]).filter(r=>r['ESTUDIANTE_MATRICULA']==eid);
+  const notas =(DB['tbl_notas']        ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
+  const notas2=(DB['tbl_notas2']       ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
+  const habs  =(DB['tbl_habilitaciones']||[]).filter(r=>r['ESTUDIANTE_HABILITACION']==eid);
+  // Financial: CLIENTE_* = eid (same numeric ID used across fac_ tables)
+  const recibos =(DB['fac_recibos'] ||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
+  const recibos2=(DB['fac_recibos2']||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
+  const creditos=(DB['fac_creditos']||[]).filter(r=>r['CLIENTE_CREDITO']==eid);
+  const facturas=(DB['fac_facturas']||[]).filter(r=>r['CLIENTE_FACTURA']==eid);
+  const inscs   =(DB['tbl_inscripciones']||[]).filter(r=>r['ESTUDIANTE_ADMISION']==eid);
+
+  return{est,ids:{eid,mats,notas,notas2,habs,recibos,recibos2,creditos,facturas,inscs,
+    cursos,modulos2,docentes,grupos,programas,estamat}};
+}
+
+function idx(arr,key){const m={};arr.forEach(r=>{if(r[key]!=null)m[r[key]]=r;});return m;}
+
+/* ════════════════════════════════════════════════════════
+   SHOW PORTAL
+════════════════════════════════════════════════════════ */
+function showPortal(){
+  document.getElementById('ls').classList.remove('v');
+  document.getElementById('p').classList.add('v');
+
+  const nom=[cEst['NOMBRES_ESTUDIANTE'],cEst['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ');
+  const ini=nom.charAt(0).toUpperCase();
+  document.getElementById('avl').textContent=ini;
+  document.getElementById('pn').textContent=nom;
+  document.getElementById('pd').textContent='Doc: '+cDoc;
+
+  // Grupo
+  const g=resolveGrupo();
+  if(g){
+    setText('g-cod',g.codigo);setText('g-ano',g.ano);
+    setText('g-prog',g.programa.length>45?g.programa.slice(0,43)+'…':g.programa);
+    setText('g-f',g.inicio+' – '+g.fin);
+    setText('g-j',g.jornada);setText('g-d',g.docente);
+  }
+
+  renderInicio(nom,ini,g);
+  renderNotas();
+  renderFinanciero();
+  renderPerfil();
+  ST('inicio',document.querySelector('.tbtn'));
+}
+
+function setText(id,v){const el=document.getElementById(id);if(el)el.textContent=v||'—';}
+
+function resolveGrupo(){
+  const {mats,cursos,grupos,programas,docentes}=cIds;
+  if(!mats||!mats.length)return null;
+  // Find last course with a group
+  let gid=null,did=null;
+  for(const m of [...mats].reverse()){
+    const c=cursos[m['CURSO_MATRICULA']];
+    if(c&&c['GRUPO_CURSO']){gid=c['GRUPO_CURSO'];did=c['DOCENTE_CURSO'];break;}
+  }
+  if(!gid)return null;
+  const gr=grupos[gid]||{};
+  const pr=programas[gr['PROGRAMA_GRUPO']]||{};
+  const dc=docentes[did]||{};
+  return{
+    codigo:gr['CODIGO_GRUPO']||'—',ano:gr['ANO_GRUPO']||'—',
+    programa:pr['NOMBRE_PROGRAMA']||'—',
+    inicio:fd(gr['FECHAINICIO_GRUPO']),fin:fd(gr['FECHAFIN_GRUPO']),
+    jornada:gr['JORNADA_GRUPO']||gr['DIAS_GRUPO']||'—',
+    docente:[dc['NOMBRES_DOCENTE'],dc['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—',
+  };
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER INICIO
+════════════════════════════════════════════════════════ */
+function renderInicio(nom,ini,g){
+  setText('bav',ini);setText('bn',nom);
+  setText('bd','Documento: '+cDoc);
+  setText('bpr','Programa: '+(g?g.programa:'—'));
+  setText('bc-g',g?g.codigo:'—');
+  setText('bc-a',g?'Año '+g.ano:'—');
+
+  const{notas,notas2,recibos,recibos2,creditos,mats}=cIds;
+  const aN=[...(notas||[]),...(notas2||[])];
+  const aR=[...(recibos||[]),...(recibos2||[])];
+
+  const prom=calcProm(aN);
+  const totalPago=aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
+  const totalCred=(creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
+
+  setText('q-prom',prom?prom.toFixed(2):'—');
+  setText('q-pag',totalPago?cop(totalPago):'$0');
+  setText('q-mod',[...new Set(aN.map(n=>n['CURSO_NOTA']))].length||'0');
+  setText('s-r',aR.length||'0');
+  setText('s-c',totalCred?cop(totalCred):'$0');
+  setText('s-n',aN.length||'0');
+  setText('s-m',(mats||[]).length||'0');
+  setText('n-prom',prom?prom.toFixed(2):'—');
+  setText('n-mod',[...new Set(aN.map(n=>n['CURSO_NOTA']))].length||'0');
+  setText('n-altas',aN.filter(n=>parseFloat(n['CALIFICACION_NOTA'])>=4.5).length||'0');
+  setText('n-est',prom?(prom>=3.0?'APROBADO':'EN RIESGO'):'—');
+
+  // Last 5 notas
+  renderNotasRows('tb-ln',aN.slice(-5).reverse(),true);
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER NOTAS
+════════════════════════════════════════════════════════ */
+function renderNotas(){
+  renderNotasRows('tb-n1',cIds.notas||[]);
+  renderNotasRows('tb-n2',cIds.notas2||[]);
+  // Habilitaciones
+  const habs=cIds.habs||[];
+  if(!habs.length){setEmpty('tb-hab',3,'✅','Sin habilitaciones.');return;}
+  document.getElementById('tb-hab').innerHTML=habs.map(h=>{
+    const c=cIds.cursos[h['CURSO_HABILITACION']]||{};
+    const m=cIds.modulos2[c['MODULO_CURSO']]||{};
+    return`<tr><td>${e(m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+h['CURSO_HABILITACION'])}</td>
+      <td><span class="sp ${sc(h['NOTA_HABILITACION'])}">${e(h['NOTA_HABILITACION'])}</span></td>
+      <td>${fd(h['FECHA_HABILITACION'])}</td></tr>`;
+  }).join('');
+}
+
+function renderNotasRows(id,notas,short=false){
+  const b=document.getElementById(id);
+  if(!b)return;
+  if(!notas.length){setEmpty(id,short?5:7,'📭','Sin notas registradas.');return;}
+  b.innerHTML=notas.map(n=>{
+    const c=cIds.cursos[n['CURSO_NOTA']]||{};
+    const m=cIds.modulos2[c['MODULO_CURSO']]||{};
+    const d=cIds.docentes[c['DOCENTE_CURSO']]||{};
+    const nm=m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+n['CURSO_NOTA'];
+    const dn=[d['NOMBRES_DOCENTE'],d['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—';
+    if(short)return`<tr><td><strong>${e(nm)}</strong></td>
+      <td><span class="badge ${ac(n['AREA_NOTA'])}">${e(n['AREA_NOTA']||'—')}</span></td>
+      <td><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${e(n['CALIFICACION_NOTA'])}</span></td>
+      <td>${fd(n['FECHA_NOTA'])}</td><td style="font-size:.74rem">${e(dn)}</td></tr>`;
+    return`<tr>
+      <td style="color:var(--muted);font-size:.7rem">${n['ID_NOTA']}</td>
+      <td><strong>${e(nm)}</strong></td>
+      <td><code style="font-size:.7rem;background:#f0f8f7;padding:2px 5px;border-radius:4px">${e(c['CODIGO_CURSO']||'—')}</code></td>
+      <td style="font-size:.75rem;white-space:nowrap">${fd(c['FECHAINICIO_CURSO'])} – ${fd(c['FECHAFIN_CURSO'])}</td>
+      <td><span class="badge ${ac(n['AREA_NOTA'])}">${e(n['AREA_NOTA']||'—')}</span></td>
+      <td><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${e(n['CALIFICACION_NOTA'])}</span></td>
+      <td style="font-size:.74rem">${e(dn)}</td></tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER FINANCIERO
+════════════════════════════════════════════════════════ */
+function renderFinanciero(){
+  const{recibos,recibos2,creditos,facturas}=cIds;
+  const aR=[...(recibos||[]),...(recibos2||[])];
+  const tot=aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
+  const totC=(creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
+  const last=aR.sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0)).slice(-1)[0];
+  setText('f-cnt',aR.length);setText('f-tot',cop(tot));
+  setText('f-dsc',cop(totC));setText('f-last',last?fd(last['FECHA_RECIBO']):'—');
+
+  rRecibos('tb-r1',recibos||[],false);
+  rRecibos('tb-r2',recibos2||[],true);
+
+  // Créditos
+  const cb=document.getElementById('tb-crd');
+  const cr=creditos||[];
+  if(!cr.length){setEmpty('tb-crd',4,'💚','Sin descuentos registrados.');}
+  else{let t=0;cb.innerHTML=cr.map(c=>{const v=Number(c['VALOR_CREDITO'])||0;t+=v;return`<tr>
+    <td><span class="badge bb">${e(c['CONSECUTIVO_CREDITO'])}</span></td>
+    <td>${fd(c['FECHA_CREDITO'])}</td><td style="font-size:.77rem">${e(c['CONCEPTO_CREDITO']||'—')}</td>
+    <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;}).join('')
+    +`<tr style="background:var(--teal-bg)"><td colspan="3" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL DESCUENTOS</td>
+    <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;}
+
+  // Facturas
+  const fb=document.getElementById('tb-fac');
+  const fc=facturas||[];
+  if(!fc.length){setEmpty('tb-fac',5,'📄','Sin facturas registradas.');}
+  else fb.innerHTML=fc.map(f=>`<tr>
+    <td><span class="badge bg">${e(f['CONSECUTIVO_FACTURA'])}</span></td>
+    <td>${e(f['TIPO_FACTURA']||'—')}</td><td>${fd(f['FECHA_FACTURA'])}</td>
+    <td><strong>${cop(Number(f['TOTAL_FACTURA'])||0)}</strong></td>
+    <td style="font-size:.77rem">${e(f['DESCRIPCION_FACTURA']||'—')}</td></tr>`).join('');
+}
+
+function rRecibos(id,list,sec){
+  const b=document.getElementById(id);
+  if(!list.length){setEmpty(id,sec?5:6,'📭','Sin recibos en este sistema.');return;}
+  let t=0;
+  b.innerHTML=list.sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0)).map(r=>{
+    const v=Number(r['VALOR_RECIBO'])||0;t+=v;
+    return`<tr>
+      <td><span class="badge bb">${e(r['CONSECUTIVO_RECIBO'])}</span></td>
+      <td style="white-space:nowrap">${fd(r['FECHA_RECIBO'])}</td>
+      <td style="font-size:.77rem">${e(r['CONCEPTO_RECIBO']||'—')}</td>
+      <td><span class="badge bt">${e(r['FORMAPAGO_RECIBO']||'—')}</span></td>
+      ${!sec?`<td style="font-size:.74rem">${e(r['NUMTRANSACCION_RECIBO']||'—')}</td>`:''}
+      <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;
+  }).join('')+`<tr style="background:var(--teal-bg)">
+    <td colspan="${sec?4:5}" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL</td>
+    <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER PERFIL
+════════════════════════════════════════════════════════ */
+function renderPerfil(){
+  const E=cEst;
+  const fields=[
+    ['Nombre completo',[E['NOMBRES_ESTUDIANTE'],E['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ')],
+    ['Documento',E['DOCUMENTO_ESTUDIANTE']],['Correo',E['CORREO_ESTUDIANTE']],
+    ['Teléfono',E['TELEFONO_ESTUDIANTE']||E['CELULAR_ESTUDIANTE']],
+    ['Dirección',E['DIRECCION_ESTUDIANTE']],['Fecha Nacimiento',fd(E['FECHANACIMIENTO_ESTUDIANTE'])],
+    ['Lugar Nacimiento',E['LUGARNACIMIENTO_ESTUDIANTE']],['Sexo',E['SEXO_ESTUDIANTE']],
+    ['Estrato',E['ESTRATO_ESTUDIANTE']],['Barrio',E['BARRIO_ESTUDIANTE']],
+    ['Ciudad',E['CIUDAD_ESTUDIANTE']],['Expedición Doc.',fd(E['EXPEDICION_ESTUDIANTE'])],
+    ['Código Estudiante',E['CODIGO_ESTUDIANTE']],['ID Interno',E['ID_ESTUDIANTE']],
+  ];
+  document.getElementById('tb-pf').innerHTML=fields
+    .filter(([,v])=>v!=null&&v!=='')
+    .map(([l,v])=>`<tr>
+      <td style="font-weight:700;color:var(--muted);width:170px;font-size:.77rem;text-transform:uppercase;letter-spacing:.04em">${e(l)}</td>
+      <td>${e(String(v))}</td></tr>`).join('');
+
+  const mats=cIds.mats||[];
+  if(!mats.length){setEmpty('tb-mat',5,'📭','Sin matrículas registradas.');return;}
+  document.getElementById('tb-mat').innerHTML=mats.map(m=>{
+    const c=cIds.cursos[m['CURSO_MATRICULA']]||{};
+    const mo=cIds.modulos2[c['MODULO_CURSO']]||{};
+    const em=cIds.estamat[m['ESTADO_MATRICULA']]||{};
+    const nm=mo['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+m['CURSO_MATRICULA'];
+    return`<tr><td><strong>${e(nm)}</strong></td><td>${fd(m['FECHA_MATRICULA'])}</td>
+      <td>${cop(Number(m['VALOR_MATRICULA'])||0)}</td>
+      <td><span style="color:${Number(m['SALDO_MATRICULA'])>0?'var(--warn)':'var(--pass)'};font-weight:700">${cop(Number(m['SALDO_MATRICULA'])||0)}</span></td>
+      <td><span class="badge ${Number(m['SALDO_MATRICULA'])>0?'bw':'bp'}">${e(em['NOMBRE_ESTADOMATRICULA']||m['ESTADO_MATRICULA']||'—')}</span></td></tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════
+   ASISTENCIA XLSX
+════════════════════════════════════════════════════════ */
+function hDrop(ev){ev.preventDefault();document.getElementById('uz').classList.remove('do');const f=ev.dataTransfer.files[0];if(f)loadXlsx(f);}
+
+function loadXlsx(file){
+  if(!file)return;
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    try{
+      const wb=XLSX.read(ev.target.result,{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      xRows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!xRows.length){alert('Archivo vacío o sin formato reconocido.');return;}
+      filterAsist();
+    }catch(err){alert('Error al leer el archivo: '+err.message);}
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+function filterAsist(){
+  if(!cDoc||!xRows.length)return;
+  const ks=Object.keys(xRows[0]);
+  const dc=ks.find(k=>/^(documento|cedula|cc|^id$|doc)/i.test(k.trim()))||ks[0];
+  const fc=ks.find(k=>/^fecha/i.test(k.trim()))||ks[1];
+  const ec=ks.find(k=>/^(estado|asist|present)/i.test(k.trim()))||ks[2];
+  const mc=ks.find(k=>/^(materia|curso|asign|modulo)/i.test(k.trim()));
+  const oc=ks.find(k=>/^(obs|nota|comment)/i.test(k.trim()));
+
+  const mine=xRows.filter(r=>String(r[dc]||'').trim().replace(/\D/g,'')===(cDoc||'').replace(/\D/g,''));
+  if(!mine.length){document.getElementById('asist-ok').style.display='none';document.getElementById('asist-no').style.display='block';return;}
+  document.getElementById('asist-ok').style.display='block';document.getElementById('asist-no').style.display='none';
+
+  const DIAS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const regs=mine.map(r=>({
+    fecha:pf(r[fc]),estado:ne(String(r[ec]||'')),
+    mat:mc?String(r[mc]||''):'',obs:oc?String(r[oc]||''):'',
+  })).filter(r=>r.fecha).sort((a,b)=>a.fecha-b.fecha);
+
+  const pr=regs.filter(r=>r.estado==='P').length;
+  const au=regs.filter(r=>r.estado==='A').length;
+  const pct=regs.length?Math.round(pr/regs.length*100):0;
+  setText('q-as',pct+'%');
+
+  document.getElementById('achips').innerHTML=`
+    <div class="ac"><div class="an">${regs.length}</div><div class="al">Registros</div></div>
+    <div class="ac"><div class="an" style="color:var(--pass)">${pr}</div><div class="al">Presencias</div></div>
+    <div class="ac"><div class="an" style="color:var(--warn)">${au}</div><div class="al">Ausencias</div></div>
+    <div class="ac"><div class="an" style="color:${pct>=80?'var(--pass)':'var(--warn)'}">${pct}%</div><div class="al">Asistencia</div></div>`;
+
+  document.getElementById('tb-as').innerHTML=regs.map((r,i)=>`<tr>
+    <td style="color:var(--muted);font-size:.7rem">${i+1}</td>
+    <td>${fd(r.fecha)}</td><td>${DIAS[r.fecha.getDay()]}</td>
+    <td>${e(r.mat||'—')}</td>
+    <td><span class="badge ${r.estado==='P'?'bp':'bw'}">${r.estado==='P'?'✓ Presente':'✗ Ausente'}</span></td>
+    <td style="font-size:.77rem">${e(r.obs||'—')}</td></tr>`).join('');
+
+  buildCal(regs);
+}
+
+function buildCal(regs){
+  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DH=['D','L','M','X','J','V','S'];
+  const mo={};
+  regs.forEach(r=>{const k=`${r.fecha.getFullYear()}-${r.fecha.getMonth()}`;if(!mo[k])mo[k]=[];mo[k].push(r);});
+  let html='';
+  for(const[k,rows]of Object.entries(mo)){
+    const[yr,m]=k.split('-').map(Number);
+    const fd0=new Date(yr,m,1).getDay();
+    const dim=new Date(yr,m+1,0).getDate();
+    const P=new Set(),A=new Set();
+    rows.forEach(r=>{const d=r.fecha.getDate();r.estado==='P'?P.add(d):A.add(d);});
+    let g=`<div class="cmo"><h4>${MN[m]} ${yr}</h4><div class="cgrid">`;
+    DH.forEach(d=>{g+=`<div class="cdh">${d}</div>`;});
+    for(let i=0;i<fd0;i++)g+=`<div class="cd"></div>`;
+    for(let d=1;d<=dim;d++){
+      const cl=P.has(d)?'cd present':A.has(d)?'cd absent':'cd noc';
+      g+=`<div class="${cl}">${d}</div>`;
+    }
+    g+=`</div></div>`;html+=g;
+  }
+  document.getElementById('calv').innerHTML=html;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABS
+════════════════════════════════════════════════════════ */
+function ST(n,btn){
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('tp-'+n);
+  if(panel)panel.classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+/* ════════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════════ */
+function calcProm(notas){
+  if(!notas||!notas.length)return null;
+  const v=notas.map(n=>parseFloat(n['CALIFICACION_NOTA'])).filter(x=>!isNaN(x)&&x>0);
+  return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
+}
+function sc(nota){const v=parseFloat(nota);if(isNaN(v))return 'sm';return v>=4.5?'sh':v>=3.0?'sm':'sl';}
+function ac(a){a=(a||'').toUpperCase();if(/CONOCIMIENTO|PRIMER/.test(a))return'bb';if(/DESEMPE|SEGUNDO/.test(a))return'bpu';if(/PRODUCTO|TERCERO/.test(a))return'bg';return'bt';}
+function fd(s){if(!s||s==='0000-00-00'||s==='')return'—';const d=s instanceof Date?s:new Date(s);if(isNaN(d))return String(s);return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
+function pf(raw){if(!raw)return null;if(raw instanceof Date)return raw;if(typeof raw==='number')return new Date(Math.round((raw-25569)*86400*1000));const s=String(raw).trim();const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return new Date(+y,+m[2]-1,+m[1]);}const d=new Date(s);return isNaN(d)?null:d;}
+function ne(s){s=s.toUpperCase().trim();return(s==='P'||s.startsWith('PRES')||s==='1'||s==='SI'||s==='SÍ')?'P':'A';}
+function cop(n){return'$'+Number(n||0).toLocaleString('es-CO');}
+function e(s){return String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setEmpty(id,cols,icon,msg){const b=document.getElementById(id);if(b)b.innerHTML=`<tr><td colspan="${cols}"><div class="empty"><div class="ei">${icon}</div><p>${msg}</p></div></td></tr>`;}
+</script>
 </body>
 </html>
