@@ -358,17 +358,25 @@ table td{
 
 /*
 |--------------------------------------------------------------------------
-| CONFIG
+| URL SQL GITHUB RAW
+|--------------------------------------------------------------------------
+|
+| IMPORTANTE:
+| El archivo asenorte.sql debe estar en el root del repo
+|
+| https://github.com/Jhonbonet/Plataforma
+|
 |--------------------------------------------------------------------------
 */
 
-const SQL_URLS = [
+const SQL_URL =
+'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
 
-'https://drive.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z',
-
-'https://drive.usercontent.google.com/download?id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z&export=download&confirm=t'
-
-];
+/*
+|--------------------------------------------------------------------------
+| CACHE
+|--------------------------------------------------------------------------
+*/
 
 let SQL_TEXT = '';
 let TABLES = {};
@@ -393,7 +401,7 @@ function alertMsg(msg,type='error'){
 
 /*
 |--------------------------------------------------------------------------
-| SANITIZE
+| SANITIZE SQL
 |--------------------------------------------------------------------------
 */
 
@@ -414,7 +422,7 @@ function clean(v){
 
 /*
 |--------------------------------------------------------------------------
-| CARGAR SQL
+| LOAD SQL
 |--------------------------------------------------------------------------
 */
 
@@ -424,40 +432,28 @@ async function loadSQL(){
         return;
     }
 
-    let success = false;
+    const response = await fetch(SQL_URL);
 
-    for(const url of SQL_URLS){
-
-        try{
-
-            const response = await fetch(url);
-
-            const text = await response.text();
-
-            /*
-            VALIDAR SI REALMENTE ES SQL
-            */
-
-            if(
-                text.includes('INSERT INTO') ||
-                text.includes('CREATE TABLE')
-            ){
-
-                SQL_TEXT = text;
-                success = true;
-                break;
-            }
-
-        }catch(err){
-
-            console.log('Intento fallido:',url);
-        }
-    }
-
-    if(!success){
+    if(!response.ok){
 
         throw new Error(
-            'Google Drive bloqueó el acceso al SQL'
+            'No se pudo descargar asenorte.sql'
+        );
+    }
+
+    SQL_TEXT = await response.text();
+
+    /*
+    VALIDACIÓN REAL SQL
+    */
+
+    if(
+        !SQL_TEXT.includes('INSERT INTO') &&
+        !SQL_TEXT.includes('CREATE TABLE')
+    ){
+
+        throw new Error(
+            'El archivo descargado no es un SQL válido'
         );
     }
 
@@ -466,11 +462,16 @@ async function loadSQL(){
 
 /*
 |--------------------------------------------------------------------------
-| SEGMENTAR TABLAS
+| SPLIT TABLES
 |--------------------------------------------------------------------------
 */
 
 function splitTables(){
+
+    /*
+    phpMyAdmin:
+    -- Volcado de datos para la tabla `tabla`
+    */
 
     const regex =
 /-- Volcado de datos para la tabla `([^`]+)`([\s\S]*?)(?=(-- Volcado de datos para la tabla|$))/g;
@@ -482,7 +483,7 @@ function splitTables(){
         TABLES[match[1]] = match[2];
     }
 
-    console.log(TABLES);
+    console.log('TABLAS:',Object.keys(TABLES));
 }
 
 /*
@@ -500,7 +501,7 @@ function getInsertBlocks(section){
     const regex =
 /INSERT INTO[\s\S]*?VALUES\s*([\s\S]*?);/gi;
 
-    let blocks = [];
+    const blocks = [];
 
     let match;
 
@@ -514,7 +515,7 @@ function getInsertBlocks(section){
 
 /*
 |--------------------------------------------------------------------------
-| PARSE TUPLAS
+| PARSER SQL
 |--------------------------------------------------------------------------
 */
 
@@ -553,11 +554,7 @@ function splitFields(row){
 
         if(c === ',' && !inside){
 
-            result.push(
-                current.trim()
-                .replace(/^'/,'')
-                .replace(/'$/,'')
-            );
+            result.push(cleanField(current));
 
             current='';
 
@@ -566,18 +563,28 @@ function splitFields(row){
         }
     }
 
-    result.push(
-        current.trim()
+    result.push(cleanField(current));
+
+    return result;
+}
+
+function cleanField(v){
+
+    if(v === null || v === undefined){
+        return '';
+    }
+
+    return clean(
+        v
+        .trim()
         .replace(/^'/,'')
         .replace(/'$/,'')
     );
-
-    return result.map(clean);
 }
 
 /*
 |--------------------------------------------------------------------------
-| USUARIO
+| BUSCAR USUARIO
 |--------------------------------------------------------------------------
 */
 
@@ -586,6 +593,9 @@ function findUser(documento){
     const sec = TABLES['tbl_usuarios'];
 
     if(!sec){
+
+        console.error('No existe tbl_usuarios');
+
         return null;
     }
 
@@ -597,20 +607,32 @@ function findUser(documento){
 
         for(const r of rows){
 
+            /*
+            AJUSTE ESTRUCTURA REAL SQL
+            */
+
             const id = r[0];
+
+            const nombre = r[3] || '';
+
+            const apellido = r[4] || '';
+
+            const email = r[5] || '';
+
             const doc = r[6] || r[2];
 
             if(String(doc) === String(documento)){
 
                 return {
 
-                    id:id,
+                    id,
+
                     nombre:
-                        `${r[3]||''} ${r[4]||''}`,
+                        `${nombre} ${apellido}`,
 
                     documento:doc,
 
-                    email:r[5] || ''
+                    email
                 };
             }
         }
@@ -621,7 +643,7 @@ function findUser(documento){
 
 /*
 |--------------------------------------------------------------------------
-| NOTAS
+| BUSCAR NOTAS
 |--------------------------------------------------------------------------
 */
 
@@ -630,6 +652,9 @@ function findGrades(userId){
     const sec = TABLES['tbl_resultados'];
 
     if(!sec){
+
+        console.error('No existe tbl_resultados');
+
         return [];
     }
 
@@ -643,15 +668,28 @@ function findGrades(userId){
 
         for(const r of rows){
 
+            /*
+            ID usuario = campo 1
+            */
+
             if(String(r[1]) === String(userId)){
 
                 data.push({
 
-                    modulo:r[2] || 'N/A',
-                    nota:parseFloat(r[3]) || 0,
-                    fecha:r[4] || '---',
-                    profesor:r[5] || '---',
-                    grupo:r[6] || '---'
+                    modulo:
+                        r[2] || 'N/A',
+
+                    nota:
+                        parseFloat(r[3]) || 0,
+
+                    fecha:
+                        r[4] || '---',
+
+                    profesor:
+                        r[5] || '---',
+
+                    grupo:
+                        r[6] || '---'
                 });
             }
         }
@@ -662,7 +700,7 @@ function findGrades(userId){
 
 /*
 |--------------------------------------------------------------------------
-| PAGOS
+| BUSCAR PAGOS
 |--------------------------------------------------------------------------
 */
 
@@ -671,6 +709,9 @@ function findPayments(documento){
     const sec = TABLES['fac_creditos'];
 
     if(!sec){
+
+        console.error('No existe fac_creditos');
+
         return [];
     }
 
@@ -684,13 +725,22 @@ function findPayments(documento){
 
         for(const r of rows){
 
+            /*
+            CLIENTE_CREDITO
+            */
+
             if(String(r[4]) === String(documento)){
 
                 data.push({
 
-                    fecha:r[1],
-                    concepto:r[6],
-                    valor:parseFloat(r[5]) || 0
+                    fecha:
+                        r[1] || '---',
+
+                    concepto:
+                        r[6] || 'Pago',
+
+                    valor:
+                        parseFloat(r[5]) || 0
                 });
             }
         }
@@ -719,7 +769,7 @@ function money(v){
 
 /*
 |--------------------------------------------------------------------------
-| RENDER
+| RENDER USER
 |--------------------------------------------------------------------------
 */
 
@@ -738,6 +788,12 @@ function renderUser(u){
         'ID Interno: ' + u.id;
 }
 
+/*
+|--------------------------------------------------------------------------
+| RENDER NOTAS
+|--------------------------------------------------------------------------
+*/
+
 function renderGrades(grades){
 
     const body =
@@ -746,6 +802,19 @@ function renderGrades(grades){
     body.innerHTML='';
 
     let total = 0;
+
+    if(!grades.length){
+
+        body.innerHTML = `
+        <tr>
+            <td colspan="6">
+                No existen notas registradas
+            </td>
+        </tr>
+        `;
+
+        return;
+    }
 
     grades.forEach(g=>{
 
@@ -778,13 +847,17 @@ function renderGrades(grades){
 
     document.getElementById('promedio')
         .innerText =
-        grades.length
-        ? (total/grades.length).toFixed(2)
-        : '0';
+        (total / grades.length).toFixed(2);
 
     document.getElementById('materias')
         .innerText = grades.length;
 }
+
+/*
+|--------------------------------------------------------------------------
+| RENDER PAGOS
+|--------------------------------------------------------------------------
+*/
 
 function renderPayments(payments){
 
@@ -794,6 +867,22 @@ function renderPayments(payments){
     body.innerHTML='';
 
     let total = 0;
+
+    if(!payments.length){
+
+        body.innerHTML = `
+        <tr>
+            <td colspan="3">
+                No existen pagos registrados
+            </td>
+        </tr>
+        `;
+
+        document.getElementById('pagado')
+            .innerText = '$0';
+
+        return;
+    }
 
     payments.forEach(p=>{
 
@@ -845,6 +934,10 @@ async function consultar(){
         document.getElementById('result')
             .style.display='none';
 
+        /*
+        CARGAR SQL
+        */
+
         await loadSQL();
 
         /*
@@ -879,6 +972,10 @@ async function consultar(){
         const payments =
             findPayments(documento);
 
+        /*
+        RENDER
+        */
+
         renderUser(user);
 
         renderGrades(grades);
@@ -898,7 +995,7 @@ async function consultar(){
         console.error(err);
 
         alertMsg(
-            'Error leyendo el SQL desde Google Drive'
+            err.message || 'Error procesando SQL'
         );
     }
 
