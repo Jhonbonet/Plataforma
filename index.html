@@ -7,34 +7,22 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #0d7a6e; --accent: #d4a017; --bg: #f4f7f6; }
-        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 4px solid var(--primary); margin-bottom: 25px; padding-bottom: 15px; }
-        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #eee; padding: 25px; border-radius: 10px; flex-wrap: wrap; }
-        select, input { padding: 14px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
-        select { min-width: 180px; background: white; cursor: pointer; }
-        input { flex: 1; min-width: 250px; }
-        input:focus, select:focus { border-color: var(--primary); }
+        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: #eee; padding: 25px; border-radius: 10px; }
+        input { flex: 1; max-width: 350px; padding: 14px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary); }
         button { padding: 14px 28px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         button:hover { background: #085a52; }
         .result-card { display: none; animation: slideUp 0.5s ease; }
-        .profile-header { background: var(--primary); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
-        .stats { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
-        .stat-card { background: #f8f9fa; border-radius: 10px; padding: 15px 25px; text-align: center; flex: 1; min-width: 150px; border-left: 4px solid var(--primary); }
-        .stat-card h3 { margin: 0 0 5px 0; color: var(--primary); font-size: 28px; }
-        .stat-card p { margin: 0; color: #666; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; font-size: 14px; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        .profile-header { background: var(--primary); color: white; padding: 25px; border-radius: 10px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
         th { background: #f1f1f1; color: var(--primary); font-weight: bold; }
         .loader { display: none; text-align: center; padding: 20px; color: var(--primary); font-weight: bold; }
         h3 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 12px; margin-top: 30px; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-        .badge-pago { background: #28a74520; color: #28a745; }
-        .badge-credito { background: #ffc10720; color: #d4a017; }
-        .badge-factura { background: #17a2b820; color: #17a2b8; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .container { padding: 15px; } th, td { font-size: 12px; padding: 8px; } }
     </style>
 </head>
 <body>
@@ -46,447 +34,135 @@
     </div>
 
     <div class="search-box">
-        <select id="tipoDoc">
-            <option value="CC">Cédula de Ciudadanía</option>
-            <option value="TI">Tarjeta de Identidad</option>
-            <option value="CE">Cédula de Extranjería</option>
-        </select>
-        <input type="text" id="docInput" placeholder="Número de Documento" autocomplete="off">
+        <input type="text" id="docInput" placeholder="Número de Cédula o ID">
         <button onclick="consultar()"><i class="fas fa-search"></i> CONSULTAR</button>
     </div>
 
-    <div id="loader" class="loader"><i class="fas fa-sync fa-spin"></i> Cargando base de datos...</div>
+    <div id="loader" class="loader"><i class="fas fa-sync fa-spin"></i> Accediendo a la base de datos SQL...</div>
 
     <div id="resultArea" class="result-card">
         <div class="profile-header">
             <div>
                 <h2 id="viewName" style="margin:0;"></h2>
                 <p id="viewInfo" style="margin:5px 0 0 0; opacity: 0.9;"></p>
-                <p id="viewPrograma" style="margin:5px 0 0 0; opacity: 0.8; font-size: 14px;"></p>
             </div>
-            <i class="fas fa-user-graduate fa-3x"></i>
+            <i class="fas fa-user-circle fa-3x"></i>
         </div>
 
-        <div class="stats" id="statsContainer"></div>
+        <h3><i class="fas fa-star"></i> Mis Calificaciones</h3>
+        <div id="tableNotas"></div>
 
-        <h3><i class="fas fa-receipt"></i> 📄 Facturas / Matrículas</h3>
-        <div id="tableFacturas"></div>
-
-        <h3><i class="fas fa-hand-holding-usd"></i> 💰 Créditos / Descuentos</h3>
-        <div id="tableCreditos"></div>
-
-        <h3><i class="fas fa-money-bill-wave"></i> 💵 Recibos de Pago</h3>
-        <div id="tableRecibos"></div>
-
-        <h3><i class="fas fa-chart-line"></i> 📊 Resumen Financiero</h3>
-        <div id="tableResumen"></div>
+        <h3><i class="fas fa-receipt"></i> Historial de Pagos</h3>
+        <div id="tablePagos"></div>
     </div>
 </div>
 
 <script>
-    // Configuración - URL del archivo SQL en Google Drive
+    // URL de descarga del archivo SQL
     const URL_SQL = 'https://docs.google.com/uc?export=download&id=1IyU90zEF2A6_QfG11FQf9Pd1Kqdi0Y0z';
 
-    // Cache global
-    let datosCache = null;
-    let ultimaCarga = 0;
-    const TIEMPO_CACHE = 5 * 60 * 1000; // 5 minutos
-
-    // ============================================
-    // FUNCIÓN PRINCIPAL DE CONSULTA
-    // ============================================
     async function consultar() {
-        const documento = document.getElementById('docInput').value.trim();
-        const tipoDoc = document.getElementById('tipoDoc').value;
-
-        if (!documento) {
-            alert("Por favor, ingrese un número de documento");
-            return;
-        }
-
-        // Validar que sea número
-        if (isNaN(documento)) {
-            alert("El número de documento debe contener solo dígitos");
-            return;
-        }
-
-        const docNum = parseInt(documento);
+        const busqueda = document.getElementById('docInput').value.trim();
+        if (!busqueda) return alert("Ingrese un documento");
 
         document.getElementById('loader').style.display = 'block';
         document.getElementById('resultArea').style.display = 'none';
 
         try {
-            // Obtener datos del SQL
-            const datos = await obtenerDatosSQL();
+            const response = await fetch(URL_SQL);
+            const sqlText = await response.text();
 
-            // Buscar información del estudiante
-            const estudiante = buscarEstudiante(datos, docNum);
+            // Dividimos el archivo SQL por el nombre de las tablas (Delimitador phpMyAdmin)
+            const secciones = sqlText.split('-- Volcado de datos para la tabla');
 
-            if (!estudiante.encontrado) {
-                alert(`No se encontraron registros para el documento ${documento}.`);
+            // 1. BUSCAR USUARIO (tbl_usuarios)
+            const secUser = secciones.find(s => s.includes('`tbl_usuarios`'));
+            const filaUser = extraerFila(secUser, busqueda);
+
+            if (!filaUser) {
+                alert("Estudiante no encontrado.");
                 return;
             }
 
-            // Mostrar información del estudiante
-            mostrarInformacion(estudiante, tipoDoc, documento);
+            const u = limpiarCampos(filaUser);
+            const idUsuario = u[0]; // ID Primario
 
-            // Renderizar tablas
-            renderizarFacturas(estudiante.facturas);
-            renderizarCreditos(estudiante.creditos);
-            renderizarRecibos(estudiante.recibos);
-            renderizarResumen(estudiante);
+            document.getElementById('viewName').innerText = (u[3] + " " + u[4]).toUpperCase();
+            document.getElementById('viewInfo').innerText = `Documento: ${u[6]} | Correo: ${u[5]}`;
+
+            // 2. BUSCAR NOTAS (tbl_resultados)
+            const secNotas = secciones.find(s => s.includes('`tbl_resultados`'));
+            const filasNotas = extraerMultiplesFilas(secNotas, idUsuario, 1); // El ID_USUARIO suele ser el segundo campo
+            const notas = filasNotas.map(f => {
+                const n = limpiarCampos(f);
+                return { modulo: 'Unidad ' + n[2], nota: n[3], fecha: n[4] };
+            });
+            renderTable('tableNotas', notas, ["Referencia", "Nota", "Fecha"], ["modulo", "nota", "fecha"]);
+
+            // 3. BUSCAR PAGOS (fac_creditos)
+            const secPagos = secciones.find(s => s.includes('`fac_creditos`'));
+            const filasPagos = extraerMultiplesFilas(secPagos, busqueda, 4); // El CLIENTE_CREDITO es el quinto campo (cédula)
+            const pagos = filasPagos.map(f => {
+                const p = limpiarCampos(f);
+                return { fecha: p[1], concepto: p[6], monto: '$' + parseInt(p[5]).toLocaleString() };
+            });
+            renderTable('tablePagos', pagos, ["Fecha", "Concepto", "Valor"], ["fecha", "monto", "monto"]);
 
             document.getElementById('resultArea').style.display = 'block';
 
-        } catch (error) {
-            console.error("Error:", error);
-            alert("Error al cargar los datos. Por favor, verifique su conexión e intente nuevamente.\n\n" + error.message);
+        } catch (e) {
+            console.error(e);
+            alert("Error al cargar la base de datos. Verifique los permisos del archivo.");
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     }
 
-    // ============================================
-    // OBTENER DATOS SQL DESDE GOOGLE DRIVE
-    // ============================================
-    async function obtenerDatosSQL() {
-        // Verificar caché
-        if (datosCache && (Date.now() - ultimaCarga) < TIEMPO_CACHE) {
-            console.log("Usando datos en caché");
-            return datosCache;
-        }
+    // --- MOTOR DE EXTRACCIÓN SQL ---
 
-        console.log("Descargando archivo SQL...");
+    function extraerFila(seccion, criterio) {
+        if (!seccion) return null;
+        // Busca una línea que contenga el criterio rodeado de comillas o comas
+        const regex = new RegExp(`INSERT INTO [^;]*VALUES[^;]*'${criterio}'[^;]*;`, 'is');
+        const match = seccion.match(regex);
+        if (!match) return null;
         
-        const response = await fetch(URL_SQL);
-        if (!response.ok) {
-            throw new Error(`Error al descargar: ${response.status}`);
-        }
-        
-        const sqlText = await response.text();
-        console.log(`Archivo descargado: ${sqlText.length} bytes`);
-        
-        // Parsear SQL
-        const datos = parsearSQL(sqlText);
-        
-        // Guardar en caché
-        datosCache = datos;
-        ultimaCarga = Date.now();
-        
-        console.log(`Datos parseados: ${datos.facturas.length} facturas, ${datos.creditos.length} créditos, ${datos.recibos.length} recibos`);
-        
-        return datos;
+        // Si hay múltiples filas en un solo INSERT, buscamos la tupla específica
+        const tuplas = match[0].split('),(');
+        return tuplas.find(t => t.includes(`'${criterio}'`));
     }
 
-    // ============================================
-    // PARSEAR ARCHIVO SQL
-    // ============================================
-    function parsearSQL(sqlText) {
-        const facturas = [];
-        const creditos = [];
-        const recibos = [];
-
-        // Extraer facturas
-        const facturasPattern = /INSERT INTO `fac_facturas` \(.*?\) VALUES\s*\((.*?)\);?/gis;
-        let match;
+    function extraerMultiplesFilas(seccion, criterio) {
+        if (!seccion) return [];
+        const regex = new RegExp(`INSERT INTO [^;]*VALUES[^;]*;`, 'gis');
+        const matches = seccion.match(regex) || [];
+        let resultados = [];
         
-        while ((match = facturasPattern.exec(sqlText)) !== null) {
-            const valores = parsearValoresSQL(match[1]);
-            if (valores && valores.length >= 12) {
-                const clienteId = parseInt(valores[5]);
-                if (!isNaN(clienteId) && clienteId > 0) {
-                    facturas.push({
-                        id: parseInt(valores[0]) || 0,
-                        cliente: clienteId,
-                        fecha: valores[6] || '',
-                        subtotal: parseFloat(valores[9]) || 0,
-                        descuento: parseFloat(valores[10]) || 0,
-                        total: parseFloat(valores[12]) || 0,
-                        descripcion: valores[13] || '',
-                        vendedor: valores[7] || ''
-                    });
-                }
-            }
-        }
-
-        // Extraer créditos
-        const creditosPattern = /INSERT INTO `fac_creditos` \(.*?\) VALUES\s*\((.*?)\);?/gis;
-        while ((match = creditosPattern.exec(sqlText)) !== null) {
-            const valores = parsearValoresSQL(match[1]);
-            if (valores && valores.length >= 7) {
-                const clienteId = parseInt(valores[4]);
-                if (!isNaN(clienteId) && clienteId > 0) {
-                    creditos.push({
-                        id: parseInt(valores[0]) || 0,
-                        cliente: clienteId,
-                        fecha: valores[1] || '',
-                        consecutivo: parseInt(valores[2]) || 0,
-                        valor: parseFloat(valores[5]) || 0,
-                        concepto: valores[6] || '',
-                        observaciones: valores[7] || ''
-                    });
-                }
-            }
-        }
-
-        // Extraer recibos
-        const recibosPattern = /INSERT INTO `fac_recibos` \(.*?\) VALUES\s*\((.*?)\);?/gis;
-        while ((match = recibosPattern.exec(sqlText)) !== null) {
-            const valores = parsearValoresSQL(match[1]);
-            if (valores && valores.length >= 6) {
-                const clienteId = parseInt(valores[3]);
-                if (!isNaN(clienteId) && clienteId > 0) {
-                    recibos.push({
-                        id: parseInt(valores[0]) || 0,
-                        cliente: clienteId,
-                        fecha: valores[2] || '',
-                        valor: parseFloat(valores[5]) || 0,
-                        concepto: valores[8] || '',
-                        formaPago: valores[7] || '',
-                        cajero: valores[10] || ''
-                    });
-                }
-            }
-        }
-
-        // Ordenar por fecha
-        facturas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        creditos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        recibos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-        return { facturas, creditos, recibos };
-    }
-
-    // ============================================
-    // PARSEAR VALORES DE UNA LÍNEA SQL
-    // ============================================
-    function parsearValoresSQL(linea) {
-        const valores = [];
-        let actual = '';
-        let dentroComillas = false;
-        let i = 0;
-        
-        while (i < linea.length) {
-            const char = linea[i];
-            
-            if (char === "'" && (i === 0 || linea[i-1] !== '\\')) {
-                dentroComillas = !dentroComillas;
-                actual += char;
-            } else if (char === ',' && !dentroComillas) {
-                let valor = actual.trim();
-                if (valor === 'NULL' || valor === 'null') {
-                    valores.push(null);
-                } else if (valor.startsWith("'") && valor.endsWith("'")) {
-                    valores.push(valor.slice(1, -1));
-                } else if (!isNaN(valor) && valor !== '') {
-                    valores.push(parseFloat(valor));
-                } else {
-                    valores.push(valor);
-                }
-                actual = '';
-            } else {
-                actual += char;
-            }
-            i++;
-        }
-        
-        // Último valor
-        if (actual.trim()) {
-            let valor = actual.trim();
-            if (valor === 'NULL' || valor === 'null') {
-                valores.push(null);
-            } else if (valor.startsWith("'") && valor.endsWith("'")) {
-                valores.push(valor.slice(1, -1));
-            } else if (!isNaN(valor) && valor !== '') {
-                valores.push(parseFloat(valor));
-            } else {
-                valores.push(valor);
-            }
-        }
-        
-        return valores;
-    }
-
-    // ============================================
-    // BUSCAR ESTUDIANTE POR DOCUMENTO
-    // ============================================
-    function buscarEstudiante(datos, documento) {
-        const facturasEstudiante = datos.facturas.filter(f => f.cliente === documento);
-        const creditosEstudiante = datos.creditos.filter(c => c.cliente === documento);
-        const recibosEstudiante = datos.recibos.filter(r => r.cliente === documento);
-        
-        const encontrado = facturasEstudiante.length > 0 || 
-                          creditosEstudiante.length > 0 || 
-                          recibosEstudiante.length > 0;
-        
-        if (!encontrado) {
-            return { encontrado: false };
-        }
-        
-        // Intentar extraer nombre de algún registro
-        let nombre = `Estudiante ${documento}`;
-        let programa = "No especificado";
-        
-        // Buscar nombre en facturas o recibos
-        for (const factura of facturasEstudiante) {
-            if (factura.descripcion && factura.descripcion.length > 0 && factura.descripcion.length < 100) {
-                const posibleNombre = factura.descripcion.split(' ').slice(0, 3).join(' ');
-                if (posibleNombre.length > 3 && !posibleNombre.includes('DESCUENTO') && !posibleNombre.includes('ABONO')) {
-                    nombre = posibleNombre;
-                    break;
-                }
-            }
-        }
-        
-        // Buscar programa en descripciones
-        const programas = ['SST', 'AE', 'SE', 'MD', 'AEM', 'AET', 'SEM', 'PI', 'PIN', 'AAM', 'AA', 'SET', 'SEN', 'MDM', 'MDT'];
-        for (const factura of facturasEstudiante) {
-            if (factura.descripcion) {
-                for (const prog of programas) {
-                    if (factura.descripcion.includes(prog)) {
-                        programa = prog;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        // Calcular totales
-        const totalFacturas = facturasEstudiante.reduce((sum, f) => sum + (f.total || 0), 0);
-        const totalCreditos = creditosEstudiante.reduce((sum, c) => sum + (c.valor || 0), 0);
-        const totalPagos = recibosEstudiante.reduce((sum, r) => sum + (r.valor || 0), 0);
-        const saldoPendiente = totalCreditos - totalPagos;
-        
-        return {
-            encontrado: true,
-            documento: documento,
-            nombre: nombre,
-            programa: programa,
-            facturas: facturasEstudiante,
-            creditos: creditosEstudiante,
-            recibos: recibosEstudiante,
-            totalFacturas: totalFacturas,
-            totalCreditos: totalCreditos,
-            totalPagos: totalPagos,
-            saldoPendiente: saldoPendiente
-        };
-    }
-
-    // ============================================
-    // MOSTRAR INFORMACIÓN DEL ESTUDIANTE
-    // ============================================
-    function mostrarInformacion(estudiante, tipoDoc, documento) {
-        document.getElementById('viewName').innerText = estudiante.nombre;
-        document.getElementById('viewInfo').innerHTML = `${tipoDoc}: ${estudiante.documento} | <i class="fas fa-calendar-alt"></i> Registros encontrados`;
-        document.getElementById('viewPrograma').innerHTML = `<i class="fas fa-graduation-cap"></i> Programa: ${estudiante.programa}`;
-        
-        // Stats
-        const statsHtml = `
-            <div class="stat-card">
-                <h3>${estudiante.facturas.length}</h3>
-                <p>Facturas</p>
-            </div>
-            <div class="stat-card">
-                <h3>${estudiante.creditos.length}</h3>
-                <p>Créditos/Descuentos</p>
-            </div>
-            <div class="stat-card">
-                <h3>${estudiante.recibos.length}</h3>
-                <p>Recibos de Pago</p>
-            </div>
-            <div class="stat-card">
-                <h3>$${estudiante.saldoPendiente.toLocaleString()}</h3>
-                <p>Saldo Pendiente</p>
-            </div>
-        `;
-        document.getElementById('statsContainer').innerHTML = statsHtml;
-    }
-
-    // ============================================
-    // RENDERIZAR TABLAS
-    // ============================================
-    function renderizarFacturas(facturas) {
-        if (!facturas || facturas.length === 0) {
-            document.getElementById('tableFacturas').innerHTML = '<p style="color:#999; text-align:center;">No hay facturas registradas.</p>';
-            return;
-        }
-        
-        let html = '<table><thead><tr><th>Fecha</th><th>Descripción</th><th>Subtotal</th><th>Descuento</th><th>Total</th><th>Vendedor</th></tr></thead><tbody>';
-        
-        facturas.forEach(f => {
-            html += `<tr>
-                        <td>${f.fecha || '---'}</td>
-                        <td>${(f.descripcion || '---').substring(0, 60)}</td>
-                        <td>$${f.subtotal.toLocaleString()}</td>
-                        <td>${f.descuento ? '$' + f.descuento.toLocaleString() : '---'}</td>
-                        <td><strong>$${f.total.toLocaleString()}</strong></td>
-                        <td>${(f.vendedor || '---').substring(0, 30)}</td>
-                     </tr>`;
+        matches.forEach(m => {
+            const tuplas = m.split('),(');
+            const filtradas = tuplas.filter(t => t.includes(`'${criterio}'`) || t.includes(`,${criterio},`));
+            resultados = resultados.concat(filtradas);
         });
-        
-        document.getElementById('tableFacturas').innerHTML = html + '</tbody></table>';
+        return resultados;
     }
 
-    function renderizarCreditos(creditos) {
-        if (!creditos || creditos.length === 0) {
-            document.getElementById('tableCreditos').innerHTML = '<p style="color:#999; text-align:center;">No hay créditos o descuentos registrados.</p>';
-            return;
+    function limpiarCampos(tupla) {
+        // Limpiar paréntesis y el INSERT inicial
+        let limpia = tupla.replace(/.*VALUES\s*\(/i, "").replace(/\);$/, "").replace(/^\(/, "");
+        // Separar por comas respetando el texto interno
+        return limpia.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(v => v.trim().replace(/^'|'$/g, ""));
+    }
+
+    function renderTable(id, datos, cabeceras, keys) {
+        let h = '<table><thead><tr>' + cabeceras.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+        if (datos.length > 0) {
+            datos.forEach(d => {
+                h += '<tr>' + keys.map(k => `<td>${d[k] || '---'}</td>`).join('') + '</tr>';
+            });
+        } else {
+            h += `<tr><td colspan="${cabeceras.length}" style="text-align:center;">No hay registros encontrados.</td></tr>`;
         }
-        
-        let html = '<table><thead><tr><th>Fecha</th><th>Concepto</th><th>Valor</th><th>Observaciones</th></tr></thead><tbody>';
-        
-        creditos.forEach(c => {
-            html += `<tr>
-                        <td>${c.fecha || '---'}</td>
-                        <td>${(c.concepto || '---').substring(0, 50)}</td>
-                        <td><span class="badge badge-credito">$${c.valor.toLocaleString()}</span></td>
-                        <td>${(c.observaciones || '---').substring(0, 40)}</td>
-                     </tr>`;
-        });
-        
-        document.getElementById('tableCreditos').innerHTML = html + '</tbody></table>';
-    }
-
-    function renderizarRecibos(recibos) {
-        if (!recibos || recibos.length === 0) {
-            document.getElementById('tableRecibos').innerHTML = '<p style="color:#999; text-align:center;">No hay recibos de pago registrados.</p>';
-            return;
-        }
-        
-        let html = '<table><thead><tr><th>Fecha</th><th>Concepto</th><th>Valor</th><th>Forma de Pago</th><th>Cajero</th></tr></thead><tbody>';
-        
-        recibos.forEach(r => {
-            html += `<tr>
-                        <td>${r.fecha || '---'}</td>
-                        <td>${(r.concepto || '---').substring(0, 50)}</td>
-                        <td><span class="badge badge-pago">$${r.valor.toLocaleString()}</span></td>
-                        <td>${r.formaPago || '---'}</td>
-                        <td>${r.cajero || '---'}</td>
-                     </tr>`;
-        });
-        
-        document.getElementById('tableRecibos').innerHTML = html + '</tbody></table>';
-    }
-
-    function renderizarResumen(estudiante) {
-        const totalCreditos = estudiante.totalCreditos;
-        const totalPagos = estudiante.totalPagos;
-        const saldo = estudiante.saldoPendiente;
-        const porcentajePagado = totalCreditos > 0 ? ((totalPagos / totalCreditos) * 100).toFixed(1) : 0;
-        
-        let html = `
-            <table>
-                <thead><tr><th>Concepto</th><th>Valor</th></tr></thead>
-                <tbody>
-                    <tr><td>💰 Total en Créditos/Descuentos</td><td><strong>$${totalCreditos.toLocaleString()}</strong></td></tr>
-                    <tr><td>💵 Total Pagado</td><td><strong>$${totalPagos.toLocaleString()}</strong></td></tr>
-                    <tr style="background:#f0f0f0;"><td>📊 Porcentaje Pagado</td><td><strong>${porcentajePagado}%</strong></td></tr>
-                    <tr><td>⚖️ Saldo Pendiente</td><td><strong style="color:${saldo > 0 ? '#d4a017' : '#28a745'}">$${saldo.toLocaleString()}</strong></td></tr>
-                </tbody>
-            </table>
-        `;
-        
-        document.getElementById('tableResumen').innerHTML = html;
+        document.getElementById(id).innerHTML = h + '</tbody></table>';
     }
 </script>
 </body>
