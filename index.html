@@ -6,7 +6,7 @@
 <title>Portal Estudiantil — ASENORTE</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-/* ═══ TOKENS ═══════════════════════════════════════════ */
+/* ═══ TOKENS (colores originales del PDF preservados) ═══════════ */
 :root{
   --teal:#1a3a5a;--teal-dk:#0d1f33;--teal-lt:#2c5282;--teal-bg:#ebf4ff;
   --gold:#c8940f;--ink:#0c1a19;--muted:#456360;--soft:#6b8f8c;
@@ -17,16 +17,16 @@
   --info:#1a5ca8;--info-bg:#ddeeff;
   --purp-bg:#ede8fe;--purp:#5a35a8;
   --gold-bg:#fff3cd;--gold-c:#7a5800;
-  --shadow:0 4px 20px rgba(11,122,110,.09);
-  --shadow-lg:0 12px 40px rgba(11,122,110,.15);
+  --shadow:0 4px 20px rgba(26,58,90,.10);
+  --shadow-lg:0 12px 40px rgba(26,58,90,.18);
   --r:12px;--tr:.2s ease;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:15px}
 
-/* ═══ LOADER ═══════════════════════════════════════════ */
-#gl{position:fixed;inset:0;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 60%,#17b8a4 100%);
+/* ═══ LOADER ══════════════════════════════════════════════════ */
+#gl{position:fixed;inset:0;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 60%,#2c6fad 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
   transition:opacity .5s,visibility .5s}
 #gl.hidden{opacity:0;visibility:hidden;pointer-events:none}
@@ -38,8 +38,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 .pb{height:100%;background:#fff;border-radius:50px;transition:width .3s ease;width:0%}
 .pbs{color:rgba(255,255,255,.8);font-size:.74rem;margin-top:10px;min-height:18px;text-align:center}
 
-/* ═══ LOGIN ════════════════════════════════════════════ */
-#ls{display:none;min-height:100vh;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 55%,#18b8a4 100%);
+/* ═══ LOGIN ══════════════════════════════════════════════════ */
+#ls{display:none;min-height:100vh;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 55%,#2c6fad 100%);
   align-items:center;justify-content:center;padding:20px}
 #ls.v{display:flex}
 .lc{background:var(--white);border-radius:20px;padding:48px 44px 40px;width:100%;max-width:430px;
@@ -47,7 +47,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 @keyframes su{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 .l-logo{width:80px;height:80px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
   border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;
-  margin:0 auto 16px;box-shadow:0 8px 24px rgba(11,122,110,.28)}
+  margin:0 auto 16px;box-shadow:0 8px 24px rgba(26,58,90,.28)}
 .lc h1{font-size:1.55rem;font-weight:800;color:var(--teal-dk);letter-spacing:-.02em;text-align:center}
 .lc .sub{color:var(--muted);font-size:.83rem;text-align:center;margin:6px 0 24px}
 .notice{background:var(--teal-bg);border:1px solid var(--border);border-radius:10px;
@@ -60,19 +60,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 .fg input{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:10px;
   font-size:1rem;color:var(--ink);background:var(--paper);
   transition:border-color var(--tr),box-shadow var(--tr);outline:none}
-.fg input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(11,122,110,.12)}
+.fg input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(26,58,90,.12)}
 .btn-p{width:100%;padding:14px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
   color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;
   letter-spacing:.02em;transition:transform var(--tr),box-shadow var(--tr);
-  box-shadow:0 4px 16px rgba(11,122,110,.28)}
-.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(11,122,110,.38)}
+  box-shadow:0 4px 16px rgba(26,58,90,.28)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(26,58,90,.38)}
 .btn-p:active{transform:translateY(0)}
 .btn-p:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .err{display:none;background:var(--warn-bg);color:var(--warn);border-radius:8px;
   padding:10px 14px;font-size:.82rem;margin-top:12px;font-weight:500}
 .lnote{margin-top:18px;font-size:.7rem;color:#a0c5c2;text-align:center}
 
-/* ═══ PORTAL ════════════════════════════════════════════ */
+/* ═══ PORTAL ════════════════════════════════════════════════ */
 #p{display:none;flex-direction:column;min-height:100vh}
 #p.v{display:flex}
 
@@ -84,13 +84,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 .tbi{font-size:22px}
 .tbt{font-size:.98rem;font-weight:800;letter-spacing:-.01em}
 .tbt span{font-size:.62rem;opacity:.6;display:block;margin-top:-2px;text-transform:uppercase;letter-spacing:.05em}
+.tbr{display:flex;align-items:center;gap:10px}
+
+/* ── FOTO PERFIL / AVATAR ── */
 .sbadge{background:rgba(255,255,255,.13);border-radius:50px;padding:5px 14px 5px 7px;
-  display:flex;align-items:center;gap:8px}
-.av{width:30px;height:30px;background:var(--gold);border-radius:50%;display:flex;
-  align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+  display:flex;align-items:center;gap:8px;cursor:pointer;position:relative}
+.sbadge:hover{background:rgba(255,255,255,.2)}
+.av-wrap{position:relative;flex-shrink:0}
+.av{width:34px;height:34px;background:var(--gold);border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;
+  object-fit:cover;border:2px solid rgba(255,255,255,.3);cursor:pointer}
+.av-edit-hint{position:absolute;bottom:-2px;right:-2px;background:var(--gold);border-radius:50%;
+  width:14px;height:14px;display:flex;align-items:center;justify-content:center;
+  font-size:8px;border:1px solid rgba(255,255,255,.6)}
 .si .sn{font-size:.82rem;font-weight:700;line-height:1.2}
 .si .sd{font-size:.65rem;opacity:.65}
-.tbr{display:flex;align-items:center;gap:8px}
+#foto-input{display:none}
 .btn-o{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);color:#fff;
   border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:600;cursor:pointer;
   transition:background var(--tr);white-space:nowrap}
@@ -98,9 +107,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 
 /* group strip */
 .gs{background:var(--teal-bg);border-bottom:1px solid var(--border);
-  padding:9px 24px;display:flex;flex-wrap:wrap;gap:18px}
-.gc .gl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);font-weight:700;display:block}
+  padding:9px 24px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.gc{display:flex;flex-direction:column;gap:1px}
+.gc .gl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);font-weight:700}
 .gc .gv{font-size:.82rem;font-weight:700;color:var(--ink)}
+
+/* Estado badge en strip */
+.estado-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.est-activo    {background:#d2f0e2;color:#177a46}
+.est-retirado  {background:#fde4d2;color:#b84808}
+.est-graduado  {background:#ddeeff;color:#1a5ca8}
+.est-etapa     {background:#fff7dc;color:#7a5e00}
+.est-cupo      {background:#ede8fe;color:#5a35a8}
+.est-sin-etapa {background:#f5f5f5;color:#555}
+.est-default   {background:#e8e8e8;color:#444}
 
 /* tabs */
 .tnav{display:flex;background:var(--white);border-bottom:2px solid var(--border);
@@ -118,11 +138,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:v
 .tp.active{display:block}
 @keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
-/* ═══ COMPONENTS ════════════════════════════════════════ */
+/* ═══ SHARED COMPONENTS ════════════════════════════════════ */
 .sttl{font-size:1rem;font-weight:800;color:var(--teal-dk);border-left:4px solid var(--gold);
   padding-left:11px;margin-bottom:16px;letter-spacing:-.01em}
-.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
-  box-shadow:var(--shadow);overflow:hidden}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
 .tw{overflow-x:auto}
 table.dt{width:100%;border-collapse:collapse;font-size:.81rem}
 table.dt thead tr{background:var(--teal);color:#fff}
@@ -132,8 +151,7 @@ table.dt td{padding:10px 14px;border-bottom:1px solid #edf5f4;vertical-align:mid
 table.dt tr:last-child td{border-bottom:none}
 table.dt tr:nth-child(even) td{background:#fafefe}
 table.dt tr:hover td{background:var(--teal-bg)}
-.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.69rem;font-weight:700;
-  letter-spacing:.04em;white-space:nowrap}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.69rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
 .bp{background:var(--pass-bg);color:var(--pass)}
 .bw{background:var(--warn-bg);color:var(--warn)}
 .bm{background:var(--mid-bg);color:var(--mid)}
@@ -149,24 +167,28 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .empty .ei{font-size:2.2rem;margin-bottom:8px}
 .empty p{font-size:.84rem}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin-bottom:20px}
-.sc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
-  padding:16px;box-shadow:var(--shadow)}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
 .sc .scl{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:4px}
 .sc .scv{font-size:1.45rem;font-weight:900;letter-spacing:-.02em;color:var(--teal-dk)}
 .sc .scv.c-pass{color:var(--pass)}
 .sc .scv.c-warn{color:var(--warn)}
 .sc .scv.c-gold{color:var(--gold)}
-.spin-i{display:inline-block;width:16px;height:16px;border:3px solid rgba(11,122,110,.18);
+.spin-i{display:inline-block;width:16px;height:16px;border:3px solid rgba(26,58,90,.18);
   border-top-color:var(--teal);border-radius:50%;animation:sp .7s linear infinite;
   vertical-align:middle;margin-right:6px}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-/* inicio */
+/* ═══ INICIO ════════════════════════════════════════════════ */
 .pbanner{background:linear-gradient(135deg,var(--teal-dk),var(--teal));border-radius:var(--r);
   padding:28px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.bav{width:68px;height:68px;background:rgba(255,255,255,.2);border-radius:50%;
+/* Foto grande en banner */
+.bav-wrap{position:relative;flex-shrink:0}
+.bav{width:72px;height:72px;background:rgba(255,255,255,.2);border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;
-  border:3px solid rgba(255,255,255,.3);flex-shrink:0}
+  border:3px solid rgba(255,255,255,.3);object-fit:cover;cursor:pointer}
+.bav-btn{position:absolute;bottom:0;right:0;background:var(--gold);border:none;border-radius:50%;
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;cursor:pointer;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
 .binfo h2{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
 .binfo p{font-size:.79rem;opacity:.75;margin-bottom:2px}
 .bchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
@@ -182,47 +204,94 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .qt{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
 .qv{font-size:1.2rem;font-weight:900;color:var(--teal-dk);letter-spacing:-.02em}
 
-/* asistencia */
+/* ═══ ASISTENCIA ════════════════════════════════════════════ */
+.asist-info-bar{background:linear-gradient(135deg,var(--teal-dk),var(--teal));
+  border-radius:var(--r);padding:18px 22px;color:#fff;margin-bottom:18px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.asist-info-bar .ai-item{display:flex;flex-direction:column;gap:2px}
+.asist-info-bar .ai-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;font-weight:700}
+.asist-info-bar .ai-val{font-size:.88rem;font-weight:700}
+.asist-source-tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:3px 11px;font-size:.68rem;font-weight:600;margin-left:auto}
+
 .uz{border:2px dashed var(--border);border-radius:var(--r);padding:30px 20px;text-align:center;
   background:var(--teal-bg);margin-bottom:18px;cursor:pointer;
   transition:border-color var(--tr),background var(--tr)}
-.uz:hover,.uz.do{border-color:var(--teal);background:#d6eee9}
+.uz:hover,.uz.do{border-color:var(--teal);background:#d6e8f7}
 .ui-i{font-size:2.2rem;margin-bottom:8px}
 .uz p{color:var(--muted);font-size:.82rem;line-height:1.6}
 .uz strong{color:var(--teal)}
 #xi{display:none}
-.achips{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
-.ac{background:var(--white);border:1px solid var(--border);border-radius:10px;
-  padding:10px 14px;box-shadow:var(--shadow);text-align:center;min-width:100px}
-.ac .an{font-size:1.45rem;font-weight:900;color:var(--teal)}
-.ac .al{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
-.calm{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;margin-top:18px}
-.cmo{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow)}
-.cmo h4{font-size:.83rem;font-weight:700;color:var(--teal-dk);text-transform:capitalize;margin-bottom:8px}
-.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+#foto-input{display:none}
+
+/* Chips de resumen asistencia */
+.achips{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.ac{background:var(--white);border:1px solid var(--border);border-radius:12px;
+  padding:14px 18px;box-shadow:var(--shadow);text-align:center;min-width:110px;flex:1}
+.ac .an{font-size:1.6rem;font-weight:900;color:var(--teal)}
+.ac .al{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-top:2px}
+
+/* Barra de porcentaje */
+.pct-bar-wrap{background:#e8eef5;border-radius:50px;height:10px;overflow:hidden;margin:6px 0 4px}
+.pct-bar{height:100%;border-radius:50px;transition:width .6s ease}
+.pct-ok{background:linear-gradient(90deg,#177a46,#2ecc71)}
+.pct-warn{background:linear-gradient(90deg,#b84808,#e67e22)}
+
+/* Calendario mejorado */
+.calm{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:20px}
+.cmo{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+.cmo h4{font-size:.85rem;font-weight:700;color:var(--teal-dk);text-transform:capitalize;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.cmo .cmo-stats{font-size:.68rem;color:var(--muted);font-weight:600}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
 .cdh{text-align:center;font-size:.57rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.04em;color:var(--soft);padding:3px 0}
 .cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  border-radius:6px;font-size:.7rem;font-weight:600;color:var(--muted)}
+  border-radius:6px;font-size:.72rem;font-weight:600;color:var(--muted);transition:transform .1s}
 .cd.present{background:var(--pass-bg);color:var(--pass);font-weight:800}
+.cd.present:hover{transform:scale(1.15)}
 .cd.absent{background:var(--warn-bg);color:var(--warn)}
+.cd.absent:hover{transform:scale(1.15)}
 .cd.noc{color:#c0d5d3}
 
+/* Leyenda calendario */
+.cal-legend{display:flex;gap:14px;margin-top:12px;font-size:.72rem;color:var(--muted);flex-wrap:wrap}
+.cal-legend span{display:flex;align-items:center;gap:5px}
+.cal-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.leg-p{background:var(--pass-bg)}
+.leg-a{background:var(--warn-bg)}
+
+/* Cargando Google Sheets */
+.gs-loading{display:flex;align-items:center;gap:10px;padding:16px;
+  background:var(--teal-bg);border-radius:10px;font-size:.83rem;color:var(--teal-dk);
+  border:1px solid var(--border);margin-bottom:16px}
+
+/* Tabla asistencia mejorada */
+.asist-table-wrap{border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+table.dt .td-pres{background:var(--pass-bg)!important}
+table.dt .td-aus{background:var(--warn-bg)!important}
+
+/* ═══ NOTAS — Definitiva column ═══════════════════════════ */
+.col-def{font-weight:800;font-size:.9rem}
+.nota-section{border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.nota-section-hidden{display:none}
+
+/* ═══ RESPONSIVE ════════════════════════════════════════════ */
 @media(max-width:640px){
   .tb,.tc,.gs,.tnav{padding-left:14px;padding-right:14px}
   .tb{height:52px}.lc{padding:32px 20px 28px}
   .pbanner{padding:18px}.bav{width:54px;height:54px;font-size:22px}
   .binfo h2{font-size:1.05rem}
+  .achips .ac{min-width:80px;padding:10px 12px}
 }
 @media print{
-  .tb,.tnav,.uz{display:none!important}
+  .tb,.tnav,.uz,.asist-info-bar{display:none!important}
   .tp{display:block!important}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ LOADER ═══════════════════════════════════════════ -->
+<!-- ═══ LOADER ════════════════════════════════════════════════ -->
 <div id="gl">
   <div class="ll">🏥</div>
   <div class="lt">ASENORTE</div>
@@ -231,15 +300,15 @@ table.dt tr:hover td{background:var(--teal-bg)}
   <div class="pbs" id="pbs">Iniciando…</div>
 </div>
 
-<!-- ═══ LOGIN ════════════════════════════════════════════ -->
+<!-- ═══ LOGIN ════════════════════════════════════════════════ -->
 <div id="ls">
   <div class="lc">
     <div class="l-logo">🏥</div>
     <h1>Portal Estudiantil</h1>
-    <p class="sub">ASENORTE — Corporación Educativa Asesoríass del Norte</p>
+    <p class="sub">ASENORTE — Corporación Educativa Asesorías del Norte</p>
     <div class="notice">
       <span>🔒</span>
-      <span>Bienvenido.</span>
+      <span>Bienvenido. Sus datos se consultan de forma segura.</span>
     </div>
     <div class="fg">
       <label>Número de Cédula / Documento</label>
@@ -252,32 +321,41 @@ table.dt tr:hover td{background:var(--teal-bg)}
   </div>
 </div>
 
-<!-- ═══ PORTAL ════════════════════════════════════════════ -->
+<!-- ═══ PORTAL ════════════════════════════════════════════════ -->
 <div id="p">
 
+  <!-- Topbar -->
   <div class="tb">
     <div class="tbl">
       <span class="tbi">🏥</span>
       <div class="tbt">ASENORTE<span>Portal Estudiantil</span></div>
     </div>
     <div class="tbr">
-      <div class="sbadge">
-        <div class="av" id="avl">?</div>
+      <!-- Avatar/foto con tooltip de cambio -->
+      <div class="sbadge" onclick="triggerFotoInput()" title="Clic para cambiar foto de perfil">
+        <div class="av-wrap">
+          <img id="av-img" class="av" src="" alt="" style="display:none">
+          <div id="av-txt" class="av">?</div>
+          <span class="av-edit-hint">✏</span>
+        </div>
         <div class="si"><div class="sn" id="pn">—</div><div class="sd" id="pd">—</div></div>
       </div>
+      <input type="file" id="foto-input" accept=".jpg,.jpeg,.png" onchange="cambiarFoto(this)">
       <button class="btn-o" onclick="doLogout()">↩ Salir</button>
     </div>
   </div>
 
+  <!-- Group Strip — SIN Docente, CON Estado -->
   <div class="gs">
     <div class="gc"><span class="gl">Grupo</span><span class="gv" id="g-cod">—</span></div>
     <div class="gc"><span class="gl">Año</span><span class="gv" id="g-ano">—</span></div>
     <div class="gc"><span class="gl">Programa</span><span class="gv" id="g-prog">—</span></div>
     <div class="gc"><span class="gl">Inicio / Fin</span><span class="gv" id="g-f">—</span></div>
     <div class="gc"><span class="gl">Jornada</span><span class="gv" id="g-j">—</span></div>
-    <div class="gc"><span class="gl">Docente</span><span class="gv" id="g-d">—</span></div>
+    <div class="gc"><span class="gl">Estado</span><span class="gv" id="g-estado"><span class="estado-badge est-default">—</span></span></div>
   </div>
 
+  <!-- Tabs -->
   <div class="tnav">
     <button class="tbtn active" onclick="ST('inicio',this)">🏠 Inicio</button>
     <button class="tbtn" onclick="ST('notas',this)">📝 Académico</button>
@@ -288,10 +366,14 @@ table.dt tr:hover td{background:var(--teal-bg)}
 
   <div class="tc">
 
-    <!-- ── INICIO ── -->
+    <!-- ════ INICIO ════ -->
     <div id="tp-inicio" class="tp active">
       <div class="pbanner">
-        <div class="bav" id="bav">?</div>
+        <div class="bav-wrap">
+          <img id="banner-av-img" class="bav" src="" alt="" style="display:none">
+          <div id="banner-av-txt" class="bav">?</div>
+          <button class="bav-btn" onclick="triggerFotoInput()" title="Cambiar foto">✏</button>
+        </div>
         <div class="binfo">
           <h2 id="bn">—</h2>
           <p id="bd">Documento: —</p>
@@ -299,10 +381,11 @@ table.dt tr:hover td{background:var(--teal-bg)}
           <div class="bchips">
             <span class="bchip" id="bc-g">—</span>
             <span class="bchip" id="bc-a">—</span>
-            <span class="bchip" id="bc-e">Activo</span>
+            <span class="bchip" id="bc-e">—</span>
           </div>
         </div>
       </div>
+
       <div class="qgrid">
         <div class="qcard" onclick="ST('notas',document.querySelectorAll('.tbtn')[1])">
           <div class="qicon">📝</div><div><div class="qt">Promedio</div><div class="qv" id="q-prom">—</div></div>
@@ -314,23 +397,27 @@ table.dt tr:hover td{background:var(--teal-bg)}
           <div class="qicon">📚</div><div><div class="qt">Módulos</div><div class="qv" id="q-mod">—</div></div>
         </div>
         <div class="qcard" onclick="ST('asist',document.querySelectorAll('.tbtn')[3])">
-          <div class="qicon">📅</div><div><div class="qt">Asistencia</div><div class="qv" id="q-as">Cargar XLS</div></div>
+          <div class="qicon">📅</div><div><div class="qt">Asistencia</div><div class="qv" id="q-as">Cargando…</div></div>
         </div>
       </div>
+
       <div class="sgrid">
         <div class="sc"><div class="scl">Recibos de Pago</div><div class="scv c-pass" id="s-r">—</div></div>
         <div class="sc"><div class="scl">Descuentos/Cred.</div><div class="scv c-gold" id="s-c">—</div></div>
         <div class="sc"><div class="scl">Notas Registradas</div><div class="scv" id="s-n">—</div></div>
         <div class="sc"><div class="scl">Cursos Matrículas</div><div class="scv" id="s-m">—</div></div>
       </div>
+
       <h2 class="sttl">Últimas Notas</h2>
       <div class="card"><div class="tw">
-        <table class="dt"><thead><tr><th>Módulo</th><th>Área</th><th>Nota</th><th>Fecha</th><th>Docente</th></tr></thead>
-        <tbody id="tb-ln"></tbody></table>
+        <table class="dt">
+          <thead><tr><th>Módulo</th><th>Área</th><th>Nota</th><th>Fecha</th><th>Docente</th></tr></thead>
+          <tbody id="tb-ln"></tbody>
+        </table>
       </div></div>
     </div>
 
-    <!-- ── ACADÉMICO ── -->
+    <!-- ════ ACADÉMICO ════ -->
     <div id="tp-notas" class="tp">
       <h2 class="sttl">Notas Académicas</h2>
       <div class="sgrid">
@@ -339,24 +426,42 @@ table.dt tr:hover td{background:var(--teal-bg)}
         <div class="sc"><div class="scl">Notas ≥ 4.5</div><div class="scv c-pass" id="n-altas">—</div></div>
         <div class="sc"><div class="scl">Estado Académico</div><div class="scv c-pass" id="n-est">—</div></div>
       </div>
-      <h2 class="sttl" style="margin-top:4px">Sistema de Notas Principal (tbl_notas)</h2>
-      <div class="card" style="margin-bottom:18px"><div class="tw">
-        <table class="dt"><thead><tr><th>ID</th><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Área</th><th>Nota</th><th>Docente</th></tr></thead>
-        <tbody id="tb-n1"></tbody></table>
-      </div></div>
-      <h2 class="sttl">Sistema de Notas Histórico (tbl_notas2)</h2>
-      <div class="card" style="margin-bottom:18px"><div class="tw">
-        <table class="dt"><thead><tr><th>ID</th><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Área</th><th>Nota</th><th>Docente</th></tr></thead>
-        <tbody id="tb-n2"></tbody></table>
-      </div></div>
-      <h2 class="sttl">Habilitaciones</h2>
-      <div class="card"><div class="tw">
-        <table class="dt"><thead><tr><th>Módulo</th><th>Nota Habilitación</th><th>Fecha</th></tr></thead>
-        <tbody id="tb-hab"></tbody></table>
-      </div></div>
+
+      <!-- tbl_notas — solo visible si tiene datos -->
+      <div id="sec-n1" class="nota-section">
+        <h2 class="sttl" style="margin-top:4px">Notas — Sistema Principal</h2>
+        <div class="card"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Conocimiento</th><th>Desempeño</th><th>Producto</th><th>Definitiva</th><th>Docente</th></tr></thead>
+            <tbody id="tb-n1"></tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <!-- tbl_notas2 — solo visible si tiene datos -->
+      <div id="sec-n2" class="nota-section">
+        <h2 class="sttl" style="margin-top:4px">Notas — Sistema Histórico</h2>
+        <div class="card"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Primer</th><th>Segundo</th><th>Tercero</th><th>Definitiva</th><th>Docente</th></tr></thead>
+            <tbody id="tb-n2"></tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <!-- Habilitaciones -->
+      <div id="sec-hab" class="nota-section">
+        <h2 class="sttl">Habilitaciones</h2>
+        <div class="card"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>Módulo</th><th>Nota Habilitación</th><th>Fecha</th></tr></thead>
+            <tbody id="tb-hab"></tbody>
+          </table>
+        </div></div>
+      </div>
     </div>
 
-    <!-- ── FINANCIERO ── -->
+    <!-- ════ FINANCIERO ════ -->
     <div id="tp-fin" class="tp">
       <h2 class="sttl">Estado Financiero</h2>
       <div class="sgrid">
@@ -365,21 +470,25 @@ table.dt tr:hover td{background:var(--teal-bg)}
         <div class="sc"><div class="scl">Total Descuentos</div><div class="scv c-gold" id="f-dsc">—</div></div>
         <div class="sc"><div class="scl">Último Pago</div><div class="scv" id="f-last" style="font-size:.95rem">—</div></div>
       </div>
+
       <h2 class="sttl" style="margin-top:4px">Recibos de Pago — fac_recibos</h2>
       <div class="card" style="margin-bottom:18px"><div class="tw">
         <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Forma Pago</th><th>N° Transacción</th><th>Valor</th></tr></thead>
         <tbody id="tb-r1"></tbody></table>
       </div></div>
+
       <h2 class="sttl">Otros Recibos — fac_recibos2</h2>
       <div class="card" style="margin-bottom:18px"><div class="tw">
         <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Forma Pago</th><th>Valor</th></tr></thead>
         <tbody id="tb-r2"></tbody></table>
       </div></div>
+
       <h2 class="sttl">Descuentos y Créditos — fac_creditos</h2>
       <div class="card" style="margin-bottom:18px"><div class="tw">
         <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Valor Descontado</th></tr></thead>
         <tbody id="tb-crd"></tbody></table>
       </div></div>
+
       <h2 class="sttl">Facturas — fac_facturas</h2>
       <div class="card"><div class="tw">
         <table class="dt"><thead><tr><th>Consec.</th><th>Tipo</th><th>Fecha</th><th>Total</th><th>Descripción</th></tr></thead>
@@ -387,47 +496,83 @@ table.dt tr:hover td{background:var(--teal-bg)}
       </div></div>
     </div>
 
-    <!-- ── ASISTENCIA ── -->
+    <!-- ════ ASISTENCIA ════ -->
     <div id="tp-asist" class="tp">
       <h2 class="sttl">Registro de Asistencia</h2>
+
+      <!-- Barra de info de fuente -->
+      <div class="asist-info-bar" id="asist-info-bar" style="display:none">
+        <div class="ai-item"><div class="ai-lbl">Estudiante</div><div class="ai-val" id="ai-nombre">—</div></div>
+        <div class="ai-item"><div class="ai-lbl">Documento</div><div class="ai-val" id="ai-doc">—</div></div>
+        <div class="ai-item"><div class="ai-lbl">Registros encontrados</div><div class="ai-val" id="ai-total">—</div></div>
+        <span class="asist-source-tag" id="asist-source-tag">📊 Google Sheets</span>
+      </div>
+
+      <!-- Estado de carga Google Sheets -->
+      <div class="gs-loading" id="gs-loading" style="display:none">
+        <span class="spin-i"></span>
+        <span id="gs-status">Conectando con Google Sheets…</span>
+      </div>
+
+      <!-- Error Google Sheets -->
+      <div class="err" id="gs-err" style="display:block;margin-bottom:16px">
+        ⚠ No se pudo cargar Google Sheets automáticamente (CORS). Puede cargar el archivo XLSX manualmente abajo.
+      </div>
+
+      <!-- Upload manual como respaldo -->
       <div class="uz" id="uz"
            onclick="document.getElementById('xi').click()"
            ondragover="event.preventDefault();this.classList.add('do')"
            ondragleave="this.classList.remove('do')"
            ondrop="hDrop(event)">
         <div class="ui-i">📂</div>
-        <p><strong>Cargar ASISTENCIA.xlsx</strong></p>
-        <p>Haz clic o arrastra el archivo actualizado desde Google Drive / GitHub.</p>
+        <p><strong>Cargar ASISTENCIA.xlsx manualmente</strong></p>
+        <p>Descarga la hoja "Asistencia" de Google Sheets y cárgala aquí.<br>
+           O arrastra el archivo directamente.</p>
         <p style="font-size:.69rem;margin-top:7px;opacity:.55">
           Columnas: <strong>DOCUMENTO</strong> · <strong>FECHA</strong> · <strong>ESTADO</strong> (P/A) · MATERIA (opcional) · OBSERVACIONES (opcional)
         </p>
         <input type="file" id="xi" accept=".xlsx,.xls,.csv" onchange="loadXlsx(this.files[0])">
       </div>
+
+      <!-- Resultados asistencia -->
       <div id="asist-ok" style="display:none">
         <div class="achips" id="achips"></div>
+
         <h2 class="sttl">Detalle de Asistencia</h2>
-        <div class="card" style="margin-bottom:18px"><div class="tw">
-          <table class="dt"><thead><tr><th>#</th><th>Fecha</th><th>Día</th><th>Materia</th><th>Estado</th><th>Observaciones</th></tr></thead>
-          <tbody id="tb-as"></tbody></table>
+        <div class="asist-table-wrap card" style="margin-bottom:20px"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>#</th><th>Fecha</th><th>Día</th><th>Materia</th><th>Estado</th><th>Observaciones</th></tr></thead>
+            <tbody id="tb-as"></tbody>
+          </table>
         </div></div>
-        <h2 class="sttl">Calendario</h2>
+
+        <h2 class="sttl">Calendario de Asistencia</h2>
+        <div class="cal-legend">
+          <span><i class="leg-p"></i> Presente</span>
+          <span><i class="leg-a"></i> Ausente</span>
+        </div>
         <div class="calm" id="calv"></div>
       </div>
+
       <div id="asist-no" style="display:none">
-        <div class="empty"><div class="ei">🔍</div><p>No se encontraron registros para este documento en el archivo cargado.</p></div>
+        <div class="empty"><div class="ei">🔍</div><p>No se encontraron registros de asistencia para este documento.</p></div>
       </div>
     </div>
 
-    <!-- ── PERFIL ── -->
+    <!-- ════ PERFIL ════ -->
     <div id="tp-perfil" class="tp">
       <h2 class="sttl">Información Personal</h2>
       <div class="card" style="margin-bottom:18px"><div class="tw">
         <table class="dt"><tbody id="tb-pf"></tbody></table>
       </div></div>
+
       <h2 class="sttl">Matrículas Registradas</h2>
       <div class="card"><div class="tw">
-        <table class="dt"><thead><tr><th>Módulo / Curso</th><th>Fecha</th><th>Valor</th><th>Saldo</th><th>Estado</th></tr></thead>
-        <tbody id="tb-mat"></tbody></table>
+        <table class="dt">
+          <thead><tr><th>Módulo / Curso</th><th>Fecha</th><th>Valor</th><th>Saldo</th><th>Estado</th></tr></thead>
+          <tbody id="tb-mat"></tbody>
+        </table>
       </div></div>
     </div>
 
@@ -435,38 +580,43 @@ table.dt tr:hover td{background:var(--teal-bg)}
 </div><!-- /portal -->
 
 <script>
-/* ════════════════════════════════════════════════════════
-   CONFIG  ← Ajusta solo esta sección
-════════════════════════════════════════════════════════ */
-// URL del SQL en GitHub Raw. Si el archivo está en la misma raíz del repo, usa './asenorte.sql'
+/* ════════════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════════════ */
 const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
 
-/* ════════════════════════════════════════════════════════
-   ESTADO GLOBAL
-════════════════════════════════════════════════════════ */
-const DB  = {};      // {tableName: [rows]}
-let cDoc  = null;    // documento activo
-let cEst  = null;    // fila estudiante
-let cIds  = {};      // mapa relacional construido
-let xRows = [];      // filas xlsx asistencia
+// URL pública de exportación CSV de Google Sheets (hoja Asistencia)
+// Para obtenerla: Archivo → Compartir → Publicar en la web → CSV → hoja Asistencia
+// La URL debe ser la de PUBLICACIÓN (no la de edición). Formato:
+// https://docs.google.com/spreadsheets/d/ID/gviz/tq?tqx=out:csv&sheet=Asistencia
+const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1hJaDoj--k0O2nQ_vXjkO8fIaEw9hJhCHKVW9ciTB3ME/gviz/tq?tqx=out:csv&sheet=Asistencia';
 
-/* ════════════════════════════════════════════════════════
+// URL base para fotos de estudiantes en GitHub
+const FOTOS_BASE_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/Fotos/';
+
+/* ════════════════════════════════════════════════════════════
+   ESTADO GLOBAL
+════════════════════════════════════════════════════════════ */
+const DB = {};
+let cDoc = null, cEst = null, cIds = {}, xRows = [];
+let fotoPersonal = null; // DataURL de foto cargada localmente
+
+/* ════════════════════════════════════════════════════════════
    ARRANQUE
-════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
   prog(5, 'Conectando con GitHub…');
   try {
     const r = await fetch(SQL_URL);
-    if(!r.ok) throw new Error('HTTP ' + r.status + ' — Verifica que asenorte.sql esté en el repositorio Plataforma.');
+    if(!r.ok) throw new Error('HTTP ' + r.status);
     prog(18, 'Archivo recibido. Parseando SQL…');
     const txt = await r.text();
     prog(30, 'Segmentando tablas…');
     await parseSQL(txt);
     prog(100, '¡Base de datos lista!');
     await wait(500);
-  } catch(e) {
-    document.getElementById('pbs').innerHTML =
-      '<span style="color:#ffaaaa">⚠ ' + e.message + '</span>';
+  } catch(err) {
+    document.getElementById('pbs').innerHTML = '<span style="color:#ffaaaa">⚠ ' + err.message + ' — Verifica que asenorte.sql esté en el repositorio.</span>';
     await wait(3000);
   }
   document.getElementById('gl').classList.add('hidden');
@@ -474,27 +624,21 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function prog(p,m){
-  document.getElementById('pb').style.width=p+'%';
-  if(m) document.getElementById('pbs').textContent=m;
-}
+function prog(p,m){ document.getElementById('pb').style.width=p+'%'; if(m) document.getElementById('pbs').textContent=m; }
 
-/* ════════════════════════════════════════════════════════
-   SQL PARSER  — robusto, async, soporta 400k líneas
-════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   SQL PARSER
+════════════════════════════════════════════════════════════ */
 async function parseSQL(text){
-  // Dividir por secciones de tabla usando el comentario phpMyAdmin
   const SEC = /--\s*Estructura de tabla para la tabla\s*`([^`]+)`/g;
-  const segs = [], matches = [];
+  const matches = [];
   let m;
   while((m=SEC.exec(text))!==null) matches.push({name:m[1],idx:m.index});
-
   for(let i=0;i<matches.length;i++){
     const name=matches[i].name;
     const start=matches[i].idx;
     const end=(i+1<matches.length)?matches[i+1].idx:text.length;
-    const chunk=text.slice(start,end);
-    parseTableChunk(name,chunk);
+    parseTableChunk(name, text.slice(start,end));
     if(i%8===0){
       prog(30+Math.round(i/matches.length*65), `Procesando: ${name} (${i+1}/${matches.length})`);
       await wait(0);
@@ -503,8 +647,7 @@ async function parseSQL(text){
   prog(95,'Indexando…'); await wait(0);
 }
 
-function parseTableChunk(tbl, chunk){
-  // Encuentra INSERT INTO `tbl` (cols) VALUES …;
+function parseTableChunk(tbl,chunk){
   const IR = new RegExp(
     `INSERT\\s+INTO\\s+\`${tbl.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\`\\s*\\(([^)]+)\\)\\s*VALUES\\s*`,
     'gi'
@@ -512,9 +655,7 @@ function parseTableChunk(tbl, chunk){
   let im;
   while((im=IR.exec(chunk))!==null){
     const cols = im[1].split(',').map(c=>c.trim().replace(/`/g,''));
-    // Read the VALUES block until ; not inside a string
-    const start = im.index + im[0].length;
-    const block = readValuesBlock(chunk, start);
+    const block = readValuesBlock(chunk, im.index+im[0].length);
     const tuples = parseTuples(block);
     if(!DB[tbl]) DB[tbl]=[];
     for(const t of tuples){
@@ -526,9 +667,8 @@ function parseTableChunk(tbl, chunk){
   }
 }
 
-// Extract from position until we find ';' outside of string context
-function readValuesBlock(text, start){
-  let i=start, inStr=false, depth=0, result='';
+function readValuesBlock(text,start){
+  let i=start,inStr=false,result='';
   while(i<text.length){
     const c=text[i];
     if(!inStr){
@@ -564,18 +704,13 @@ function parseTuples(block){
       else if(block[i]==="'"){
         i++;let s='';
         while(i<n){
-          if(block[i]==='\\'){
-            const nx=block[i+1]||'';
-            const ESC={"'":"'","\\":"\\",'n':'\n','r':'\r','t':'\t'};
-            s+=ESC[nx]!==undefined?ESC[nx]:nx; i+=2;
-          } else if(block[i]==="'"){
-            if(block[i+1]==="'"){s+="'";i+=2}else{i++;break}
-          } else {s+=block[i];i++}
+          if(block[i]==='\\'){const nx=block[i+1]||'';const ESC={"'":"'","\\":"\\",'n':'\n','r':'\r','t':'\t'};s+=ESC[nx]!==undefined?ESC[nx]:nx;i+=2;}
+          else if(block[i]==="'"){if(block[i+1]==="'"){s+="'";i+=2}else{i++;break}}
+          else{s+=block[i];i++}
         }
         val=s;
       } else if(block.slice(i,i+2).toLowerCase()==='0x'){
-        let j=i+2;while(j<n&&/[0-9a-fA-F]/.test(block[j]))j++;
-        val=null;i=j;
+        let j=i+2;while(j<n&&/[0-9a-fA-F]/.test(block[j]))j++;val=null;i=j;
       } else {
         let j=i;while(j<n&&block[j]!==','&&block[j]!==')'&&block[j]!==' ')j++;
         const raw=block.slice(i,j).trim();
@@ -592,262 +727,472 @@ function parseTuples(block){
   return results;
 }
 
-/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
+   FOTO DE PERFIL
+════════════════════════════════════════════════════════════ */
+function triggerFotoInput(){ document.getElementById('foto-input').click(); }
+
+function cambiarFoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    fotoPersonal = ev.target.result;
+    aplicarFoto(fotoPersonal);
+  };
+  reader.readAsDataURL(file);
+}
+
+function aplicarFoto(src){
+  // Topbar
+  const img = document.getElementById('av-img');
+  const txt = document.getElementById('av-txt');
+  img.src = src; img.style.display='flex'; txt.style.display='none';
+  // Banner
+  const bimg = document.getElementById('banner-av-img');
+  const btxt = document.getElementById('banner-av-txt');
+  bimg.src = src; bimg.style.display='flex'; btxt.style.display='none';
+}
+
+// Intenta cargar foto desde GitHub Fotos/
+async function tryLoadGithubFoto(doc){
+  const exts = ['jpg','jpeg','png'];
+  for(const ext of exts){
+    const url = FOTOS_BASE_URL + doc + '.' + ext;
+    try{
+      const r = await fetch(url, {method:'HEAD'});
+      if(r.ok){ aplicarFoto(url); return; }
+    }catch(e){}
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
    LOGIN
-════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════ */
 function doLogin(){
-  const doc=document.getElementById('di').value.trim().replace(/\s/g,'');
-  if(!doc)return;
+  const doc = document.getElementById('di').value.trim().replace(/\s/g,'');
+  if(!doc) return;
   document.getElementById('em').style.display='none';
-  const btn=document.getElementById('bl');
-  btn.innerHTML='<span class="spin-i"></span>Buscando…';
-  btn.disabled=true;
+  const btn = document.getElementById('bl');
+  btn.innerHTML='<span class="spin-i"></span>Buscando…'; btn.disabled=true;
   setTimeout(()=>{
     try{
-      const res=findStudent(doc);
-      if(res){cDoc=doc;cEst=res.est;cIds=res.ids;showPortal();}
-      else{document.getElementById('em').style.display='block';}
-    }catch(e){document.getElementById('em').textContent='⚠ Error: '+e.message;document.getElementById('em').style.display='block';}
-    btn.innerHTML='Consultar mi información';btn.disabled=false;
-  },60);
+      const res = findStudent(doc);
+      if(res){ cDoc=doc; cEst=res.est; cIds=res.ids; showPortal(); }
+      else{ document.getElementById('em').style.display='block'; }
+    }catch(err){
+      document.getElementById('em').textContent='⚠ Error: '+err.message;
+      document.getElementById('em').style.display='block';
+    }
+    btn.innerHTML='Consultar mi información'; btn.disabled=false;
+  }, 60);
 }
 
 function doLogout(){
-  cDoc=null;cEst=null;cIds={};xRows=[];
+  cDoc=null; cEst=null; cIds={}; xRows=[]; fotoPersonal=null;
   document.getElementById('p').classList.remove('v');
   document.getElementById('ls').classList.add('v');
   document.getElementById('di').value='';
   document.getElementById('asist-ok').style.display='none';
   document.getElementById('asist-no').style.display='none';
+  document.getElementById('gs-err').style.display='block';
+  document.getElementById('gs-loading').style.display='none';
+  document.getElementById('asist-info-bar').style.display='none';
+  // Reset foto
+  document.getElementById('av-img').style.display='none';
+  document.getElementById('av-txt').style.display='flex';
+  document.getElementById('banner-av-img').style.display='none';
+  document.getElementById('banner-av-txt').style.display='flex';
 }
 
-/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    FIND STUDENT + RELATIONAL MAP
-════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════ */
 function findStudent(doc){
-  const dn=String(doc).trim();
-  const est=(DB['tbl_estudiantes']||[]).find(r=>String(r['DOCUMENTO_ESTUDIANTE']||'').trim()===dn);
-  if(!est)return null;
-  const eid=est['ID_ESTUDIANTE'];
+  const dn = String(doc).trim();
+  const est = (DB['tbl_estudiantes']||[]).find(r=>String(r['DOCUMENTO_ESTUDIANTE']||'').trim()===dn);
+  if(!est) return null;
+  const eid = est['ID_ESTUDIANTE'];
 
-  // Lookups
-  const cursos   =idx(DB['tbl_cursos']   ||[],'ID_CURSO');
-  const modulos2 =idx(DB['tbl_modulos2'] ||[],'ID_MODULOPROGRAMA');
-  const docentes =idx(DB['tbl_docentes'] ||[],'ID_DOCENTE');
-  const grupos   =idx(DB['tbl_grupos']   ||[],'ID_GRUPO');
-  const programas=idx(DB['tbl_programas']||[],'ID_PROGRAMA');
-  const estamat  =idx(DB['tbl_estadomatricula']||[],'ID_ESTADOMATRICULA');
+  const cursos    = idx(DB['tbl_cursos']    ||[],'ID_CURSO');
+  const modulos2  = idx(DB['tbl_modulos2']  ||[],'ID_MODULOPROGRAMA');
+  const docentes  = idx(DB['tbl_docentes']  ||[],'ID_DOCENTE');
+  const grupos    = idx(DB['tbl_grupos']    ||[],'ID_GRUPO');
+  const programas = idx(DB['tbl_programas'] ||[],'ID_PROGRAMA');
+  const estamat   = idx(DB['tbl_estadomatricula']||[],'ID_ESTADOMATRICULA');
+  const estadoadm = idx(DB['tbl_estadoadmision'] ||[],'ID_ESTADOADMISION');
 
-  // Relations
-  const mats  =(DB['tbl_matriculas']   ||[]).filter(r=>r['ESTUDIANTE_MATRICULA']==eid);
-  const notas =(DB['tbl_notas']        ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
-  const notas2=(DB['tbl_notas2']       ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
-  const habs  =(DB['tbl_habilitaciones']||[]).filter(r=>r['ESTUDIANTE_HABILITACION']==eid);
-  // Financial: CLIENTE_* = eid (same numeric ID used across fac_ tables)
-  const recibos =(DB['fac_recibos'] ||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
-  const recibos2=(DB['fac_recibos2']||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
-  const creditos=(DB['fac_creditos']||[]).filter(r=>r['CLIENTE_CREDITO']==eid);
-  const facturas=(DB['fac_facturas']||[]).filter(r=>r['CLIENTE_FACTURA']==eid);
-  const inscs   =(DB['tbl_inscripciones']||[]).filter(r=>r['ESTUDIANTE_ADMISION']==eid);
+  const mats     = (DB['tbl_matriculas']    ||[]).filter(r=>r['ESTUDIANTE_MATRICULA']==eid);
+  const notas    = (DB['tbl_notas']         ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
+  const notas2   = (DB['tbl_notas2']        ||[]).filter(r=>r['ESTUDIANTE_NOTA']==eid);
+  const habs     = (DB['tbl_habilitaciones']||[]).filter(r=>r['ESTUDIANTE_HABILITACION']==eid);
+  const recibos  = (DB['fac_recibos']       ||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
+  const recibos2 = (DB['fac_recibos2']      ||[]).filter(r=>r['CLIENTE_RECIBO']==eid);
+  const creditos = (DB['fac_creditos']      ||[]).filter(r=>r['CLIENTE_CREDITO']==eid);
+  const facturas = (DB['fac_facturas']      ||[]).filter(r=>r['CLIENTE_FACTURA']==eid);
+  const inscs    = (DB['tbl_inscripciones'] ||[]).filter(r=>r['ESTUDIANTE_ADMISION']==eid);
+  const practicas= (DB['tbl_practicas']     ||[]).filter(r=>r['ESTUDIANTE_PRACTICA']==eid);
 
-  return{est,ids:{eid,mats,notas,notas2,habs,recibos,recibos2,creditos,facturas,inscs,
-    cursos,modulos2,docentes,grupos,programas,estamat}};
+  return{est,ids:{eid,mats,notas,notas2,habs,recibos,recibos2,creditos,facturas,inscs,practicas,
+    cursos,modulos2,docentes,grupos,programas,estamat,estadoadm}};
 }
 
-function idx(arr,key){const m={};arr.forEach(r=>{if(r[key]!=null)m[r[key]]=r;});return m;}
+function idx(arr,key){ const m={}; arr.forEach(r=>{ if(r[key]!=null) m[r[key]]=r; }); return m; }
 
-/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
+   DETERMINAR ESTADO DEL ESTUDIANTE
+   Lógica: inscripciones → ESTADO_ADMISION → tbl_estadoadmision
+   + practicas → EN ETAPA PRODUCTIVA si hay practica activa
+════════════════════════════════════════════════════════════ */
+function resolveEstado(){
+  const { inscs, practicas, estadoadm, mats, estamat } = cIds;
+
+  // 1. Verificar si tiene práctica activa → EN ETAPA PRODUCTIVA
+  if(practicas && practicas.length){
+    const hoy = new Date();
+    const practicaActiva = practicas.find(pr => {
+      const fin = pr['FECHAFIN_PRACTICA'] ? new Date(pr['FECHAFIN_PRACTICA']) : null;
+      return !fin || fin >= hoy;
+    });
+    if(practicaActiva) return { texto:'EN ETAPA PRODUCTIVA', cls:'est-etapa' };
+  }
+
+  // 2. Tomar estado de la inscripción más reciente
+  if(inscs && inscs.length){
+    const ultima = inscs[inscs.length-1];
+    const estadoId = ultima['ESTADO_ADMISION'];
+    const estadoObj = estadoadm[estadoId] || {};
+    const nombre = (estadoObj['NOMBRE_ESTADOADMISION'] || '').toUpperCase();
+
+    if(nombre.includes('ACTIVO'))                                    return{ texto:'ACTIVO', cls:'est-activo' };
+    if(nombre.includes('RETIRADO'))                                  return{ texto:'RETIRADO', cls:'est-retirado' };
+    if(nombre.includes('GRADUADO'))                                  return{ texto:'GRADUADO', cls:'est-graduado' };
+    if(nombre.includes('CON ETAPA'))                                 return{ texto:'CON ETAPA PRODUCTIVA', cls:'est-etapa' };
+    if(nombre.includes('SIN GRADUAR SIN ETAPA')||nombre.includes('SIN ETAPA')) return{ texto:'SIN ETAPA PRODUCTIVA', cls:'est-sin-etapa' };
+    if(nombre.includes('ETAPA PRODUCTIVA'))                          return{ texto:'EN ETAPA PRODUCTIVA', cls:'est-etapa' };
+    if(nombre.includes('RESERVA'))                                   return{ texto:'RESERVA DE CUPO', cls:'est-cupo' };
+    if(nombre)                                                        return{ texto:nombre, cls:'est-default' };
+  }
+
+  // 3. Fallback: estado matricula más reciente
+  if(mats && mats.length){
+    const ulmat = mats[mats.length-1];
+    const em = estamat[ulmat['ESTADO_MATRICULA']] || {};
+    const n = (em['NOMBRE_ESTADOMATRICULA']||'').toUpperCase();
+    if(n.includes('ACTIVO'))    return{ texto:'ACTIVO', cls:'est-activo' };
+    if(n.includes('RETIRADO'))  return{ texto:'RETIRADO', cls:'est-retirado' };
+    if(n.includes('FINALIZADO'))return{ texto:'GRADUADO', cls:'est-graduado' };
+    if(n)                        return{ texto:n, cls:'est-default' };
+  }
+
+  return{ texto:'ACTIVO', cls:'est-activo' };
+}
+
+/* ════════════════════════════════════════════════════════════
    SHOW PORTAL
-════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════ */
 function showPortal(){
   document.getElementById('ls').classList.remove('v');
   document.getElementById('p').classList.add('v');
 
-  const nom=[cEst['NOMBRES_ESTUDIANTE'],cEst['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ');
-  const ini=nom.charAt(0).toUpperCase();
-  document.getElementById('avl').textContent=ini;
-  document.getElementById('pn').textContent=nom;
-  document.getElementById('pd').textContent='Doc: '+cDoc;
+  const nom = [cEst['NOMBRES_ESTUDIANTE'],cEst['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ');
+  const ini = nom.charAt(0).toUpperCase();
 
-  // Grupo
-  const g=resolveGrupo();
+  // Avatar inicial
+  document.getElementById('av-txt').textContent = ini;
+  document.getElementById('banner-av-txt').textContent = ini;
+  document.getElementById('pn').textContent = nom;
+  document.getElementById('pd').textContent = 'Doc: '+cDoc;
+
+  // Intenta cargar foto de GitHub Fotos/
+  tryLoadGithubFoto(cDoc);
+
+  // Grupo strip
+  const g = resolveGrupo();
   if(g){
-    setText('g-cod',g.codigo);setText('g-ano',g.ano);
-    setText('g-prog',g.programa.length>45?g.programa.slice(0,43)+'…':g.programa);
-    setText('g-f',g.inicio+' – '+g.fin);
-    setText('g-j',g.jornada);setText('g-d',g.docente);
+    setText('g-cod', g.codigo);
+    setText('g-ano', g.ano);
+    setText('g-prog', g.programa.length>45 ? g.programa.slice(0,43)+'…' : g.programa);
+    setText('g-f', g.inicio+' – '+g.fin);
+    setText('g-j', g.jornada);
   }
 
-  renderInicio(nom,ini,g);
+  // Estado (reemplaza docente)
+  const estado = resolveEstado();
+  document.getElementById('g-estado').innerHTML =
+    `<span class="estado-badge ${estado.cls}">${estado.texto}</span>`;
+
+  renderInicio(nom, ini, g, estado);
   renderNotas();
   renderFinanciero();
   renderPerfil();
-  ST('inicio',document.querySelector('.tbtn'));
+
+  // Cargar asistencia de Google Sheets automáticamente
+  loadGoogleSheets();
+
+  ST('inicio', document.querySelector('.tbtn'));
 }
 
-function setText(id,v){const el=document.getElementById(id);if(el)el.textContent=v||'—';}
+function setText(id,v){ const el=document.getElementById(id); if(el) el.textContent=v||'—'; }
 
 function resolveGrupo(){
-  const {mats,cursos,grupos,programas,docentes}=cIds;
-  if(!mats||!mats.length)return null;
-  // Find last course with a group
-  let gid=null,did=null;
+  const { mats,cursos,grupos,programas,docentes } = cIds;
+  if(!mats||!mats.length) return null;
+  let gid=null, did=null;
   for(const m of [...mats].reverse()){
-    const c=cursos[m['CURSO_MATRICULA']];
-    if(c&&c['GRUPO_CURSO']){gid=c['GRUPO_CURSO'];did=c['DOCENTE_CURSO'];break;}
+    const c = cursos[m['CURSO_MATRICULA']];
+    if(c&&c['GRUPO_CURSO']){ gid=c['GRUPO_CURSO']; did=c['DOCENTE_CURSO']; break; }
   }
-  if(!gid)return null;
-  const gr=grupos[gid]||{};
-  const pr=programas[gr['PROGRAMA_GRUPO']]||{};
-  const dc=docentes[did]||{};
+  if(!gid) return null;
+  const gr = grupos[gid]||{};
+  const pr = programas[gr['PROGRAMA_GRUPO']]||{};
+  const dc = docentes[did]||{};
   return{
-    codigo:gr['CODIGO_GRUPO']||'—',ano:gr['ANO_GRUPO']||'—',
-    programa:pr['NOMBRE_PROGRAMA']||'—',
-    inicio:fd(gr['FECHAINICIO_GRUPO']),fin:fd(gr['FECHAFIN_GRUPO']),
-    jornada:gr['JORNADA_GRUPO']||gr['DIAS_GRUPO']||'—',
-    docente:[dc['NOMBRES_DOCENTE'],dc['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—',
+    codigo: gr['CODIGO_GRUPO']||'—',
+    ano:    gr['ANO_GRUPO']||'—',
+    programa: pr['NOMBRE_PROGRAMA']||'—',
+    inicio: fd(gr['FECHAINICIO_GRUPO']),
+    fin:    fd(gr['FECHAFIN_GRUPO']),
+    jornada: gr['JORNADA_GRUPO']||gr['DIAS_GRUPO']||'—',
+    docente: [dc['NOMBRES_DOCENTE'],dc['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—',
   };
 }
 
-/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    RENDER INICIO
-════════════════════════════════════════════════════════ */
-function renderInicio(nom,ini,g){
-  setText('bav',ini);setText('bn',nom);
-  setText('bd','Documento: '+cDoc);
+════════════════════════════════════════════════════════════ */
+function renderInicio(nom,ini,g,estado){
+  setText('bav-txt' in document.getElementById('banner-av-txt')?'dummy':'banner-av-txt', ini);
+  document.getElementById('banner-av-txt').textContent = ini;
+  setText('bn',nom); setText('bd','Documento: '+cDoc);
   setText('bpr','Programa: '+(g?g.programa:'—'));
-  setText('bc-g',g?g.codigo:'—');
-  setText('bc-a',g?'Año '+g.ano:'—');
+  setText('bc-g', g?g.codigo:'—');
+  setText('bc-a', g?'Año '+g.ano:'—');
+  document.getElementById('bc-e').textContent = estado.texto;
 
-  const{notas,notas2,recibos,recibos2,creditos,mats}=cIds;
-  const aN=[...(notas||[]),...(notas2||[])];
-  const aR=[...(recibos||[]),...(recibos2||[])];
+  const { notas,notas2,recibos,recibos2,creditos,mats } = cIds;
+  const aN = [...(notas||[]),...(notas2||[])];
+  const aR = [...(recibos||[]),...(recibos2||[])];
+  const prom = calcProm(aN);
+  const totalPago = aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
+  const totalCred = (creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
 
-  const prom=calcProm(aN);
-  const totalPago=aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
-  const totalCred=(creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
+  setText('q-prom', prom?prom.toFixed(2):'—');
+  setText('q-pag', totalPago?cop(totalPago):'$0');
+  const modCount = Object.keys(groupNotasByModule(notas||[])).length + Object.keys(groupNotasByModule(notas2||[])).length;
+  setText('q-mod', modCount||'0');
+  setText('s-r', aR.length||'0');
+  setText('s-c', totalCred?cop(totalCred):'$0');
+  setText('s-n', aN.length||'0');
+  setText('s-m', (mats||[]).length||'0');
+  setText('n-prom', prom?prom.toFixed(2):'—');
+  setText('n-mod', modCount||'0');
+  setText('n-altas', aN.filter(n=>parseFloat(n['CALIFICACION_NOTA'])>=4.5).length||'0');
+  setText('n-est', prom?(prom>=3.0?'APROBADO':'EN RIESGO'):'—');
 
-  setText('q-prom',prom?prom.toFixed(2):'—');
-  setText('q-pag',totalPago?cop(totalPago):'$0');
-  setText('q-mod',[...new Set(aN.map(n=>n['CURSO_NOTA']))].length||'0');
-  setText('s-r',aR.length||'0');
-  setText('s-c',totalCred?cop(totalCred):'$0');
-  setText('s-n',aN.length||'0');
-  setText('s-m',(mats||[]).length||'0');
-  setText('n-prom',prom?prom.toFixed(2):'—');
-  setText('n-mod',[...new Set(aN.map(n=>n['CURSO_NOTA']))].length||'0');
-  setText('n-altas',aN.filter(n=>parseFloat(n['CALIFICACION_NOTA'])>=4.5).length||'0');
-  setText('n-est',prom?(prom>=3.0?'APROBADO':'EN RIESGO'):'—');
-
-  // Last 5 notas
-  renderNotasRows('tb-ln',aN.slice(-5).reverse(),true);
+  // Últimas 5 notas (sin agrupar para el widget de inicio)
+  renderNotasRowsShort('tb-ln', aN.slice(-5).reverse());
 }
 
-/* ════════════════════════════════════════════════════════
-   RENDER NOTAS
-════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   NOTAS — Agrupación por módulo con Definitiva
+════════════════════════════════════════════════════════════ */
+
+// Agrupa notas por CURSO_NOTA y calcula promedio por área
+function groupNotasByModule(notas){
+  const groups = {};
+  notas.forEach(n => {
+    const cid = n['CURSO_NOTA'];
+    if(!groups[cid]) groups[cid] = { notas: [], curso_id: cid };
+    groups[cid].notas.push(n);
+  });
+  return groups;
+}
+
 function renderNotas(){
-  renderNotasRows('tb-n1',cIds.notas||[]);
-  renderNotasRows('tb-n2',cIds.notas2||[]);
+  const n1 = cIds.notas||[];
+  const n2 = cIds.notas2||[];
+  const habs = cIds.habs||[];
+
+  // Sección notas principales
+  if(n1.length){
+    document.getElementById('sec-n1').classList.remove('nota-section-hidden');
+    renderNotasAgrupadas('tb-n1', n1, ['CONOCIMIENTO','DESEMPEÑO','PRODUCTO']);
+  } else {
+    document.getElementById('sec-n1').classList.add('nota-section-hidden');
+  }
+
+  // Sección notas históricas
+  if(n2.length){
+    document.getElementById('sec-n2').classList.remove('nota-section-hidden');
+    renderNotasAgrupadas('tb-n2', n2, ['PRIMER','SEGUNDO','TERCERO']);
+  } else {
+    document.getElementById('sec-n2').classList.add('nota-section-hidden');
+  }
+
   // Habilitaciones
-  const habs=cIds.habs||[];
-  if(!habs.length){setEmpty('tb-hab',3,'✅','Sin habilitaciones.');return;}
-  document.getElementById('tb-hab').innerHTML=habs.map(h=>{
-    const c=cIds.cursos[h['CURSO_HABILITACION']]||{};
-    const m=cIds.modulos2[c['MODULO_CURSO']]||{};
-    return`<tr><td>${e(m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+h['CURSO_HABILITACION'])}</td>
+  if(!habs.length){
+    document.getElementById('sec-hab').classList.add('nota-section-hidden');
+    return;
+  }
+  document.getElementById('sec-hab').classList.remove('nota-section-hidden');
+  document.getElementById('tb-hab').innerHTML = habs.map(h=>{
+    const c = cIds.cursos[h['CURSO_HABILITACION']]||{};
+    const m = cIds.modulos2[c['MODULO_CURSO']]||{};
+    return`<tr>
+      <td>${e(m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+h['CURSO_HABILITACION'])}</td>
       <td><span class="sp ${sc(h['NOTA_HABILITACION'])}">${e(h['NOTA_HABILITACION'])}</span></td>
       <td>${fd(h['FECHA_HABILITACION'])}</td></tr>`;
   }).join('');
 }
 
-function renderNotasRows(id,notas,short=false){
-  const b=document.getElementById(id);
-  if(!b)return;
-  if(!notas.length){setEmpty(id,short?5:7,'📭','Sin notas registradas.');return;}
-  b.innerHTML=notas.map(n=>{
-    const c=cIds.cursos[n['CURSO_NOTA']]||{};
-    const m=cIds.modulos2[c['MODULO_CURSO']]||{};
-    const d=cIds.docentes[c['DOCENTE_CURSO']]||{};
-    const nm=m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+n['CURSO_NOTA'];
-    const dn=[d['NOMBRES_DOCENTE'],d['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—';
-    if(short)return`<tr><td><strong>${e(nm)}</strong></td>
-      <td><span class="badge ${ac(n['AREA_NOTA'])}">${e(n['AREA_NOTA']||'—')}</span></td>
-      <td><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${e(n['CALIFICACION_NOTA'])}</span></td>
-      <td>${fd(n['FECHA_NOTA'])}</td><td style="font-size:.74rem">${e(dn)}</td></tr>`;
+// Renderiza agrupando por módulo/curso con promedio como Definitiva
+function renderNotasAgrupadas(tbodyId, notas, areaLabels){
+  const tbody = document.getElementById(tbodyId);
+  if(!notas.length){ setEmpty(tbodyId, 8, '📭', 'Sin notas registradas.'); return; }
+
+  const groups = groupNotasByModule(notas);
+  const rows = [];
+
+  for(const [cid, g] of Object.entries(groups)){
+    const c = cIds.cursos[cid]||{};
+    const m = cIds.modulos2[c['MODULO_CURSO']]||{};
+    const d = cIds.docentes[c['DOCENTE_CURSO']]||{};
+    const nm = m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+cid;
+    const dn = [d['NOMBRES_DOCENTE'],d['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—';
+    const periodo = fd(c['FECHAINICIO_CURSO'])+' – '+fd(c['FECHAFIN_CURSO']);
+
+    // Buscar nota por área
+    const notasPorArea = {};
+    g.notas.forEach(n => {
+      const a = (n['AREA_NOTA']||'').toUpperCase().trim();
+      if(!notasPorArea[a]) notasPorArea[a] = [];
+      notasPorArea[a].push(parseFloat(n['CALIFICACION_NOTA'])||0);
+    });
+
+    // Promedio por área (en caso de duplicados)
+    const promedioArea = {};
+    for(const [a,vals] of Object.entries(notasPorArea)){
+      promedioArea[a] = vals.reduce((x,y)=>x+y,0)/vals.length;
+    }
+
+    // Calcular definitiva = promedio de todas las notas del módulo
+    const allVals = g.notas.map(n=>parseFloat(n['CALIFICACION_NOTA'])||0).filter(v=>v>0);
+    const definitiva = allVals.length ? allVals.reduce((a,b)=>a+b,0)/allVals.length : null;
+
+    // Obtener valor por cada área label
+    const getArea = (lbl) => {
+      const key = Object.keys(promedioArea).find(k=>k.includes(lbl)||lbl.includes(k));
+      return key ? promedioArea[key] : null;
+    };
+
+    rows.push({ nm, cid, c, periodo, areaLabels, promedioArea, getArea, definitiva, dn });
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const a0 = r.getArea(r.areaLabels[0]);
+    const a1 = r.getArea(r.areaLabels[1]);
+    const a2 = r.getArea(r.areaLabels[2]);
+    const def = r.definitiva;
+    return `<tr>
+      <td><strong>${e(r.nm)}</strong></td>
+      <td><code style="font-size:.7rem;background:#f0f6ff;padding:2px 5px;border-radius:4px">${e(r.c['CODIGO_CURSO']||'—')}</code></td>
+      <td style="font-size:.75rem;white-space:nowrap">${e(r.periodo)}</td>
+      <td>${a0!==null?`<span class="sp ${sc(a0)}">${a0.toFixed(1)}</span>`:'<span style="color:#ccc">—</span>'}</td>
+      <td>${a1!==null?`<span class="sp ${sc(a1)}">${a1.toFixed(1)}</span>`:'<span style="color:#ccc">—</span>'}</td>
+      <td>${a2!==null?`<span class="sp ${sc(a2)}">${a2.toFixed(1)}</span>`:'<span style="color:#ccc">—</span>'}</td>
+      <td class="col-def">${def!==null?`<span class="sp ${sc(def)}">${def.toFixed(1)}</span>`:'—'}</td>
+      <td style="font-size:.74rem">${e(r.dn)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Para inicio — tabla simple sin agrupación
+function renderNotasRowsShort(tbodyId, notas){
+  const tbody = document.getElementById(tbodyId);
+  if(!notas||!notas.length){ setEmpty(tbodyId,5,'📭','Sin notas recientes.'); return; }
+  tbody.innerHTML = notas.map(n=>{
+    const c = cIds.cursos[n['CURSO_NOTA']]||{};
+    const m = cIds.modulos2[c['MODULO_CURSO']]||{};
+    const d = cIds.docentes[c['DOCENTE_CURSO']]||{};
+    const nm = m['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+n['CURSO_NOTA'];
+    const dn = [d['NOMBRES_DOCENTE'],d['APELLIDOS_DOCENTE']].filter(Boolean).join(' ')||'—';
     return`<tr>
-      <td style="color:var(--muted);font-size:.7rem">${n['ID_NOTA']}</td>
       <td><strong>${e(nm)}</strong></td>
-      <td><code style="font-size:.7rem;background:#f0f8f7;padding:2px 5px;border-radius:4px">${e(c['CODIGO_CURSO']||'—')}</code></td>
-      <td style="font-size:.75rem;white-space:nowrap">${fd(c['FECHAINICIO_CURSO'])} – ${fd(c['FECHAFIN_CURSO'])}</td>
       <td><span class="badge ${ac(n['AREA_NOTA'])}">${e(n['AREA_NOTA']||'—')}</span></td>
       <td><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${e(n['CALIFICACION_NOTA'])}</span></td>
+      <td>${fd(n['FECHA_NOTA'])}</td>
       <td style="font-size:.74rem">${e(dn)}</td></tr>`;
   }).join('');
 }
 
-/* ════════════════════════════════════════════════════════
-   RENDER FINANCIERO
-════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   FINANCIERO
+════════════════════════════════════════════════════════════ */
 function renderFinanciero(){
-  const{recibos,recibos2,creditos,facturas}=cIds;
-  const aR=[...(recibos||[]),...(recibos2||[])];
-  const tot=aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
-  const totC=(creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
-  const last=aR.sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0)).slice(-1)[0];
-  setText('f-cnt',aR.length);setText('f-tot',cop(tot));
-  setText('f-dsc',cop(totC));setText('f-last',last?fd(last['FECHA_RECIBO']):'—');
-
+  const { recibos,recibos2,creditos,facturas } = cIds;
+  const aR = [...(recibos||[]),...(recibos2||[])];
+  const tot = aR.reduce((a,r)=>a+(Number(r['VALOR_RECIBO'])||0),0);
+  const totC = (creditos||[]).reduce((a,r)=>a+(Number(r['VALOR_CREDITO'])||0),0);
+  const last = [...aR].sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0)).slice(-1)[0];
+  setText('f-cnt',aR.length); setText('f-tot',cop(tot));
+  setText('f-dsc',cop(totC)); setText('f-last',last?fd(last['FECHA_RECIBO']):'—');
   rRecibos('tb-r1',recibos||[],false);
   rRecibos('tb-r2',recibos2||[],true);
 
-  // Créditos
-  const cb=document.getElementById('tb-crd');
-  const cr=creditos||[];
-  if(!cr.length){setEmpty('tb-crd',4,'💚','Sin descuentos registrados.');}
-  else{let t=0;cb.innerHTML=cr.map(c=>{const v=Number(c['VALOR_CREDITO'])||0;t+=v;return`<tr>
-    <td><span class="badge bb">${e(c['CONSECUTIVO_CREDITO'])}</span></td>
-    <td>${fd(c['FECHA_CREDITO'])}</td><td style="font-size:.77rem">${e(c['CONCEPTO_CREDITO']||'—')}</td>
-    <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;}).join('')
-    +`<tr style="background:var(--teal-bg)"><td colspan="3" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL DESCUENTOS</td>
-    <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;}
+  const cr = creditos||[];
+  if(!cr.length){ setEmpty('tb-crd',4,'💚','Sin descuentos registrados.'); }
+  else{
+    let t=0;
+    document.getElementById('tb-crd').innerHTML = cr.map(c=>{
+      const v=Number(c['VALOR_CREDITO'])||0; t+=v;
+      return`<tr>
+        <td><span class="badge bb">${e(c['CONSECUTIVO_CREDITO'])}</span></td>
+        <td>${fd(c['FECHA_CREDITO'])}</td>
+        <td style="font-size:.77rem">${e(c['CONCEPTO_CREDITO']||'—')}</td>
+        <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;
+    }).join('') + `<tr style="background:var(--teal-bg)">
+      <td colspan="3" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL DESCUENTOS</td>
+      <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;
+  }
 
-  // Facturas
-  const fb=document.getElementById('tb-fac');
-  const fc=facturas||[];
-  if(!fc.length){setEmpty('tb-fac',5,'📄','Sin facturas registradas.');}
-  else fb.innerHTML=fc.map(f=>`<tr>
+  const fc = facturas||[];
+  if(!fc.length){ setEmpty('tb-fac',5,'📄','Sin facturas registradas.'); }
+  else document.getElementById('tb-fac').innerHTML = fc.map(f=>`<tr>
     <td><span class="badge bg">${e(f['CONSECUTIVO_FACTURA'])}</span></td>
-    <td>${e(f['TIPO_FACTURA']||'—')}</td><td>${fd(f['FECHA_FACTURA'])}</td>
+    <td>${e(f['TIPO_FACTURA']||'—')}</td>
+    <td>${fd(f['FECHA_FACTURA'])}</td>
     <td><strong>${cop(Number(f['TOTAL_FACTURA'])||0)}</strong></td>
     <td style="font-size:.77rem">${e(f['DESCRIPCION_FACTURA']||'—')}</td></tr>`).join('');
 }
 
 function rRecibos(id,list,sec){
-  const b=document.getElementById(id);
-  if(!list.length){setEmpty(id,sec?5:6,'📭','Sin recibos en este sistema.');return;}
+  if(!list.length){ setEmpty(id,sec?5:6,'📭','Sin recibos en este sistema.'); return; }
   let t=0;
-  b.innerHTML=list.sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0)).map(r=>{
-    const v=Number(r['VALOR_RECIBO'])||0;t+=v;
-    return`<tr>
-      <td><span class="badge bb">${e(r['CONSECUTIVO_RECIBO'])}</span></td>
-      <td style="white-space:nowrap">${fd(r['FECHA_RECIBO'])}</td>
-      <td style="font-size:.77rem">${e(r['CONCEPTO_RECIBO']||'—')}</td>
-      <td><span class="badge bt">${e(r['FORMAPAGO_RECIBO']||'—')}</span></td>
-      ${!sec?`<td style="font-size:.74rem">${e(r['NUMTRANSACCION_RECIBO']||'—')}</td>`:''}
-      <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;
-  }).join('')+`<tr style="background:var(--teal-bg)">
-    <td colspan="${sec?4:5}" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL</td>
-    <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;
+  document.getElementById(id).innerHTML = [...list]
+    .sort((a,b)=>new Date(a['FECHA_RECIBO']||0)-new Date(b['FECHA_RECIBO']||0))
+    .map(r=>{
+      const v=Number(r['VALOR_RECIBO'])||0; t+=v;
+      return`<tr>
+        <td><span class="badge bb">${e(r['CONSECUTIVO_RECIBO'])}</span></td>
+        <td style="white-space:nowrap">${fd(r['FECHA_RECIBO'])}</td>
+        <td style="font-size:.77rem">${e(r['CONCEPTO_RECIBO']||'—')}</td>
+        <td><span class="badge bt">${e(r['FORMAPAGO_RECIBO']||'—')}</span></td>
+        ${!sec?`<td style="font-size:.74rem">${e(r['NUMTRANSACCION_RECIBO']||'—')}</td>`:''}
+        <td><strong style="color:var(--pass)">${cop(v)}</strong></td></tr>`;
+    }).join('')
+    + `<tr style="background:var(--teal-bg)">
+        <td colspan="${sec?4:5}" style="text-align:right;font-weight:700;color:var(--teal-dk)">TOTAL</td>
+        <td><strong style="color:var(--pass)">${cop(t)}</strong></td></tr>`;
 }
 
-/* ════════════════════════════════════════════════════════
-   RENDER PERFIL
-════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   PERFIL
+════════════════════════════════════════════════════════════ */
 function renderPerfil(){
-  const E=cEst;
-  const fields=[
-    ['Nombre completo',[E['NOMBRES_ESTUDIANTE'],E['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ')],
+  const E = cEst;
+  const fields = [
+    ['Nombre completo', [E['NOMBRES_ESTUDIANTE'],E['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ')],
     ['Documento',E['DOCUMENTO_ESTUDIANTE']],['Correo',E['CORREO_ESTUDIANTE']],
     ['Teléfono',E['TELEFONO_ESTUDIANTE']||E['CELULAR_ESTUDIANTE']],
     ['Dirección',E['DIRECCION_ESTUDIANTE']],['Fecha Nacimiento',fd(E['FECHANACIMIENTO_ESTUDIANTE'])],
@@ -856,137 +1201,268 @@ function renderPerfil(){
     ['Ciudad',E['CIUDAD_ESTUDIANTE']],['Expedición Doc.',fd(E['EXPEDICION_ESTUDIANTE'])],
     ['Código Estudiante',E['CODIGO_ESTUDIANTE']],['ID Interno',E['ID_ESTUDIANTE']],
   ];
-  document.getElementById('tb-pf').innerHTML=fields
+  document.getElementById('tb-pf').innerHTML = fields
     .filter(([,v])=>v!=null&&v!=='')
     .map(([l,v])=>`<tr>
       <td style="font-weight:700;color:var(--muted);width:170px;font-size:.77rem;text-transform:uppercase;letter-spacing:.04em">${e(l)}</td>
       <td>${e(String(v))}</td></tr>`).join('');
 
-  const mats=cIds.mats||[];
-  if(!mats.length){setEmpty('tb-mat',5,'📭','Sin matrículas registradas.');return;}
-  document.getElementById('tb-mat').innerHTML=mats.map(m=>{
-    const c=cIds.cursos[m['CURSO_MATRICULA']]||{};
-    const mo=cIds.modulos2[c['MODULO_CURSO']]||{};
-    const em=cIds.estamat[m['ESTADO_MATRICULA']]||{};
-    const nm=mo['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+m['CURSO_MATRICULA'];
-    return`<tr><td><strong>${e(nm)}</strong></td><td>${fd(m['FECHA_MATRICULA'])}</td>
+  const mats = cIds.mats||[];
+  if(!mats.length){ setEmpty('tb-mat',5,'📭','Sin matrículas registradas.'); return; }
+  document.getElementById('tb-mat').innerHTML = mats.map(m=>{
+    const c = cIds.cursos[m['CURSO_MATRICULA']]||{};
+    const mo = cIds.modulos2[c['MODULO_CURSO']]||{};
+    const em = cIds.estamat[m['ESTADO_MATRICULA']]||{};
+    const nm = mo['NOMBRE_MODULOPROGRAMA']||c['CODIGO_CURSO']||'Curso #'+m['CURSO_MATRICULA'];
+    return`<tr>
+      <td><strong>${e(nm)}</strong></td>
+      <td>${fd(m['FECHA_MATRICULA'])}</td>
       <td>${cop(Number(m['VALOR_MATRICULA'])||0)}</td>
       <td><span style="color:${Number(m['SALDO_MATRICULA'])>0?'var(--warn)':'var(--pass)'};font-weight:700">${cop(Number(m['SALDO_MATRICULA'])||0)}</span></td>
       <td><span class="badge ${Number(m['SALDO_MATRICULA'])>0?'bw':'bp'}">${e(em['NOMBRE_ESTADOMATRICULA']||m['ESTADO_MATRICULA']||'—')}</span></td></tr>`;
   }).join('');
 }
 
-/* ════════════════════════════════════════════════════════
-   ASISTENCIA XLSX
-════════════════════════════════════════════════════════ */
-function hDrop(ev){ev.preventDefault();document.getElementById('uz').classList.remove('do');const f=ev.dataTransfer.files[0];if(f)loadXlsx(f);}
+/* ════════════════════════════════════════════════════════════
+   ASISTENCIA — Google Sheets CSV
+════════════════════════════════════════════════════════════ */
+async function loadGoogleSheets(){
+  document.getElementById('gs-err').style.display='none';
+  document.getElementById('gs-loading').style.display='flex';
+  document.getElementById('gs-status').textContent = 'Conectando con Google Sheets…';
+
+  try{
+    // Necesita que la hoja esté PUBLICADA (Archivo → Publicar en la web)
+    const r = await fetch(SHEETS_CSV_URL);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const csv = await r.text();
+    document.getElementById('gs-status').textContent = 'Procesando datos…';
+    xRows = parseCSV(csv);
+    document.getElementById('gs-loading').style.display='none';
+    if(xRows.length){
+      document.getElementById('asist-source-tag').textContent = '📊 Google Sheets';
+      filterAsist(true);
+    } else {
+      throw new Error('Hoja vacía');
+    }
+  }catch(err){
+    document.getElementById('gs-loading').style.display='none';
+    document.getElementById('gs-err').style.display='block';
+    document.getElementById('gs-err').textContent =
+      '⚠ No se pudo cargar Google Sheets automáticamente (' + err.message +
+      '). La hoja debe estar publicada públicamente. Puede cargar el XLSX manualmente.';
+  }
+}
+
+// Parser CSV robusto (maneja comas dentro de comillas)
+function parseCSV(text){
+  const lines = text.split('\n').filter(l=>l.trim());
+  if(lines.length<2) return [];
+  const headers = csvRow(lines[0]);
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    const vals = csvRow(lines[i]);
+    if(vals.length<2) continue;
+    const obj = {};
+    headers.forEach((h,j)=>obj[h.trim()]=vals[j]||'');
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function csvRow(line){
+  const result=[]; let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    if(line[i]==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(line[i]===','&&!inQ){result.push(cur);cur='';}
+    else cur+=line[i];
+  }
+  result.push(cur);
+  return result;
+}
+
+/* ════════════════════════════════════════════════════════════
+   ASISTENCIA — XLSX manual (respaldo)
+════════════════════════════════════════════════════════════ */
+function hDrop(ev){
+  ev.preventDefault();
+  document.getElementById('uz').classList.remove('do');
+  const f = ev.dataTransfer.files[0];
+  if(f) loadXlsx(f);
+}
 
 function loadXlsx(file){
-  if(!file)return;
-  const rd=new FileReader();
-  rd.onload=ev=>{
+  if(!file) return;
+  const rd = new FileReader();
+  rd.onload = ev=>{
     try{
-      const wb=XLSX.read(ev.target.result,{type:'array',cellDates:true});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      xRows=XLSX.utils.sheet_to_json(ws,{defval:''});
-      if(!xRows.length){alert('Archivo vacío o sin formato reconocido.');return;}
-      filterAsist();
-    }catch(err){alert('Error al leer el archivo: '+err.message);}
+      const wb = XLSX.read(ev.target.result,{type:'array',cellDates:true});
+      // Buscar hoja llamada "Asistencia", o usar la primera
+      const sheetName = wb.SheetNames.find(s=>s.toLowerCase().includes('asist')) || wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      xRows = XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!xRows.length){ alert('Archivo vacío o sin formato reconocido.'); return; }
+      document.getElementById('gs-err').style.display='none';
+      document.getElementById('asist-source-tag').textContent = '📁 Archivo local';
+      filterAsist(false);
+    }catch(err){ alert('Error al leer el archivo: '+err.message); }
   };
   rd.readAsArrayBuffer(file);
 }
 
-function filterAsist(){
-  if(!cDoc||!xRows.length)return;
-  const ks=Object.keys(xRows[0]);
-  const dc=ks.find(k=>/^(documento|cedula|cc|^id$|doc)/i.test(k.trim()))||ks[0];
-  const fc=ks.find(k=>/^fecha/i.test(k.trim()))||ks[1];
-  const ec=ks.find(k=>/^(estado|asist|present)/i.test(k.trim()))||ks[2];
-  const mc=ks.find(k=>/^(materia|curso|asign|modulo)/i.test(k.trim()));
-  const oc=ks.find(k=>/^(obs|nota|comment)/i.test(k.trim()));
+/* ════════════════════════════════════════════════════════════
+   FILTRAR Y RENDERIZAR ASISTENCIA
+════════════════════════════════════════════════════════════ */
+function filterAsist(fromSheets){
+  if(!cDoc||!xRows.length) return;
+  const ks = Object.keys(xRows[0]);
+  const dc = ks.find(k=>/^(documento|cedula|cc|^id$|doc)/i.test(k.trim()))||ks[0];
+  const fc = ks.find(k=>/^fecha/i.test(k.trim()))||ks[1];
+  const ec = ks.find(k=>/^(estado|asist|present)/i.test(k.trim()))||ks[2];
+  const mc = ks.find(k=>/^(materia|curso|asign|modulo)/i.test(k.trim()));
+  const oc = ks.find(k=>/^(obs|nota|comment)/i.test(k.trim()));
 
-  const mine=xRows.filter(r=>String(r[dc]||'').trim().replace(/\D/g,'')===(cDoc||'').replace(/\D/g,''));
-  if(!mine.length){document.getElementById('asist-ok').style.display='none';document.getElementById('asist-no').style.display='block';return;}
-  document.getElementById('asist-ok').style.display='block';document.getElementById('asist-no').style.display='none';
+  const mine = xRows.filter(r=>String(r[dc]||'').trim().replace(/\D/g,'')===(cDoc||'').replace(/\D/g,''));
+  if(!mine.length){
+    document.getElementById('asist-ok').style.display='none';
+    document.getElementById('asist-no').style.display='block';
+    document.getElementById('asist-info-bar').style.display='none';
+    return;
+  }
 
-  const DIAS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const regs=mine.map(r=>({
-    fecha:pf(r[fc]),estado:ne(String(r[ec]||'')),
-    mat:mc?String(r[mc]||''):'',obs:oc?String(r[oc]||''):'',
+  document.getElementById('asist-ok').style.display='block';
+  document.getElementById('asist-no').style.display='none';
+
+  const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const regs = mine.map(r=>({
+    fecha:  pf(r[fc]),
+    estado: ne(String(r[ec]||'')),
+    mat:    mc?String(r[mc]||''):'',
+    obs:    oc?String(r[oc]||''):'',
   })).filter(r=>r.fecha).sort((a,b)=>a.fecha-b.fecha);
 
-  const pr=regs.filter(r=>r.estado==='P').length;
-  const au=regs.filter(r=>r.estado==='A').length;
-  const pct=regs.length?Math.round(pr/regs.length*100):0;
-  setText('q-as',pct+'%');
+  const pr  = regs.filter(r=>r.estado==='P').length;
+  const au  = regs.filter(r=>r.estado==='A').length;
+  const pct = regs.length ? Math.round(pr/regs.length*100) : 0;
+  setText('q-as', pct+'%');
 
-  document.getElementById('achips').innerHTML=`
-    <div class="ac"><div class="an">${regs.length}</div><div class="al">Registros</div></div>
-    <div class="ac"><div class="an" style="color:var(--pass)">${pr}</div><div class="al">Presencias</div></div>
-    <div class="ac"><div class="an" style="color:var(--warn)">${au}</div><div class="al">Ausencias</div></div>
-    <div class="ac"><div class="an" style="color:${pct>=80?'var(--pass)':'var(--warn)'}">${pct}%</div><div class="al">Asistencia</div></div>`;
+  // Info bar
+  const nom = [cEst['NOMBRES_ESTUDIANTE'],cEst['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ');
+  document.getElementById('asist-info-bar').style.display='flex';
+  setText('ai-nombre', nom);
+  setText('ai-doc', cDoc);
+  setText('ai-total', regs.length + ' clases');
 
-  document.getElementById('tb-as').innerHTML=regs.map((r,i)=>`<tr>
-    <td style="color:var(--muted);font-size:.7rem">${i+1}</td>
-    <td>${fd(r.fecha)}</td><td>${DIAS[r.fecha.getDay()]}</td>
-    <td>${e(r.mat||'—')}</td>
-    <td><span class="badge ${r.estado==='P'?'bp':'bw'}">${r.estado==='P'?'✓ Presente':'✗ Ausente'}</span></td>
-    <td style="font-size:.77rem">${e(r.obs||'—')}</td></tr>`).join('');
+  // Chips mejoradas
+  const pctCls = pct>=80 ? 'pct-ok' : 'pct-warn';
+  document.getElementById('achips').innerHTML = `
+    <div class="ac">
+      <div class="an">${regs.length}</div>
+      <div class="al">Clases Registradas</div>
+    </div>
+    <div class="ac">
+      <div class="an" style="color:var(--pass)">${pr}</div>
+      <div class="al">Presencias</div>
+      <div class="pct-bar-wrap" style="margin-top:6px">
+        <div class="pct-bar pct-ok" style="width:${regs.length?Math.round(pr/regs.length*100):0}%"></div>
+      </div>
+    </div>
+    <div class="ac">
+      <div class="an" style="color:var(--warn)">${au}</div>
+      <div class="al">Ausencias</div>
+      <div class="pct-bar-wrap" style="margin-top:6px">
+        <div class="pct-bar pct-warn" style="width:${regs.length?Math.round(au/regs.length*100):0}%"></div>
+      </div>
+    </div>
+    <div class="ac">
+      <div class="an" style="color:${pct>=80?'var(--pass)':'var(--warn)'};font-size:1.8rem">${pct}%</div>
+      <div class="al">% Asistencia</div>
+      <div class="pct-bar-wrap" style="margin-top:6px">
+        <div class="pct-bar ${pctCls}" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+
+  // Tabla detalle
+  document.getElementById('tb-as').innerHTML = regs.map((r,i)=>{
+    const esPres = r.estado==='P';
+    return`<tr class="${esPres?'':''}">
+      <td style="color:var(--muted);font-size:.7rem">${i+1}</td>
+      <td>${fd(r.fecha)}</td>
+      <td>${DIAS[r.fecha.getDay()]}</td>
+      <td>${e(r.mat||'—')}</td>
+      <td class="${esPres?'td-pres':'td-aus'}">
+        <span class="badge ${esPres?'bp':'bw'}">${esPres?'✓ Presente':'✗ Ausente'}</span>
+      </td>
+      <td style="font-size:.77rem">${e(r.obs||'—')}</td></tr>`;
+  }).join('');
 
   buildCal(regs);
 }
 
+/* ════════════════════════════════════════════════════════════
+   CALENDARIO MEJORADO
+════════════════════════════════════════════════════════════ */
 function buildCal(regs){
-  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const DH=['D','L','M','X','J','V','S'];
-  const mo={};
-  regs.forEach(r=>{const k=`${r.fecha.getFullYear()}-${r.fecha.getMonth()}`;if(!mo[k])mo[k]=[];mo[k].push(r);});
-  let html='';
-  for(const[k,rows]of Object.entries(mo)){
-    const[yr,m]=k.split('-').map(Number);
-    const fd0=new Date(yr,m,1).getDay();
-    const dim=new Date(yr,m+1,0).getDate();
-    const P=new Set(),A=new Set();
-    rows.forEach(r=>{const d=r.fecha.getDate();r.estado==='P'?P.add(d):A.add(d);});
-    let g=`<div class="cmo"><h4>${MN[m]} ${yr}</h4><div class="cgrid">`;
+  const MN = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DH = ['D','L','M','X','J','V','S'];
+  const mo = {};
+  regs.forEach(r=>{
+    const k = `${r.fecha.getFullYear()}-${r.fecha.getMonth()}`;
+    if(!mo[k]) mo[k]=[];
+    mo[k].push(r);
+  });
+  let html = '';
+  for(const [k,rows] of Object.entries(mo)){
+    const [yr,m] = k.split('-').map(Number);
+    const fd0 = new Date(yr,m,1).getDay();
+    const dim  = new Date(yr,m+1,0).getDate();
+    const P=new Set(), A=new Set();
+    rows.forEach(r=>{ const d=r.fecha.getDate(); r.estado==='P'?P.add(d):A.add(d); });
+    const presN = P.size, ausN = A.size;
+    const pctM  = (presN+ausN)>0 ? Math.round(presN/(presN+ausN)*100) : 0;
+    let g = `<div class="cmo">
+      <h4>${MN[m]} ${yr} <span class="cmo-stats">${presN}P / ${ausN}A · ${pctM}%</span></h4>
+      <div class="cgrid">`;
     DH.forEach(d=>{g+=`<div class="cdh">${d}</div>`;});
-    for(let i=0;i<fd0;i++)g+=`<div class="cd"></div>`;
+    for(let i=0;i<fd0;i++) g+=`<div class="cd"></div>`;
     for(let d=1;d<=dim;d++){
-      const cl=P.has(d)?'cd present':A.has(d)?'cd absent':'cd noc';
-      g+=`<div class="${cl}">${d}</div>`;
+      if(P.has(d)) g+=`<div class="cd present" title="Presente ${d}/${m+1}/${yr}">${d}</div>`;
+      else if(A.has(d)) g+=`<div class="cd absent" title="Ausente ${d}/${m+1}/${yr}">${d}</div>`;
+      else g+=`<div class="cd noc">${d}</div>`;
     }
-    g+=`</div></div>`;html+=g;
+    g+=`</div></div>`;
+    html+=g;
   }
   document.getElementById('calv').innerHTML=html;
 }
 
-/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    TABS
-════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════ */
 function ST(n,btn){
   document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
-  const panel=document.getElementById('tp-'+n);
-  if(panel)panel.classList.add('active');
-  if(btn)btn.classList.add('active');
+  const panel = document.getElementById('tp-'+n);
+  if(panel) panel.classList.add('active');
+  if(btn) btn.classList.add('active');
 }
 
-/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    UTILS
-════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════ */
 function calcProm(notas){
-  if(!notas||!notas.length)return null;
-  const v=notas.map(n=>parseFloat(n['CALIFICACION_NOTA'])).filter(x=>!isNaN(x)&&x>0);
-  return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
+  if(!notas||!notas.length) return null;
+  const v = notas.map(n=>parseFloat(n['CALIFICACION_NOTA'])).filter(x=>!isNaN(x)&&x>0);
+  return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null;
 }
-function sc(nota){const v=parseFloat(nota);if(isNaN(v))return 'sm';return v>=4.5?'sh':v>=3.0?'sm':'sl';}
-function ac(a){a=(a||'').toUpperCase();if(/CONOCIMIENTO|PRIMER/.test(a))return'bb';if(/DESEMPE|SEGUNDO/.test(a))return'bpu';if(/PRODUCTO|TERCERO/.test(a))return'bg';return'bt';}
-function fd(s){if(!s||s==='0000-00-00'||s==='')return'—';const d=s instanceof Date?s:new Date(s);if(isNaN(d))return String(s);return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
-function pf(raw){if(!raw)return null;if(raw instanceof Date)return raw;if(typeof raw==='number')return new Date(Math.round((raw-25569)*86400*1000));const s=String(raw).trim();const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return new Date(+y,+m[2]-1,+m[1]);}const d=new Date(s);return isNaN(d)?null:d;}
-function ne(s){s=s.toUpperCase().trim();return(s==='P'||s.startsWith('PRES')||s==='1'||s==='SI'||s==='SÍ')?'P':'A';}
-function cop(n){return'$'+Number(n||0).toLocaleString('es-CO');}
-function e(s){return String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function setEmpty(id,cols,icon,msg){const b=document.getElementById(id);if(b)b.innerHTML=`<tr><td colspan="${cols}"><div class="empty"><div class="ei">${icon}</div><p>${msg}</p></div></td></tr>`;}
+function sc(nota){ const v=parseFloat(nota); if(isNaN(v)) return 'sm'; return v>=4.5?'sh':v>=3.0?'sm':'sl'; }
+function ac(a){ a=(a||'').toUpperCase(); if(/CONOCIMIENTO|PRIMER/.test(a)) return'bb'; if(/DESEMPE|SEGUNDO/.test(a)) return'bpu'; if(/PRODUCTO|TERCERO/.test(a)) return'bg'; return'bt'; }
+function fd(s){ if(!s||s==='0000-00-00'||s==='') return'—'; const d=s instanceof Date?s:new Date(s); if(isNaN(d)) return String(s); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+function pf(raw){ if(!raw) return null; if(raw instanceof Date) return raw; if(typeof raw==='number') return new Date(Math.round((raw-25569)*86400*1000)); const s=String(raw).trim(); const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/); if(m){ const y=m[3].length===2?'20'+m[3]:m[3]; return new Date(+y,+m[2]-1,+m[1]); } const d=new Date(s); return isNaN(d)?null:d; }
+function ne(s){ s=s.toUpperCase().trim(); return(s==='P'||s.startsWith('PRES')||s==='1'||s==='SI'||s==='SÍ')?'P':'A'; }
+function cop(n){ return'$'+Number(n||0).toLocaleString('es-CO'); }
+function e(s){ return String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setEmpty(id,cols,icon,msg){ const b=document.getElementById(id); if(b) b.innerHTML=`<tr><td colspan="${cols}"><div class="empty"><div class="ei">${icon}</div><p>${msg}</p></div></td></tr>`; }
 </script>
 </body>
 </html>
