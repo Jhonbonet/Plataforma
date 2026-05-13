@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /asenorte.sql
+Disallow: /fotos/
+Disallow: /*.png$
+Disallow: /*.jpg$
+Disallow: /*.jpeg$
