@@ -1,160 +1,587 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Estudiantil — ASENORTE</title>
-  <style>
-    :root {
-      --teal: #1a3a5a;
-      --teal-bg: #ebf4ff;
-      --ink: #0c1a19;
-      --border: #bcd9d6;
-      --white: #fff;
-      --pass: #177a46;
-      --pass-bg: #d2f0e2;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f9fbfb;
-      color: var(--ink);
-      line-height: 1.25;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: var(--white);
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    h1, h2 {
-      color: var(--teal);
-    }
-    .profile-card {
-      background-color: var(--teal-bg);
-      padding: 15px;
-      border-radius: 6px;
-      margin-bottom: 25px;
-    }
-    .profile-card p {
-      margin: 5px 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid var(--border);
-      padding: 12px;
-      text-align: left;
-    }
-    th {
-      background-color: var(--teal);
-      color: var(--white);
-      font-weight: bold;
-    }
-    tr:nth-child(even) {
-      background-color: #f2f7f7;
-    }
-    .loading {
-      color: #6b8f8c;
-      font-style: italic;
-    }
-    .badge-presente {
-      background-color: var(--pass-bg);
-      color: var(--pass);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Estudiantil — ASENORTE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ═══ TOKENS (colores originales del PDF preservados) ═══════════ */
+:root{
+  --teal:#1a3a5a;--teal-dk:#0d1f33;--teal-lt:#2c5282;--teal-bg:#ebf4ff;
+  --gold:#c8940f;--ink:#0c1a19;--muted:#456360;--soft:#6b8f8c;
+  --border:#bcd9d6;--paper:#f5fbfa;--white:#fff;
+  --pass:#177a46;--pass-bg:#d2f0e2;
+  --warn:#b84808;--warn-bg:#fde4d2;
+  --mid:#7a5e00;--mid-bg:#fff7dc;
+  --info:#1a5ca8;--info-bg:#ddeeff;
+  --purp-bg:#ede8fe;--purp:#5a35a8;
+  --gold-bg:#fff3cd;--gold-c:#7a5800;
+  --shadow:0 4px 20px rgba(26,58,90,.10);
+  --shadow-lg:0 12px 40px rgba(26,58,90,.18);
+  --r:12px;--tr:.2s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:15px}
+
+/* ═══ LOADER ══════════════════════════════════════════════════ */
+#gl{position:fixed;inset:0;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 60%,#2c6fad 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
+  transition:opacity .5s,visibility .5s}
+#gl.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.ll{font-size:52px;margin-bottom:14px;animation:pu 2s ease-in-out infinite}
+@keyframes pu{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.lt{color:#fff;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.ls{color:rgba(255,255,255,.65);font-size:.82rem;margin-bottom:28px}
+.pb-wrap{width:300px;background:rgba(255,255,255,.2);border-radius:50px;height:6px;overflow:hidden}
+.pb{height:100%;background:#fff;border-radius:50px;transition:width .3s ease;width:0%}
+.pbs{color:rgba(255,255,255,.8);font-size:.74rem;margin-top:10px;min-height:18px;text-align:center}
+
+/* ═══ LOGIN ══════════════════════════════════════════════════ */
+#ls{display:none;min-height:100vh;background:linear-gradient(135deg,var(--teal-dk) 0%,var(--teal) 55%,#2c6fad 100%);
+  align-items:center;justify-content:center;padding:20px}
+#ls.v{display:flex}
+.lc{background:var(--white);border-radius:20px;padding:48px 44px 40px;width:100%;max-width:430px;
+  box-shadow:var(--shadow-lg);animation:su .4s cubic-bezier(.23,1,.32,1)}
+@keyframes su{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.l-logo{width:80px;height:80px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;
+  margin:0 auto 16px;box-shadow:0 8px 24px rgba(26,58,90,.28)}
+.lc h1{font-size:1.55rem;font-weight:800;color:var(--teal-dk);letter-spacing:-.02em;text-align:center}
+.lc .sub{color:var(--muted);font-size:.83rem;text-align:center;margin:6px 0 24px}
+.notice{background:var(--teal-bg);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;font-size:.74rem;color:var(--muted);margin-bottom:20px;
+  display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.notice span{font-size:1rem;flex-shrink:0;margin-top:1px}
+.fg{margin-bottom:18px}
+.fg label{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:6px}
+.fg input{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:10px;
+  font-size:1rem;color:var(--ink);background:var(--paper);
+  transition:border-color var(--tr),box-shadow var(--tr);outline:none}
+.fg input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(26,58,90,.12)}
+.btn-p{width:100%;padding:14px;background:linear-gradient(135deg,var(--teal),var(--teal-lt));
+  color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;
+  letter-spacing:.02em;transition:transform var(--tr),box-shadow var(--tr);
+  box-shadow:0 4px 16px rgba(26,58,90,.28)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(26,58,90,.38)}
+.btn-p:active{transform:translateY(0)}
+.btn-p:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.err{display:none;background:var(--warn-bg);color:var(--warn);border-radius:8px;
+  padding:10px 14px;font-size:.82rem;margin-top:12px;font-weight:500}
+.lnote{margin-top:18px;font-size:.7rem;color:#a0c5c2;text-align:center}
+
+/* ═══ PORTAL ════════════════════════════════════════════════ */
+#p{display:none;flex-direction:column;min-height:100vh}
+#p.v{display:flex}
+
+/* topbar */
+.tb{background:var(--teal-dk);color:#fff;padding:0 24px;display:flex;align-items:center;
+  justify-content:space-between;height:58px;position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 16px rgba(0,0,0,.22)}
+.tbl{display:flex;align-items:center;gap:10px}
+.tbi{font-size:22px}
+.tbt{font-size:.98rem;font-weight:800;letter-spacing:-.01em}
+.tbt span{font-size:.62rem;opacity:.6;display:block;margin-top:-2px;text-transform:uppercase;letter-spacing:.05em}
+.tbr{display:flex;align-items:center;gap:10px}
+
+/* ── FOTO PERFIL / AVATAR ── */
+.sbadge{background:rgba(255,255,255,.13);border-radius:50px;padding:5px 14px 5px 7px;
+  display:flex;align-items:center;gap:8px;cursor:pointer;position:relative}
+.sbadge:hover{background:rgba(255,255,255,.2)}
+.av-wrap{position:relative;flex-shrink:0}
+.av{width:34px;height:34px;background:var(--gold);border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;
+  object-fit:cover;border:2px solid rgba(255,255,255,.3);cursor:pointer}
+.av-edit-hint{position:absolute;bottom:-2px;right:-2px;background:var(--gold);border-radius:50%;
+  width:14px;height:14px;display:flex;align-items:center;justify-content:center;
+  font-size:8px;border:1px solid rgba(255,255,255,.6)}
+.si .sn{font-size:.82rem;font-weight:700;line-height:1.2}
+.si .sd{font-size:.65rem;opacity:.65}
+#foto-input{display:none}
+.btn-o{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);color:#fff;
+  border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:600;cursor:pointer;
+  transition:background var(--tr);white-space:nowrap}
+.btn-o:hover{background:rgba(255,255,255,.22)}
+
+/* group strip */
+.gs{background:var(--teal-bg);border-bottom:1px solid var(--border);
+  padding:9px 24px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.gc{display:flex;flex-direction:column;gap:1px}
+.gc .gl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);font-weight:700}
+.gc .gv{font-size:.82rem;font-weight:700;color:var(--ink)}
+
+/* Estado badge en strip */
+.estado-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.est-activo    {background:#d2f0e2;color:#177a46}
+.est-retirado  {background:#fde4d2;color:#b84808}
+.est-graduado  {background:#ddeeff;color:#1a5ca8}
+.est-etapa     {background:#fff7dc;color:#7a5e00}
+.est-cupo      {background:#ede8fe;color:#5a35a8}
+.est-sin-etapa {background:#f5f5f5;color:#555}
+.est-default   {background:#e8e8e8;color:#444}
+
+/* tabs */
+.tnav{display:flex;background:var(--white);border-bottom:2px solid var(--border);
+  padding:0 24px;overflow-x:auto}
+.tbtn{padding:13px 20px;font-size:.84rem;font-weight:600;color:var(--muted);border:none;
+  background:none;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+  margin-bottom:-2px;display:flex;align-items:center;gap:7px;
+  transition:color var(--tr),border-color var(--tr)}
+.tbtn:hover{color:var(--teal)}
+.tbtn.active{color:var(--teal);border-bottom-color:var(--teal)}
+
+/* panels */
+.tc{padding:24px;flex:1}
+.tp{display:none;animation:fi .22s ease}
+.tp.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ SHARED COMPONENTS ════════════════════════════════════ */
+.sttl{font-size:1rem;font-weight:800;color:var(--teal-dk);border-left:4px solid var(--gold);
+  padding-left:11px;margin-bottom:16px;letter-spacing:-.01em}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.tw{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-size:.81rem}
+table.dt thead tr{background:var(--teal);color:#fff}
+table.dt th{padding:10px 14px;text-align:left;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.07em;font-weight:700;white-space:nowrap}
+table.dt td{padding:10px 14px;border-bottom:1px solid #edf5f4;vertical-align:middle}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tr:nth-child(even) td{background:#fafefe}
+table.dt tr:hover td{background:var(--teal-bg)}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.69rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.bp{background:var(--pass-bg);color:var(--pass)}
+.bw{background:var(--warn-bg);color:var(--warn)}
+.bm{background:var(--mid-bg);color:var(--mid)}
+.bb{background:var(--info-bg);color:var(--info)}
+.bpu{background:var(--purp-bg);color:var(--purp)}
+.bg{background:var(--gold-bg);color:var(--gold-c)}
+.bt{background:var(--teal-bg);color:var(--teal-dk)}
+.sp{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.83rem;font-weight:800}
+.sh{background:var(--pass-bg);color:var(--pass)}
+.sm{background:var(--mid-bg);color:var(--mid)}
+.sl{background:var(--warn-bg);color:var(--warn)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty .ei{font-size:2.2rem;margin-bottom:8px}
+.empty p{font-size:.84rem}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin-bottom:20px}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+.sc .scl{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:4px}
+.sc .scv{font-size:1.45rem;font-weight:900;letter-spacing:-.02em;color:var(--teal-dk)}
+.sc .scv.c-pass{color:var(--pass)}
+.sc .scv.c-warn{color:var(--warn)}
+.sc .scv.c-gold{color:var(--gold)}
+.spin-i{display:inline-block;width:16px;height:16px;border:3px solid rgba(26,58,90,.18);
+  border-top-color:var(--teal);border-radius:50%;animation:sp .7s linear infinite;
+  vertical-align:middle;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ═══ INICIO ════════════════════════════════════════════════ */
+.pbanner{background:linear-gradient(135deg,var(--teal-dk),var(--teal));border-radius:var(--r);
+  padding:28px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+/* Foto grande en banner */
+.bav-wrap{position:relative;flex-shrink:0}
+.bav{width:72px;height:72px;background:rgba(255,255,255,.2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;
+  border:3px solid rgba(255,255,255,.3);object-fit:cover;cursor:pointer}
+.bav-btn{position:absolute;bottom:0;right:0;background:var(--gold);border:none;border-radius:50%;
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;cursor:pointer;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.binfo h2{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.binfo p{font-size:.79rem;opacity:.75;margin-bottom:2px}
+.bchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.bchip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:4px 12px;font-size:.7rem;font-weight:600}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+.qcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;box-shadow:var(--shadow);cursor:pointer;
+  transition:transform var(--tr),box-shadow var(--tr);display:flex;align-items:center;gap:12px}
+.qcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.qicon{font-size:26px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  background:var(--teal-bg);border-radius:10px;flex-shrink:0}
+.qt{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.qv{font-size:1.2rem;font-weight:900;color:var(--teal-dk);letter-spacing:-.02em}
+
+/* ═══ ASISTENCIA ════════════════════════════════════════════ */
+.asist-info-bar{background:linear-gradient(135deg,var(--teal-dk),var(--teal));
+  border-radius:var(--r);padding:18px 22px;color:#fff;margin-bottom:18px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.asist-info-bar .ai-item{display:flex;flex-direction:column;gap:2px}
+.asist-info-bar .ai-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;font-weight:700}
+.asist-info-bar .ai-val{font-size:.88rem;font-weight:700}
+.asist-source-tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:3px 11px;font-size:.68rem;font-weight:600;margin-left:auto}
+
+.uz{border:2px dashed var(--border);border-radius:var(--r);padding:30px 20px;text-align:center;
+  background:var(--teal-bg);margin-bottom:18px;cursor:pointer;
+  transition:border-color var(--tr),background var(--tr)}
+.uz:hover,.uz.do{border-color:var(--teal);background:#d6e8f7}
+.ui-i{font-size:2.2rem;margin-bottom:8px}
+.uz p{color:var(--muted);font-size:.82rem;line-height:1.6}
+.uz strong{color:var(--teal)}
+#xi{display:none}
+#foto-input{display:none}
+
+/* Chips de resumen asistencia */
+.achips{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.ac{background:var(--white);border:1px solid var(--border);border-radius:12px;
+  padding:14px 18px;box-shadow:var(--shadow);text-align:center;min-width:110px;flex:1}
+.ac .an{font-size:1.6rem;font-weight:900;color:var(--teal)}
+.ac .al{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-top:2px}
+
+/* Barra de porcentaje */
+.pct-bar-wrap{background:#e8eef5;border-radius:50px;height:10px;overflow:hidden;margin:6px 0 4px}
+.pct-bar{height:100%;border-radius:50px;transition:width .6s ease}
+.pct-ok{background:linear-gradient(90deg,#177a46,#2ecc71)}
+.pct-warn{background:linear-gradient(90deg,#b84808,#e67e22)}
+
+/* Calendario mejorado */
+.calm{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:20px}
+.cmo{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+.cmo h4{font-size:.85rem;font-weight:700;color:var(--teal-dk);text-transform:capitalize;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.cmo .cmo-stats{font-size:.68rem;color:var(--muted);font-weight:600}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.cdh{text-align:center;font-size:.57rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--soft);padding:3px 0}
+.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:6px;font-size:.72rem;font-weight:600;color:var(--muted);transition:transform .1s}
+.cd.present{background:var(--pass-bg);color:var(--pass);font-weight:800}
+.cd.present:hover{transform:scale(1.15)}
+.cd.absent{background:var(--warn-bg);color:var(--warn)}
+.cd.absent:hover{transform:scale(1.15)}
+.cd.noc{color:#c0d5d3}
+
+/* Leyenda calendario */
+.cal-legend{display:flex;gap:14px;margin-top:12px;font-size:.72rem;color:var(--muted);flex-wrap:wrap}
+.cal-legend span{display:flex;align-items:center;gap:5px}
+.cal-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.leg-p{background:var(--pass-bg)}
+.leg-a{background:var(--warn-bg)}
+
+/* Cargando Google Sheets */
+.gs-loading{display:flex;align-items:center;gap:10px;padding:16px;
+  background:var(--teal-bg);border-radius:10px;font-size:.83rem;color:var(--teal-dk);
+  border:1px solid var(--border);margin-bottom:16px}
+
+/* Tabla asistencia mejorada */
+.asist-table-wrap{border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+table.dt .td-pres{background:var(--pass-bg)!important}
+table.dt .td-aus{background:var(--warn-bg)!important}
+
+/* ═══ NOTAS — Definitiva column ═══════════════════════════ */
+.col-def{font-weight:800;font-size:.9rem}
+.nota-section{border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.nota-section-hidden{display:none}
+
+/* ═══ RESPONSIVE ════════════════════════════════════════════ */
+@media(max-width:640px){
+  .tb,.tc,.gs,.tnav{padding-left:14px;padding-right:14px}
+  .tb{height:52px}.lc{padding:32px 20px 28px}
+  .pbanner{padding:18px}.bav{width:54px;height:54px;font-size:22px}
+  .binfo h2{font-size:1.05rem}
+  .achips .ac{min-width:80px;padding:10px 12px}
+}
+@media print{
+  .tb,.tnav,.uz,.asist-info-bar{display:none!important}
+  .tp{display:block!important}
+}
+</style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Portal Estudiantil Asenorte</h1>
-  
-  <div id="perfilUsuario" class="profile-card">
-    <p><strong>Cargando información del usuario...</strong></p>
-  </div>
+<div id="gl">
+  <div class="ll">🏥</div>
+  <div class="lt">ASENORTE</div>
+  <div class="ls">Cargando base de datos académica…</div>
+  <div class="pb-wrap"><div class="pb" id="pb"></div></div>
+  <div class="pbs" id="pbs">Iniciando…</div>
+</div>
 
-  <h2>Historial de Asistencia Diaria</h2>
-  <div id="tablaAsistenciaContenedor">
-    <p class="loading">Consultando registros de asistencia del alumno en la base de datos...</p>
+<div id="ls">
+  <div class="lc">
+   <div class="l-logo">
+  <img src="Fotos/logo_asenorte.png" alt="Logo Asenorte" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
+</div>
+    <h1>Portal Estudiantil</h1>
+    <p class="sub">ASENORTE — Corporación Educativa Asesorías del Norte</p>
+    <div class="notice">
+      <span>🔒</span>
+      <span>Bienvenido.</span>
+    </div>
+    <div class="fg">
+      <label>Número de Cédula / Documento</label>
+      <input id="di" type="text" inputmode="numeric" placeholder="Ej: 1083000000"
+             autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-p" id="bl" onclick="doLogin()">Consultar mi información</button>
+    <div class="err" id="em">⚠ Documento no encontrado. Verifique e intente nuevamente.</div>
+    <p class="lnote">Portal de consulta académica · ASENORTE 2026</p>
   </div>
 </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // 1. Obtener los datos del alumno logueado
-    google.script.run
-      .withSuccessHandler(function(usuario) {
-        mostrarPerfil(usuario);
-        // 2. Con el ID obtenido, cargar la asistencia de la hoja Asistencia_Diaria
-        cargarAsistencia(usuario.id);
-      })
-      .withFailureHandler(function(err) {
-        document.getElementById("perfilUsuario").innerHTML = "<p style='color:red;'>Error al cargar usuario: " + err.message + "</p>";
-      })
-      .obtenerDatosUsuario();
-  });
+<div id="p">
 
-  function mostrarPerfil(usuario) {
-    const html = `
-      <p><strong>Estudiante:</strong> ${usuario.nombre}</p>
-      <p><strong>Identificación:</strong> ${usuario.id}</p>
-      <p><strong>Correo electrónico:</strong> ${usuario.email}</p>
-      <p><strong>Rol asignado:</strong> ${usuario.rol}</p>
-    `;
-    document.getElementById("perfilUsuario").innerHTML = html;
+  <div class="tb">
+    <div class="tbl">
+      <span class="tbi">🏥</span>
+      <div class="tbt">ASENORTE<span>Portal Estudiantil</span></div>
+    </div>
+    <div class="tbr">
+      <div class="sbadge" onclick="triggerFotoInput()" title="Clic para cambiar foto de perfil">
+        <div class="av-wrap">
+          <img id="av-img" class="av" src="" alt="" style="display:none">
+          <div id="av-txt" class="av">?</div>
+          <span class="av-edit-hint">✏</span>
+        </div>
+        <div class="si"><div class="sn" id="pn">—</div><div class="sd" id="pd">—</div></div>
+      </div>
+      <input type="file" id="foto-input" accept=".jpg,.jpeg,.png" onchange="cambiarFoto(this)">
+      <button class="btn-o" onclick="doLogout()">↩ Salir</button>
+    </div>
+  </div>
+
+  <div class="gs">
+    <div class="gc"><span class="gl">Grupo</span><span class="gv" id="g-cod">—</span></div>
+    <div class="gc"><span class="gl">Año</span><span class="gv" id="g-ano">—</span></div>
+    <div class="gc"><span class="gl">Programa</span><span class="gv" id="g-prog">—</span></div>
+    <div class="gc"><span class="gl">Inicio / Fin</span><span class="gv" id="g-f">—</span></div>
+    <div class="gc"><span class="gl">Jornada</span><span class="gv" id="g-j">—</span></div>
+    <div class="gc"><span class="gl">Estado</span><span class="gv" id="g-estado"><span class="estado-badge est-default">—</span></span></div>
+  </div>
+
+  <div class="tnav">
+    <button class="tbtn active" onclick="ST('inicio',this)">🏠 Inicio</button>
+    <button class="tbtn" onclick="ST('notas',this)">📝 Académico</button>
+    <button class="tbtn" onclick="ST('fin',this)">💳 Financiero</button>
+    <button class="tbtn" onclick="ST('asist',this)">📅 Asistencia</button>
+    <button class="tbtn" onclick="ST('perfil',this)">👤 Perfil</button>
+  </div>
+
+  <div class="tc">
+
+    <div id="tp-inicio" class="tp active">
+      <div class="pbanner">
+        <div class="bav-wrap">
+          <img id="banner-av-img" class="bav" src="" alt="" style="display:none">
+          <div id="banner-av-txt" class="bav">?</div>
+          <button class="bav-btn" onclick="triggerFotoInput()" title="Cambiar foto">✏</button>
+        </div>
+        <div class="binfo">
+          <h2 id="bn">—</h2>
+          <p id="bd">Documento: —</p>
+          <p id="bpr">Programa: —</p>
+          <div class="bchips">
+            <span class="bchip" id="bc-g">—</span>
+            <span class="bchip" id="bc-a">—</span>
+            <span class="bchip" id="bc-e">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="qgrid">
+        <div class="qcard" onclick="ST('notas',document.querySelectorAll('.tbtn')[1])">
+          <div class="qicon">📝</div><div><div class="qt">Promedio</div><div class="qv" id="q-prom">—</div></div>
+        </div>
+        <div class="qcard" onclick="ST('fin',document.querySelectorAll('.tbtn')[2])">
+          <div class="qicon">💳</div><div><div class="qt">Total Pagado</div><div class="qv" id="q-pag">—</div></div>
+        </div>
+        <div class="qcard" onclick="ST('notas',document.querySelectorAll('.tbtn')[1])">
+          <div class="qicon">📚</div><div><div class="qt">Módulos</div><div class="qv" id="q-mod">—</div></div>
+        </div>
+        <div class="qcard" onclick="ST('asist',document.querySelectorAll('.tbtn')[3])">
+          <div class="qicon">📅</div><div><div class="qt">Asistencia</div><div class="qv" id="q-as">Cargando…</div></div>
+        </div>
+      </div>
+
+      <div class="sgrid">
+        <div class="sc"><div class="scl">Recibos de Pago</div><div class="scv c-pass" id="s-r">—</div></div>
+        <div class="sc"><div class="scl">Descuentos/Cred.</div><div class="scv c-gold" id="s-c">—</div></div>
+        <div class="sc"><div class="scl">Notas Registradas</div><div class="scv" id="s-n">—</div></div>
+        <div class="sc"><div class="scl">Cursos Matrículas</div><div class="scv" id="s-m">—</div></div>
+      </div>
+
+      <h2 class="sttl">Últimas Notas</h2>
+      <div class="card"><div class="tw">
+        <table class="dt">
+          <thead><tr><th>Módulo</th><th>Área</th><th>Nota</th><th>Fecha</th><th>Docente</th></tr></thead>
+          <tbody id="tb-ln"></tbody>
+        </table>
+      </div></div>
+    </div>
+
+    <div id="tp-notas" class="tp">
+      <h2 class="sttl">Notas Académicas</h2>
+      <div class="sgrid">
+        <div class="sc"><div class="scl">Promedio General</div><div class="scv c-pass" id="n-prom">—</div></div>
+        <div class="sc"><div class="scl">Módulos Cursados</div><div class="scv" id="n-mod">—</div></div>
+        <div class="sc"><div class="scl">Notas ≥ 4.5</div><div class="scv c-pass" id="n-altas">—</div></div>
+        <div class="sc"><div class="scl">Estado Académico</div><div class="scv c-pass" id="n-est">—</div></div>
+      </div>
+
+      <div id="sec-n1" class="nota-section">
+        <h2 class="sttl" style="margin-top:4px">Notas — Sistema Principal</h2>
+        <div class="card"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Conocimiento</th><th>Desempeño</th><th>Producto</th><th>Definitiva</th><th>Docente</th></tr></thead>
+            <tbody id="tb-n1"></tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <div id="sec-n2" class="nota-section">
+        <h2 class="sttl" style="margin-top:4px">Notas — Sistema Histórico</h2>
+        <div class="card"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>Módulo / Curso</th><th>Código</th><th>Período</th><th>Primer</th><th>Segundo</th><th>Tercero</th><th>Definitiva</th><th>Docente</th></tr></thead>
+            <tbody id="tb-n2"></tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <div id="sec-hab" class="nota-section">
+        <h2 class="sttl">Habilitaciones</h2>
+        <div class="card"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>Módulo</th><th>Nota Habilitación</th><th>Fecha</th></tr></thead>
+            <tbody id="tb-hab"></tbody>
+          </table>
+        </div></div>
+      </div>
+    </div>
+
+    <div id="tp-fin" class="tp">
+      <h2 class="sttl">Estado Financiero</h2>
+      <div class="sgrid">
+        <div class="sc"><div class="scl">Total Recibos</div><div class="scv c-pass" id="f-cnt">—</div></div>
+        <div class="sc"><div class="scl">Total Pagado</div><div class="scv c-pass" id="f-tot">—</div></div>
+        <div class="sc"><div class="scl">Total Descuentos</div><div class="scv c-gold" id="f-dsc">—</div></div>
+        <div class="sc"><div class="scl">Último Pago</div><div class="scv" id="f-last" style="font-size:.95rem">—</div></div>
+      </div>
+
+      <h2 class="sttl" style="margin-top:4px">Recibos de Pago — fac_recibos</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Forma Pago</th><th>N° Transacción</th><th>Valor</th></tr></thead>
+        <tbody id="tb-r1"></tbody></table>
+      </div></div>
+
+      <h2 class="sttl">Otros Recibos — fac_recibos2</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Forma Pago</th><th>Valor</th></tr></thead>
+        <tbody id="tb-r2"></tbody></table>
+      </div></div>
+
+      <h2 class="sttl">Descuentos y Créditos — fac_creditos</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Fecha</th><th>Concepto</th><th>Valor Descontado</th></tr></thead>
+        <tbody id="tb-crd"></tbody></table>
+      </div></div>
+
+      <h2 class="sttl">Facturas — fac_facturas</h2>
+      <div class="card"><div class="tw">
+        <table class="dt"><thead><tr><th>Consec.</th><th>Tipo</th><th>Fecha</th><th>Total</th><th>Descripción</th></tr></thead>
+        <tbody id="tb-fac"></tbody></table>
+      </div></div>
+    </div>
+
+    <div id="tp-asist" class="tp">
+      <h2 class="sttl">Registro de Asistencia</h2>
+
+      <div class="asist-info-bar" id="asist-info-bar" style="display:none">
+        <div class="ai-item"><div class="ai-lbl">Estudiante</div><div class="ai-val" id="ai-nombre">—</div></div>
+        <div class="ai-item"><div class="ai-lbl">Documento</div><div class="ai-val" id="ai-doc">—</div></div>
+        <div class="ai-item"><div class="ai-lbl">Registros encontrados</div><div class="ai-val" id="ai-total">—</div></div>
+        <span class="asist-source-tag" id="asist-source-tag">📊 Base de Datos Servidor (Asistencia_DiDaily)</span>
+      </div>
+
+      <div class="gs-loading" id="gs-loading" style="display:none">
+        <span class="spin-i"></span>
+        <span id="gs-status">Conectando con base de datos en tiempo real…</span>
+      </div>
+
+      <div id="asist-ok" style="display:none">
+        <div class="achips" id="achips"></div>
+
+        <h2 class="sttl">Detalle de Asistencia</h2>
+        <div class="asist-table-wrap card" style="margin-bottom:20px"><div class="tw">
+          <table class="dt">
+            <thead><tr><th>#</th><th>Fecha</th><th>Día</th><th>Materia</th><th>Estado</th><th>Observaciones</th></tr></thead>
+            <tbody id="tb-as"></tbody>
+          </table>
+        </div></div>
+
+        <h2 class="sttl">Calendario de Asistencia</h2>
+        <div class="cal-legend">
+          <span><i class="leg-p"></i> Presente</span>
+          <span><i class="leg-a"></i> Ausente</span>
+        </div>
+        <div class="calm" id="calv"></div>
+      </div>
+
+      <div id="asist-no" style="display:none">
+        <div class="empty"><div class="ei">🔍</div><p>No se encontraron registros de asistencia para este documento en la hoja.</p></div>
+      </div>
+
+      <div class="uz" id="uz" style="display:none;" onclick="document.getElementById('xi').click()">
+        <input type="file" id="xi" accept=".xlsx,.xls,.csv" onchange="loadXlsx(this.files[0])">
+      </div>
+    </div>
+
+    <div id="tp-perfil" class="tp">
+      <h2 class="sttl">Información Personal</h2>
+      <div class="card" style="margin-bottom:18px"><div class="tw">
+        <table class="dt"><tbody id="tb-pf"></tbody></table>
+      </div></div>
+
+      <h2 class="sttl">Matrículas Registradas</h2>
+      <div class="card"><div class="tw">
+        <table class="dt">
+          <thead><tr><th>Módulo / Curso</th><th>Fecha</th><th>Valor</th><th>Saldo</th><th>Estado</th></tr></thead>
+          <tbody id="tb-mat"></tbody>
+        </table>
+      </div></div>
+    </div>
+
+  </div></div><script>
+/* ════════════════════════════════════════════════════════════ CONFIG ════════════════════════════════════════════════════════════ */
+const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
+const FOTOS_BASE_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/Fotos/';
+
+/* ════════════════════════════════════════════════════════════ ESTADO GLOBAL ════════════════════════════════════════════════════════════ */
+const DB = {};
+let cDoc = null, cEst = null, cIds = {}, xRows = [];
+let fotoPersonal = null;
+
+/* ════════════════════════════════════════════════════════════ ARRANQUE ════════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async () => {
+  prog(5, 'Conectando con GitHub…');
+  try {
+    const r = await fetch(SQL_URL);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    prog(18, 'Archivo recibido. Parseando SQL…');
+    const txt = await r.text();
+    prog(30, 'Segmentando tablas…');
+    await parseSQL(txt);
+    prog(100, '¡Base de datos lista!');
+    await wait(500);
+  } catch(err) {
+    document.getElementById('pbs').innerHTML = '<span style="color:#ffaaaa">⚠ ' + err.message + ' — Verifica que asenorte.sql esté en el repositorio.</span>';
+    await wait(3000);
   }
+  document.getElementById('gl').classList.add('hidden');
+  document.getElementById('ls').classList.add('v');
+});
 
-  function cargarAsistencia(idEstudiante) {
-    google.script.run
-      .withSuccessHandler(function(asistencias) {
-        const contenedor = document.getElementById("tablaAsistenciaContenedor");
-        
-        if (asistencias.length === 0) {
-          contenedor.innerHTML = "<p>No se encontraron registros de asistencia vigentes para este estudiante.</p>";
-          return;
-        }
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function prog(p,m){
+  document.getElementById('pb').style.width = p+'%';
+  document.getElementById('pbs').innerText = m;
+}
 
-        // Obtener nombres de columnas dinámicamente basados en los encabezados de la hoja
-        const columnas = Object.keys(asistencias[0]);
-
-        let htmlTabla = "<table><thead><tr>";
-        columnas.forEach(col => {
-          htmlTabla += `<th>${col}</th>`;
-        });
-        htmlTabla += "</tr></thead><tbody>";
-
-        asistencias.forEach(reg => {
-          htmlTabla += "<tr>";
-          columnas.forEach(col => {
-            let celda = reg[col] !== undefined ? reg[col] : "—";
-            
-            // Destacar de manera visual si el campo dice 'Asiste', 'Presente', etc.
-            if(celda.toString().toLowerCase() === 'asiste' || celda.toString().toLowerCase() === 'presente') {
-              celda = `<span class="badge-presente">${celda}</span>`;
-            }
-            htmlTabla += `<td>${celda}</td>`;
-          });
-          htmlTabla += "</tr>";
-        });
-
-        htmlTabla += "</tbody></table>";
-        contenedor.innerHTML = htmlTabla;
-      })
-      .withFailureHandler(function(err) {
-        document.getElementById("tablaAsistenciaContenedor").innerHTML = "<p style='color:red;'>Error al recopilar la asistencia: " + err.message + "</p>";
-      })
-      .obtenerAsistenciaEstudiante(idEstudiante);
-  }
-</script>
-
-</body>
-</html>
+/* ════════════════════════════════════════════════════════════ PARSER SQL SIMPLE ════════════════════════════════════════════════════════════ */
+async function parseSQL(t){
+  const lines = t.split('\n');
+  let cTab = null;
+  for(let i=0; i<lines.length; i++){
+    let
