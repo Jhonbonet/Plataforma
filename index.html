@@ -210,7 +210,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
   display:flex;flex-wrap:wrap;align-items:center;gap:16px}
 .asist-info-bar .ai-item{display:flex;flex-direction:column;gap:2px}
 .asist-info-bar .ai-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;font-weight:700}
-.asist-info-bar .ai-val{font-size:.88rem;font-weight:700}
+.asist-info-bar .ai-val{font-size:-88rem;font-weight:700}
 .asist-source-tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
   border-radius:50px;padding:3px 11px;font-size:.68rem;font-weight:600;margin-left:auto}
 
@@ -301,9 +301,9 @@ table.dt .td-aus{background:var(--warn-bg)!important}
 
 <div id="ls">
   <div class="lc">
-   <div class="l-logo">
-  <img src="Fotos/logo_asenorte.png" alt="Logo Asenorte" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
-</div>
+    <div class="l-logo">
+      <img src="Fotos/logo_asenorte.png" alt="Logo Asenorte" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
+    </div>
     <h1>Portal Estudiantil</h1>
     <p class="sub">ASENORTE — Corporación Educativa Asesorías del Norte</p>
     <div class="notice">
@@ -558,20 +558,22 @@ table.dt .td-aus{background:var(--warn-bg)!important}
       </div></div>
     </div>
 
-  </div></div><script>
+  </div>
+</div>
+
+<script>
 /* ════════════════════════════════════════════════════════════ CONFIG ════════════════════════════════════════════════════════════ */
 const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql'; 
 
-// URL de la API Web desplegada desde tu Google Sheets (Apps Script)
+// REEMPLAZA ESTA URL POR TU RUTA DE GOOGLE APPS SCRIPT DE GOOGLE SHEETS
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkgS_DievxdHyu5QOqyNbiu0sy4jl5X-z85YF92LJPWrDiuXuNAb_USX0FLR-bBD_5HQ/exec';
 
-// URL base para fotos de estudiantes en GitHub
 const FOTOS_BASE_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/Fotos/';
 
 /* ════════════════════════════════════════════════════════════ ESTADO GLOBAL ════════════════════════════════════════════════════════════ */
 const DB = {};
 let cDoc = null, cEst = null, cIds = {}, xRows = [];
-let fotoPersonal = null; // DataURL de foto cargada localmente
+let fotoPersonal = null;
 
 /* ════════════════════════════════════════════════════════════ ARRANQUE ════════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
@@ -592,7 +594,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('gl').classList.add('hidden');
   document.getElementById('ls').classList.add('v');
   
-  // Auto-login si ya hay sesión activa
   const saved = localStorage.getItem('asenorte_cedula');
   if(saved){
     document.getElementById('di').value = saved;
@@ -606,7 +607,7 @@ function prog(p,t){
 }
 function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-/* ════════════════════════════════════════════════════════════ PARSER SQL OPTIMIZADO ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════ PARSER SQL ORIGINAL ════════════════════════════════════════════════════════════ */
 async function parseSQL(text) {
   const lines = text.split('\n');
   let currentTable = null;
@@ -692,7 +693,7 @@ function cleanVal(s) {
   return s.replace(/''/g, "'");
 }
 
-/* ════════════════════════════════════════════════════════════ LOGIN & CONTEXT ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════ LOGIN ════════════════════════════════════════════════════════════ */
 function doLogin() {
   const input = document.getElementById('di').value.trim();
   if (!input) return;
@@ -700,23 +701,18 @@ function doLogin() {
   const tEst = DB['tbl_estudiantes'];
   if (!tEst) { msg('Base de datos no inicializada'); return; }
 
-  let found = tEst.find(r => r[1] && r[1].trim() === input); // index 1: documento
-  if (!found) {
-    found = tEst.find(r => r[2] && r[2].trim().toLowerCase() === input.toLowerCase());
-  }
-
+  // Validación idéntica al archivo index original funcional
+  const found = tEst.find(r => r[1] && String(r[1]).trim() === input);
   if (!found) {
     document.getElementById('em').style.display = 'block';
     return;
   }
 
   document.getElementById('em').style.display = 'none';
-  cDoc = found[1]; // Cédula oficial
+  cDoc = found[1];
   cEst = found;
   
   localStorage.setItem('asenorte_cedula', cDoc);
-  
-  // Cargar foto personal guardada en este navegador si existe
   fotoPersonal = localStorage.getItem('asenorte_foto_' + cDoc);
 
   document.getElementById('ls').classList.remove('v');
@@ -735,20 +731,16 @@ function doLogout() {
 
 /* ════════════════════════════════════════════════════════════ CONSTRUCCIÓN PORTAL ════════════════════════════════════════════════════════════ */
 function buildPortal() {
-  // Inicializar IDs relacionales del estudiante
   cIds = { id: cEst[0], grupo: cEst[16], programa: cEst[17] };
 
-  // 1. Cabeceras e Info básica
   const fullNombre = (cEst[2] || '') + ' ' + (cEst[3] || '') + ' ' + (cEst[4] || '') + ' ' + (cEst[5] || '');
   document.getElementById('pn').innerText = fullNombre.trim() || 'Estudiante';
   document.getElementById('pd').innerText = 'CC ' + cDoc;
   document.getElementById('bn').innerText = '¡Hola, ' + (cEst[2] || 'Estudiante') + '!';
   document.getElementById('bd').innerText = 'Documento: ' + cDoc;
 
-  // Renderizar avatar/foto
   renderAvatar(fullNombre);
 
-  // 2. Traer información de grupo de tbl_grupos
   let gName = 'No asignado', gAno = '—', gFin = '—', gJor = '—';
   if(cIds.grupo && DB['tbl_grupos']){
     const gRow = DB['tbl_grupos'].find(r => r[0] == cIds.grupo);
@@ -766,7 +758,6 @@ function buildPortal() {
   document.getElementById('bc-g').innerText = 'Grupo: ' + gName;
   document.getElementById('bc-a').innerText = 'Año: ' + gAno;
 
-  // 3. Programa Académico
   let pName = 'No registrado';
   if(cIds.programa && DB['tbl_programas']){
     const pRow = DB['tbl_programas'].find(r => r[0] == cIds.programa);
@@ -775,7 +766,6 @@ function buildPortal() {
   document.getElementById('g-prog').innerText = pName;
   document.getElementById('bpr').innerText = 'Programa: ' + pName;
 
-  // 4. Estado de Matrícula (Mapeo de estilos del PDF original)
   let estadoText = (cEst[25] || '—').trim().toUpperCase();
   let estadoClass = 'est-default';
   if(/ACTIVO/.test(estadoText)) estadoClass = 'est-activo';
@@ -788,16 +778,14 @@ function buildPortal() {
   document.getElementById('g-estado').innerHTML = `<span class="estado-badge ${estadoClass}">${estadoText}</span>`;
   document.getElementById('bc-e').innerText = 'Estado: ' + estadoText;
 
-  // 5. Cargar Paneles SQL
   buildNotas();
   buildFinanciero();
   buildPerfil();
   
-  // 6. Carga automática de asistencia desde Google Sheets (Apps Script)
+  // Llamada asíncrona de asistencia sin interferir en el login principal
   cargarAsistenciaGoogleSheets();
 }
 
-/* ── MANEJO DE FOTO DE PERFIL ── */
 function renderAvatar(nombreStr) {
   const avImg = document.getElementById('av-img');
   const avTxt = document.getElementById('av-txt');
@@ -805,16 +793,13 @@ function renderAvatar(nombreStr) {
   const bAvTxt = document.getElementById('banner-av-txt');
 
   if (fotoPersonal) {
-    // Si hay foto cargada en localStorage local
     avImg.src = fotoPersonal; avImg.style.display = 'block'; avTxt.style.display = 'none';
     bAvImg.src = fotoPersonal; bAvImg.style.display = 'block'; bAvTxt.style.display = 'none';
   } else if (cEst[26]) { 
-    // Si el campo foto del SQL tiene un nombre de archivo
     const url = FOTOS_BASE_URL + cEst[26].trim();
     avImg.src = url; avImg.style.display = 'block'; avTxt.style.display = 'none';
     bAvImg.src = url; bAvImg.style.display = 'block'; bAvTxt.style.display = 'none';
     
-    // Validar si la imagen no existe en servidor (fallback a iniciales)
     const errHandler = () => {
       avImg.style.display = 'none'; avTxt.style.display = 'flex';
       bAvImg.style.display = 'none'; bAvTxt.style.display = 'flex';
@@ -822,25 +807,19 @@ function renderAvatar(nombreStr) {
     avImg.onerror = errHandler;
     bAvImg.onerror = errHandler;
   } else {
-    // Iniciales por defecto
     const ini = (nombreStr.trim()[0] || '?').toUpperCase();
     avTxt.innerText = ini; avImg.style.display = 'none'; avTxt.style.display = 'flex';
     bAvTxt.innerText = ini; bAvImg.style.display = 'none'; bAvTxt.style.display = 'flex';
   }
 }
 
-function triggerFotoInput() {
-  document.getElementById('foto-input').click();
-}
-
+function triggerFotoInput() { document.getElementById('foto-input').click(); }
 function cambiarFoto(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = function(e) {
       fotoPersonal = e.target.result;
-      // Guardar localmente
       localStorage.setItem('asenorte_foto_' + cDoc, fotoPersonal);
-      // Re-renderizar
       const fullNombre = (cEst[2] || '') + ' ' + (cEst[3] || '') + ' ' + (cEst[4] || '') + ' ' + (cEst[5] || '');
       renderAvatar(fullNombre);
     };
@@ -848,7 +827,7 @@ function cambiarFoto(input) {
   }
 }
 
-/* ════════════════════════════════════════════════════════════ TAB ACADÉMICO (NOTAS) ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════ ACADÉMICO ════════════════════════════════════════════════════════════ */
 function buildNotas() {
   const n1 = DB['tbl_notas'] ? DB['tbl_notas'].filter(r => r[1] == cIds.id) : [];
   const n2 = DB['tbl_notas2'] ? DB['tbl_notas2'].filter(r => r[1] == cIds.id) : [];
@@ -857,7 +836,6 @@ function buildNotas() {
   let sum = 0, count = 0, altas = 0;
   let h1 = '', h2 = '', hHab = '', hLn = '';
 
-  // Renderizar tbl_notas (Sistema Principal)
   n1.forEach(r => {
     const def = parseFloat(r[7]) || 0;
     if(def > 0) { sum += def; count++; if(def >= 4.5) altas++; }
@@ -875,7 +853,6 @@ function buildNotas() {
   document.getElementById('tb-n1').innerHTML = h1 || '<tr><td colspan="8" class="empty">No hay registros</td></tr>';
   document.getElementById('sec-n1').className = n1.length ? 'nota-section' : 'nota-section-hidden';
 
-  // Renderizar tbl_notas2 (Histórico de calificaciones antiguos)
   n2.forEach(r => {
     const def = parseFloat(r[7]) || 0;
     if(def > 0) { sum += def; count++; if(def >= 4.5) altas++; }
@@ -893,7 +870,6 @@ function buildNotas() {
   document.getElementById('tb-n2').innerHTML = h2 || '<tr><td colspan="8" class="empty">No hay registros</td></tr>';
   document.getElementById('sec-n2').className = n2.length ? 'nota-section' : 'nota-section-hidden';
 
-  // Renderizar Habilitaciones
   hab.forEach(r => {
     hHab += `<tr>
       <td style="font-weight:600;color:var(--teal)">${r[2]||'—'}</td>
@@ -904,7 +880,6 @@ function buildNotas() {
   document.getElementById('tb-hab').innerHTML = hHab || '<tr><td colspan="3" class="empty">Sin módulos habilitados</td></tr>';
   document.getElementById('sec-hab').className = hab.length ? 'nota-section' : 'nota-section-hidden';
 
-  // Combinar los últimos registros indexados para el bloque de "Últimas Notas" de Inicio
   const combinadas = [...n1, ...n2].sort((a,b) => String(b[3]).localeCompare(String(a[3]))).slice(0, 5);
   combinadas.forEach(r => {
     hLn += `<tr>
@@ -917,7 +892,6 @@ function buildNotas() {
   });
   document.getElementById('tb-ln').innerHTML = hLn || '<tr><td colspan="5" class="empty">Ninguna calificación reciente</td></tr>';
 
-  // Totales y KPI globales
   const prom = count > 0 ? (sum / count).toFixed(2) : '0.00';
   document.getElementById('q-prom').innerText = prom;
   document.getElementById('n-prom').innerText = prom;
@@ -928,7 +902,7 @@ function buildNotas() {
   document.getElementById('n-est').innerText = (parseFloat(prom) >= 3.0) ? 'Aprobado' : 'Condicional';
 }
 
-/* ════════════════════════════════════════════════════════════ TAB FINANCIERO ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════ FINANCIERO ════════════════════════════════════════════════════════════ */
 function buildFinanciero() {
   const r1 = DB['fac_recibos'] ? DB['fac_recibos'].filter(r => r[1] == cDoc) : [];
   const r2 = DB['fac_recibos2'] ? DB['fac_recibos2'].filter(r => r[1] == cDoc) : [];
@@ -937,332 +911,4 @@ function buildFinanciero() {
 
   let tPag = 0, tDsc = 0, hR1 = '', hR2 = '', hCrd = '', hFac = '';
 
-  r1.forEach(r => { const v = parseFloat(r[6])||0; tPag += v; hR1 += `<tr><td><strong>${r[0]}</strong></td><td>${fd(r[2])}</td><td>${r[3]||'—'}</td><td>${r[4]||'—'}</td><td>${r[5]||'—'}</td><td style="font-weight:700" class="c-pass">${fmt(v)}</td></tr>`; });
-  r2.forEach(r => { const v = parseFloat(r[5])||0; tPag += v; hR2 += `<tr><td><strong>${r[0]}</strong></td><td>${fd(r[2])}</td><td>${r[3]||'—'}</td><td>${r[4]||'—'}</td><td style="font-weight:700" class="c-pass">${fmt(v)}</td></tr>`; });
-  crd.forEach(r => { const v = parseFloat(r[3])||0; tDsc += v; hCrd += `<tr><td><strong>${r[0]}</strong></td><td>${fd(r[2])}</td><td>${r[4]||'—'}</td><td style="font-weight:700" class="c-gold">${fmt(v)}</td></tr>`; });
-  fac.forEach(r => { hFac += `<tr><td><strong>${r[0]}</strong></td><td><span class="badge bpu">${r[2]||'—'}</span></td><td>${fd(r[3])}</td><td style="font-weight:700">${fmt(r[4])}</td><td style="font-size:.74rem;color:var(--muted)">${r[5]||'—'}</td></tr>`; });
-
-  document.getElementById('tb-r1').innerHTML = hR1 || '<tr><td colspan="6" class="empty">Sin pagos registrados en fac_recibos</td></tr>';
-  document.getElementById('tb-r2').innerHTML = hR2 || '<tr><td colspan="5" class="empty">Sin pagos registrados en fac_recibos2</td></tr>';
-  document.getElementById('tb-crd').innerHTML = hCrd || '<tr><td colspan="4" class="empty">Sin descuentos asignados</td></tr>';
-  document.getElementById('tb-fac').innerHTML = hFac || '<tr><td colspan="5" class="empty">Sin facturas emitidas</td></tr>';
-
-  // KPI Financieros
-  document.getElementById('q-pag').innerText = fmtShort(tPag);
-  document.getElementById('f-tot').innerText = fmt(tPag);
-  document.getElementById('f-dsc').innerText = fmt(tDsc);
-  document.getElementById('f-cnt').innerText = (r1.length + r2.length);
-  document.getElementById('s-r').innerText = (r1.length + r2.length);
-  document.getElementById('s-c').innerText = crd.length;
-
-  // Obtener último pago procesado cronológicamente
-  const pAll = [...r1, ...r2].sort((a,b) => new Date(b[2]) - new Date(a[2]));
-  document.getElementById('f-last').innerText = pAll.length ? `${fd(pAll[0][2])} (${fmtShort(pAll[0][6]||pAll[0][5])})` : 'Sin movimientos';
-}
-
-/* ════════════════════════════════════════════════════════════ TAB PERFIL ════════════════════════════════════════════════════════════ */
-function buildPerfil() {
-  const labels = ['ID Sistema','Documento','Primer Nombre','Segundo Nombre','Primer Apellido','Segundo Apellido','Fecha Nac.','Lugar Nac.','Género','Estratificación','Dirección','Barrio','Teléfono Celular','Teléfono Fijo','Email Institucional','Empresa Trabajo','Grupo ID','Programa ID','Fecha Ingreso','Fecha Egreso','Parentesco Resp.','Nombre Resp.','Teléfono Resp.','Creado el','Actualizado el','Estado Académico'];
-  let h = '';
-  labels.forEach((lbl, idx) => {
-    let val = cEst[idx];
-    if(idx === 6 || idx === 18 || idx === 19 || idx === 23 || idx === 24) val = fd(val);
-    if(val !== undefined && val !== null && String(val).trim() !== '') {
-      h += `<tr><td style="width:30%;font-weight:700;color:var(--muted);text-transform:uppercase;font-size:.68rem">${lbl}</td><td style="font-weight:600">${val}</td></tr>`;
-    }
-  });
-  document.getElementById('tb-pf').innerHTML = h;
-
-  // Matrículas en tbl_matriculas
-  const mat = DB['tbl_matriculas'] ? DB['tbl_matriculas'].filter(r => r[1] == cIds.id) : [];
-  let hMat = '';
-  mat.forEach(r => {
-    hMat += `<tr>
-      <td style="font-weight:600;color:var(--teal)">${r[3]||'—'}</td>
-      <td>${fd(r[2])}</td>
-      <td style="font-weight:700">${fmt(r[4])}</td>
-      <td style="color:var(--warn);font-weight:700">${fmt(r[5])}</td>
-      <td><span class="badge ${r[6]=='Pagado'?'bp':'bw'}">${r[6]||'Pendiente'}</span></td>
-    </tr>`;
-  });
-  document.getElementById('tb-mat').innerHTML = hMat || '<tr><td colspan="5" class="empty">No tiene matrículas de cursos registradas</td></tr>';
-  document.getElementById('s-m').innerText = mat.length;
-}
-
-/* ════════════════════════════════════════════════════════════ CONECTIVIDAD GOOGLE SHEETS DE ASISTENCIA ════════════════════════════════════════════════════════════ */
-async function cargarAsistenciaGoogleSheets() {
-  // Si la URL no está configurada, ignoramos la carga automática y no bloqueamos el login
-  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith('TU_URL')) {
-    console.log("Apps Script no configurado. Esperando carga manual.");
-    document.getElementById('q-as').innerText = "Subir archivo";
-    return;
-  }
-
-  const divLoad = document.getElementById('gs-loading');
-  const divErr = document.getElementById('gs-err');
-  const lblStatus = document.getElementById('gs-status');
-
-  divLoad.style.display = 'flex';
-  divErr.style.display = 'none';
-  lblStatus.innerText = 'Consultando registros en Gestion_AsenorteV3…';
-
-  try {
-    const urlConsulta = APPS_SCRIPT_URL + "?documento=" + encodeURIComponent(cDoc);
-    const response = await fetch(urlConsulta);
-    if(!response.ok) throw new Error("Respuesta de red incorrecta (HTTP " + response.status + ")");
-    
-    const resJson = await response.json();
-    
-    if (resJson.error) {
-      throw new Error(resJson.error);
-    }
-    
-    xRows = resJson.data || [];
-    
-    divLoad.style.display = 'none';
-    document.getElementById('asist-source-tag').innerText = '📊 Gestion_AsenorteV3.gsheet';
-    
-    processAsistenciaData();
-    
-  } catch (error) {
-    console.error("Error cargando Google Sheets:", error);
-    divLoad.style.display = 'none';
-    divErr.style.display = 'block';
-    divErr.innerText = '⚠ Consulta automática deshabilitada o fallida: ' + error.message + '. Puede subir la asistencia manualmente.';
-    document.getElementById('q-as').innerText = 'Manual';
-  }
-}
-
-/* ── PROCESAMIENTO GENERAL DE ASISTENCIA (MANUAL O API) ── */
-function processAsistenciaData() {
-  const bar = document.getElementById('asist-info-bar');
-  const divOk = document.getElementById('asist-ok');
-  const divNo = document.getElementById('asist-no');
-
-  // Mostrar la barra de información superior
-  bar.style.display = 'flex';
-  document.getElementById('ai-nombre').innerText = document.getElementById('pn').innerText;
-  document.getElementById('ai-doc').innerText = cDoc;
-  document.getElementById('ai-total').innerText = xRows.length;
-
-  if (xRows.length === 0) {
-    divOk.style.display = 'none';
-    divNo.style.display = 'block';
-    document.getElementById('q-as').innerText = '0% (Sin registros)';
-    return;
-  }
-
-  divNo.style.display = 'none';
-  divOk.style.display = 'block';
-
-  let pres = 0, aus = 0;
-  let hTable = '';
-
-  // Ordenar de más reciente a más antigua
-  xRows.sort((a, b) => new Date(b.FECHA) - new Date(a.FECHA));
-
-  xRows.forEach((r, index) => {
-    const st = String(r.ESTADO).trim().toUpperCase();
-    let isP = st === 'P' || st === 'PRESENTE';
-    if (isP) pres++; else aus++;
-
-    const badgeCls = isP ? 'bp' : 'bw';
-    const badgeTxt = isP ? 'Presente' : 'Ausente';
-    const cellCls = isP ? 'td-pres' : 'td-aus';
-    const fObj = r.FECHA ? new Date(r.FECHA + 'T00:00:00') : null;
-    const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const diaNom = fObj && !isNaN(fObj) ? dias[fObj.getDay()] : '—';
-
-    hTable += `<tr>
-      <td><strong>${xRows.length - index}</strong></td>
-      <td style="font-weight:600">${r.FECHA ? fd(r.FECHA) : '—'}</td>
-      <td style="color:var(--muted)">${diaNom}</td>
-      <td style="font-weight:600;color:var(--teal)">${r.MATERIA || 'MóduloGeneral'}</td>
-      <td class="${cellCls}"><span class="badge ${badgeCls}">${badgeTxt}</span></td>
-      <td style="font-size:.74rem;color:var(--muted)">${r.OBSERVACIONES || ''}</td>
-    </tr>`;
-  });
-
-  document.getElementById('tb-as').innerHTML = hTable;
-
-  // Renderizado de las tarjetas/Chips resumen
-  const tot = pres + aus;
-  const pct = tot > 0 ? Math.round((pres / tot) * 100) : 0;
-  const pctCls = pct >= 80 ? 'pct-ok' : 'pct-warn';
-
-  document.getElementById('achips').innerHTML = `
-    <div class="ac"><div class="an">${tot}</div><div class="al">Clases Programadas</div></div>
-    <div class="ac"><div class="an" style="color:var(--pass)">${pres}</div><div class="al">Asistidas</div></div>
-    <div class="ac"><div class="an" style="color:var(--warn)">${aus}</div><div class="al">Fallas</div></div>
-    <div class="ac">
-      <div class="an">${pct}%</div>
-      <div class="al">Porcentaje</div>
-      <div class="pct-bar-wrap"><div class="pct-bar ${pctCls}" style="width:${pct}%"></div></div>
-    </div>
-  `;
-
-  document.getElementById('q-as').innerText = `${pct}% (${pres}/${tot})`;
-
-  // Construir Vistas de Calendarios por Mes
-  buildCalendars();
-}
-
-function buildCalendars() {
-  const container = document.getElementById('calv');
-  container.innerHTML = '';
-
-  // Agrupar filas mapeadas por Año-Mes
-  const groups = {};
-  xRows.forEach(r => {
-    if (!r.FECHA) return;
-    const parts = r.FECHA.split('-'); // yyyy-mm-dd
-    if (parts.length < 2) return;
-    const key = parts[0] + '-' + parts[1]; // yyyy-mm
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(r);
-  });
-
-  // Ordenar meses ascendentemente
-  const sortedMonths = Object.keys(groups).sort();
-
-  sortedMonths.forEach(monthKey => {
-    const parts = monthKey.split('-');
-    const year = parseInt(parts[0]), month = parseInt(parts[1]) - 1;
-    const fFirst = new Date(year, month, 1);
-    const fLast = new Date(year, month + 1, 0);
-
-    const names = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    let mPres = 0, mAus = 0;
-    
-    groups[monthKey].forEach(r => {
-      const st = String(r.ESTADO).trim().toUpperCase();
-      if(st === 'P' || st === 'PRESENTE') mPres++; else mAus++;
-    });
-
-    let hCal = `<div class="cmo">
-      <h4>
-        <span>${names[month]} ${year}</span>
-        <span class="cmo-stats">P:${mPres} | A:${mAus}</span>
-      </h4>
-      <div class="cgrid">
-        <div class="cdh">D</div><div class="cdh">L</div><div class="cdh">M</div><div class="cdh">M</div><div class="cdh">J</div><div class="cdh">V</div><div class="cdh">S</div>`;
-
-    // Espacios en blanco para el desfase del primer día de semana
-    let startDay = fFirst.getDay();
-    for (let i = 0; i < startDay; i++) { hCal += `<div class="cd noc"></div>`; }
-
-    // Generar cada día calendario
-    for (let d = 1; d <= fLast.getDate(); d++) {
-      const dStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-      const match = groups[monthKey].filter(r => r.FECHA === dStr);
-
-      let cls = '';
-      if (match.length > 0) {
-        // Si hay fallas en ese día predomina visualmente la falta
-        const tieneFalta = match.some(r => { const s = r.ESTADO.toUpperCase(); return s!=='P' && s!=='PRESENTE'; });
-        cls = tieneFalta ? 'absent' : 'present';
-      }
-
-      hCal += `<div class="cd ${cls}" title="${match.length ? 'Registros: '+match.length : ''}">${d}</div>`;
-    }
-
-    hCal += `</div></div>`;
-    container.innerHTML += hCal;
-  });
-}
-
-/* ── RESPALDO MANUAL: IMPORTADOR EXCEL/XLSX/CSV ── */
-function hDrop(e) {
-  e.preventDefault();
-  this.classList.remove('do');
-  if(e.dataTransfer.files && e.dataTransfer.files[0]) loadXlsx(e.dataTransfer.files[0]);
-}
-
-function loadXlsx(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(sheet);
-
-      if(!json || json.length === 0) throw new Error("El archivo está vacío o no es válido");
-
-      // Buscar las columnas normalizadas
-      const first = json[0];
-      let kDoc = null, kFecha = null, kEstado = null, kMat = null, kObs = null;
-      for (let key in first) {
-        const uk = key.trim().toUpperCase();
-        if (uk === 'DOCUMENTO') kDoc = key;
-        if (uk === 'FECHA') kFecha = key;
-        if (uk === 'ESTADO') kEstado = key;
-        if (uk === 'MATERIA' || uk === 'MODULO' || uk === 'CURSO') kMat = key;
-        if (uk === 'OBSERVACIONES' || uk === 'OBS') kObs = key;
-      }
-
-      if (!kDoc || !kFecha || !kEstado) {
-        alert("Estructura inválida. El archivo debe contener de forma obligatoria las columnas: DOCUMENTO, FECHA y ESTADO.");
-        return;
-      }
-
-      xRows = [];
-      json.forEach(row => {
-        if (row[kDoc] && String(row[kDoc]).trim() === String(cDoc)) {
-          let fStr = '';
-          if (row[kFecha]) {
-            // Validar si la fecha viene formateada o serializada desde Excel
-            if (!isNaN(row[kFecha]) && typeof row[kFecha] === 'number') {
-              const dObj = XLSX.utils.sheet_to_make_date(row[kFecha]);
-              fStr = dObj.getFullYear() + '-' + String(dObj.getMonth()+1).padStart(2,'0') + '-' + String(dObj.getDate()).padStart(2,'0');
-            } else {
-              const str = String(row[kFecha]).trim();
-              const m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-              if (m) {
-                const y = m[3].length === 2 ? '20' + m[3] : m[3];
-                fStr = y + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
-              } else {
-                fStr = str;
-              }
-            }
-          }
-
-          xRows.push({
-            DOCUMENTO: String(row[kDoc]).trim(),
-            FECHA: fStr,
-            ESTADO: String(row[kEstado]).trim(),
-            MATERIA: kMat ? String(row[kMat] || '').trim() : '',
-            OBSERVACIONES: kObs ? String(row[kObs] || '').trim() : ''
-          });
-        }
-      });
-
-      document.getElementById('asist-source-tag').innerText = '📂 Cargado Manual (.xlsx)';
-      processAsistenciaData();
-
-    } catch (err) {
-      alert("Error procesando el archivo: " + err.message);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-/* ════════════════════════════════════════════════════════════ UTILIDADES GLOBALES ════════════════════════════════════════════════════════════ */
-function ST(id, btn) {
-  document.querySelectorAll('.tp').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tp-' + id).classList.add('active');
-  btn.classList.add('active');
-}
-function msg(t){ alert(t); }
-function fmt(v){ if(v===null||v===undefined||isNaN(v)) return '—'; return '$'+parseFloat(v).toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function fmtShort(v){ if(v===null||v===undefined||isNaN(v)) return '—'; v = parseFloat(v); if(v>=1000000) return '$'+(v/1000000).toFixed(1)+'M'; if(v>=1000) return '$'+(v/1000).toFixed(0)+'K'; return '$'+v; }
-function vAvg(arr){ const v=arr.map(r=>parseFloat(r)).filter(n=>!isNaN(n)); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; }
-function sc(nota){ const v=parseFloat(nota); if(isNaN(v)) return 'sm'; return v>=4.5?'sh':v>=3.0?'sm':'sl'; }
-function ac(a){ a=(a||'').toUpperCase(); if(/CONOCIMIENTO|PRIMER/.test(a)) return'bb'; if(/DESEMPE|SEGUNDO/.test(a)) return'bpu'; if(/PRODUCTO|TERCERO/.test(a)) return'bg'; return'bt'; }
-function fd(s){ if(!s||s==='0000-00-00'||s==='') return'—'; const d=s instanceof Date?s:new Date(s); if(isNaN(d)) return String(s); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
-</script>
-</body>
-</html>
+  r1.forEach(r => { const v = parseFloat(r[6])||0; t
