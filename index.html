@@ -251,6 +251,8 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .cd.present:hover{transform:scale(1.15)}
 .cd.absent{background:var(--warn-bg);color:var(--warn)}
 .cd.absent:hover{transform:scale(1.15)}
+.cd.excused{background:var(--mid-bg);color:var(--mid);font-weight:800}
+.cd.excused:hover{transform:scale(1.15)}
 .cd.noc{color:#c0d5d3}
 
 /* Leyenda calendario */
@@ -259,6 +261,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .cal-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
 .leg-p{background:var(--pass-bg)}
 .leg-a{background:var(--warn-bg)}
+.leg-e{background:var(--mid-bg)}
 
 /* Cargando Google Sheets */
 .gs-loading{display:flex;align-items:center;gap:10px;padding:16px;
@@ -553,6 +556,7 @@ table.dt .td-aus{background:var(--warn-bg)!important}
         <div class="cal-legend">
           <span><i class="leg-p"></i> Presente</span>
           <span><i class="leg-a"></i> Ausente</span>
+          <span><i class="leg-e"></i> Excusa</span>
         </div>
         <div class="calm" id="calv"></div>
       </div>
@@ -587,11 +591,14 @@ table.dt .td-aus{background:var(--warn-bg)!important}
 ════════════════════════════════════════════════════════════ */
 const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
 
-// URL pública de exportación CSV de Google Sheets (hoja Asistencia)
-// Para obtenerla: Archivo → Compartir → Publicar en la web → CSV → hoja Asistencia
-// La URL debe ser la de PUBLICACIÓN (no la de edición). Formato:
-// https://docs.google.com/spreadsheets/d/ID/gviz/tq?tqx=out:csv&sheet=Asistencia
-const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1hJaDoj--k0O2nQ_vXjkO8fIaEw9hJhCHKVW9ciTB3ME/gviz/tq?tqx=out:csv&sheet=Asistencia';
+// ── Google Sheets (ID de tu planilla) ──────────────────────────────────────
+// Hoja: Asistencia_Diaria  |  Columnas: ID_Asistencia, Fecha, ID_Estudiante,
+//                                        ID_Modulo_Grupo, Estado (SI/NO/EX)
+const SPREADSHEET_ID = '1nu26saPU5MHnj97P3U-ZMeP7ECZqqqCYs5-wz2HzR9g';
+
+// URL del Web App desplegado desde Apps Script (ver codigo_apps_script.gs)
+// Después de desplegar pega aquí la URL que termina en /exec
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgJoKEogLu4y4T5Uf26v0IEUIjkMrjk9Z4CJj3b3E1wZqrJj_Y33sFmOFTtygRPPNORA/exec';
 
 // URL base para fotos de estudiantes en GitHub
 const FOTOS_BASE_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/Fotos/';
@@ -1233,26 +1240,46 @@ async function loadGoogleSheets(){
   document.getElementById('gs-loading').style.display='flex';
   document.getElementById('gs-status').textContent = 'Conectando con Google Sheets…';
 
-  try{
-    // Necesita que la hoja esté PUBLICADA (Archivo → Publicar en la web)
-    const r = await fetch(SHEETS_CSV_URL);
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    const csv = await r.text();
-    document.getElementById('gs-status').textContent = 'Procesando datos…';
-    xRows = parseCSV(csv);
+  // Si el URL del Apps Script no está configurado, mostrar error orientativo
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'PEGA_AQUI_LA_URL_DE_TU_WEB_APP'){
     document.getElementById('gs-loading').style.display='none';
+    document.getElementById('gs-err').style.display='block';
+    document.getElementById('gs-err').textContent =
+      '⚠ Apps Script no configurado. Pega la URL del Web App en la constante APPS_SCRIPT_URL del código.';
+    return;
+  }
+
+  try{
+    // El Apps Script devuelve JSON: { data: [{ID_Estudiante, Fecha, Estado, ID_Modulo_Grupo}, …] }
+    const r = await fetch(APPS_SCRIPT_URL + '?doc=' + encodeURIComponent(cDoc));
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const json = await r.json();
+
+    document.getElementById('gs-status').textContent = 'Procesando datos…';
+
+    if(json.error) throw new Error(json.error);
+
+    xRows = json.data || [];
+    document.getElementById('gs-loading').style.display='none';
+
     if(xRows.length){
       document.getElementById('asist-source-tag').textContent = '📊 Google Sheets';
       filterAsist(true);
     } else {
-      throw new Error('Hoja vacía');
+      // Sin registros para este estudiante — mostrar mensaje vacío, NO error
+      document.getElementById('gs-loading').style.display='none';
+      document.getElementById('gs-err').style.display='none';
+      document.getElementById('asist-ok').style.display='none';
+      document.getElementById('asist-no').style.display='block';
+      document.getElementById('asist-info-bar').style.display='none';
+      setText('q-as', '—');
     }
   }catch(err){
     document.getElementById('gs-loading').style.display='none';
     document.getElementById('gs-err').style.display='block';
     document.getElementById('gs-err').textContent =
-      '⚠ No se pudo cargar Google Sheets automáticamente (' + err.message +
-      '). La hoja debe estar publicada públicamente. Puede cargar el XLSX manualmente.';
+      '⚠ No se pudo cargar la asistencia desde Google Sheets (' + err.message +
+      '). Verifique que el Apps Script esté desplegado como Web App público. También puede cargar el XLSX manualmente.';
   }
 }
 
@@ -1317,18 +1344,43 @@ function loadXlsx(file){
 ════════════════════════════════════════════════════════════ */
 function filterAsist(fromSheets){
   if(!cDoc||!xRows.length) return;
+
+  // ── Detectar columnas ──────────────────────────────────────────────────
+  // Formato Google Sheets (Apps Script): ID_Estudiante, Fecha, ID_Modulo_Grupo, Estado
+  // Formato XLSX manual: puede venir con nombres distintos
   const ks = Object.keys(xRows[0]);
-  const dc = ks.find(k=>/^(documento|cedula|cc|^id$|doc)/i.test(k.trim()))||ks[0];
-  const fc = ks.find(k=>/^fecha/i.test(k.trim()))||ks[1];
-  const ec = ks.find(k=>/^(estado|asist|present)/i.test(k.trim()))||ks[2];
-  const mc = ks.find(k=>/^(materia|curso|asign|modulo)/i.test(k.trim()));
+
+  // Columna documento/estudiante
+  const dc = ks.find(k=>/^ID_Estudiante$/i.test(k.trim()))
+           || ks.find(k=>/^(documento|cedula|cc|^id$|doc)/i.test(k.trim()))
+           || ks[0];
+
+  // Columna fecha
+  const fc = ks.find(k=>/^Fecha$/i.test(k.trim()))
+           || ks.find(k=>/^fecha/i.test(k.trim()))
+           || ks[1];
+
+  // Columna estado (SI/NO/EX o P/A)
+  const ec = ks.find(k=>/^Estado$/i.test(k.trim()))
+           || ks.find(k=>/^(estado|asist|present)/i.test(k.trim()))
+           || ks[2];
+
+  // Columna módulo (opcional)
+  const mc = ks.find(k=>/^ID_Modulo_Grupo$/i.test(k.trim()))
+           || ks.find(k=>/^(materia|curso|asign|modulo)/i.test(k.trim()));
+
   const oc = ks.find(k=>/^(obs|nota|comment)/i.test(k.trim()));
 
-  const mine = xRows.filter(r=>String(r[dc]||'').trim().replace(/\D/g,'')===(cDoc||'').replace(/\D/g,''));
+  // Filtrar registros de este estudiante
+  const mine = xRows.filter(r=>
+    String(r[dc]||'').trim().replace(/\D/g,'') === (cDoc||'').replace(/\D/g,'')
+  );
+
   if(!mine.length){
     document.getElementById('asist-ok').style.display='none';
     document.getElementById('asist-no').style.display='block';
     document.getElementById('asist-info-bar').style.display='none';
+    setText('q-as','—');
     return;
   }
 
@@ -1336,16 +1388,20 @@ function filterAsist(fromSheets){
   document.getElementById('asist-no').style.display='none';
 
   const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
   const regs = mine.map(r=>({
     fecha:  pf(r[fc]),
-    estado: ne(String(r[ec]||'')),
-    mat:    mc?String(r[mc]||''):'',
-    obs:    oc?String(r[oc]||''):'',
+    estado: neExt(String(r[ec]||'')),   // 'P' | 'A' | 'E'
+    mat:    mc ? String(r[mc]||'') : '',
+    obs:    oc ? String(r[oc]||'') : '',
   })).filter(r=>r.fecha).sort((a,b)=>a.fecha-b.fecha);
 
   const pr  = regs.filter(r=>r.estado==='P').length;
   const au  = regs.filter(r=>r.estado==='A').length;
-  const pct = regs.length ? Math.round(pr/regs.length*100) : 0;
+  const ex  = regs.filter(r=>r.estado==='E').length;
+  // Para el % de asistencia: excusas cuentan como presencia
+  const asis = pr + ex;
+  const pct  = regs.length ? Math.round(asis/regs.length*100) : 0;
   setText('q-as', pct+'%');
 
   // Info bar
@@ -1355,7 +1411,7 @@ function filterAsist(fromSheets){
   setText('ai-doc', cDoc);
   setText('ai-total', regs.length + ' clases');
 
-  // Chips mejoradas
+  // Chips de resumen
   const pctCls = pct>=80 ? 'pct-ok' : 'pct-warn';
   document.getElementById('achips').innerHTML = `
     <div class="ac">
@@ -1377,6 +1433,13 @@ function filterAsist(fromSheets){
       </div>
     </div>
     <div class="ac">
+      <div class="an" style="color:var(--mid)">${ex}</div>
+      <div class="al">Excusas</div>
+      <div class="pct-bar-wrap" style="margin-top:6px">
+        <div class="pct-bar" style="background:linear-gradient(90deg,#7a5e00,#e6a817);width:${regs.length?Math.round(ex/regs.length*100):0}%"></div>
+      </div>
+    </div>
+    <div class="ac">
       <div class="an" style="color:${pct>=80?'var(--pass)':'var(--warn)'};font-size:1.8rem">${pct}%</div>
       <div class="al">% Asistencia</div>
       <div class="pct-bar-wrap" style="margin-top:6px">
@@ -1387,13 +1450,18 @@ function filterAsist(fromSheets){
   // Tabla detalle
   document.getElementById('tb-as').innerHTML = regs.map((r,i)=>{
     const esPres = r.estado==='P';
-    return`<tr class="${esPres?'':''}">
+    const esExc  = r.estado==='E';
+    let badgeCls, badgeLabel;
+    if(esPres){ badgeCls='bp'; badgeLabel='✓ Presente'; }
+    else if(esExc){ badgeCls='bm'; badgeLabel='📋 Excusa'; }
+    else { badgeCls='bw'; badgeLabel='✗ Ausente'; }
+    return`<tr>
       <td style="color:var(--muted);font-size:.7rem">${i+1}</td>
       <td>${fd(r.fecha)}</td>
       <td>${DIAS[r.fecha.getDay()]}</td>
-      <td>${e(r.mat||'—')}</td>
-      <td class="${esPres?'td-pres':'td-aus'}">
-        <span class="badge ${esPres?'bp':'bw'}">${esPres?'✓ Presente':'✗ Ausente'}</span>
+      <td style="font-size:.77rem">${e(r.mat||'—')}</td>
+      <td class="${esPres?'td-pres':esExc?'':'td-aus'}">
+        <span class="badge ${badgeCls}">${badgeLabel}</span>
       </td>
       <td style="font-size:.77rem">${e(r.obs||'—')}</td></tr>`;
   }).join('');
@@ -1418,17 +1486,23 @@ function buildCal(regs){
     const [yr,m] = k.split('-').map(Number);
     const fd0 = new Date(yr,m,1).getDay();
     const dim  = new Date(yr,m+1,0).getDate();
-    const P=new Set(), A=new Set();
-    rows.forEach(r=>{ const d=r.fecha.getDate(); r.estado==='P'?P.add(d):A.add(d); });
-    const presN = P.size, ausN = A.size;
-    const pctM  = (presN+ausN)>0 ? Math.round(presN/(presN+ausN)*100) : 0;
+    const P=new Set(), A=new Set(), E=new Set();
+    rows.forEach(r=>{
+      const d=r.fecha.getDate();
+      if(r.estado==='P') P.add(d);
+      else if(r.estado==='E') E.add(d);
+      else A.add(d);
+    });
+    const presN = P.size, ausN = A.size, excN = E.size;
+    const pctM  = (presN+ausN+excN)>0 ? Math.round((presN+excN)/(presN+ausN+excN)*100) : 0;
     let g = `<div class="cmo">
-      <h4>${MN[m]} ${yr} <span class="cmo-stats">${presN}P / ${ausN}A · ${pctM}%</span></h4>
+      <h4>${MN[m]} ${yr} <span class="cmo-stats">${presN}P / ${ausN}A / ${excN}E · ${pctM}%</span></h4>
       <div class="cgrid">`;
     DH.forEach(d=>{g+=`<div class="cdh">${d}</div>`;});
     for(let i=0;i<fd0;i++) g+=`<div class="cd"></div>`;
     for(let d=1;d<=dim;d++){
       if(P.has(d)) g+=`<div class="cd present" title="Presente ${d}/${m+1}/${yr}">${d}</div>`;
+      else if(E.has(d)) g+=`<div class="cd excused" title="Excusa ${d}/${m+1}/${yr}">${d}</div>`;
       else if(A.has(d)) g+=`<div class="cd absent" title="Ausente ${d}/${m+1}/${yr}">${d}</div>`;
       else g+=`<div class="cd noc">${d}</div>`;
     }
@@ -1462,6 +1536,8 @@ function ac(a){ a=(a||'').toUpperCase(); if(/CONOCIMIENTO|PRIMER/.test(a)) retur
 function fd(s){ if(!s||s==='0000-00-00'||s==='') return'—'; const d=s instanceof Date?s:new Date(s); if(isNaN(d)) return String(s); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
 function pf(raw){ if(!raw) return null; if(raw instanceof Date) return raw; if(typeof raw==='number') return new Date(Math.round((raw-25569)*86400*1000)); const s=String(raw).trim(); const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/); if(m){ const y=m[3].length===2?'20'+m[3]:m[3]; return new Date(+y,+m[2]-1,+m[1]); } const d=new Date(s); return isNaN(d)?null:d; }
 function ne(s){ s=s.toUpperCase().trim(); return(s==='P'||s.startsWith('PRES')||s==='1'||s==='SI'||s==='SÍ')?'P':'A'; }
+// Versión extendida: reconoce SI→P, NO→A, EX→E (excusado)
+function neExt(s){ s=s.toUpperCase().trim(); if(s==='P'||s.startsWith('PRES')||s==='SI'||s==='SÍ'||s==='1') return'P'; if(s==='EX'||s.startsWith('EXCUS')||s==='E') return'E'; return'A'; }
 function cop(n){ return'$'+Number(n||0).toLocaleString('es-CO'); }
 function e(s){ return String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function setEmpty(id,cols,icon,msg){ const b=document.getElementById(id); if(b) b.innerHTML=`<tr><td colspan="${cols}"><div class="empty"><div class="ei">${icon}</div><p>${msg}</p></div></td></tr>`; }
