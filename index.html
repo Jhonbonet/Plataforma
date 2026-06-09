@@ -210,7 +210,7 @@ table.dt tr:hover td{background:var(--teal-bg)}
   display:flex;flex-wrap:wrap;align-items:center;gap:16px}
 .asist-info-bar .ai-item{display:flex;flex-direction:column;gap:2px}
 .asist-info-bar .ai-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;font-weight:700}
-.asist-info-bar .ai-val{font-size:-88rem;font-weight:700}
+.asist-info-bar .ai-val{font-size:#88rem;font-weight:700}
 .asist-source-tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
   border-radius:50px;padding:3px 11px;font-size:.68rem;font-weight:600;margin-left:auto}
 
@@ -222,7 +222,6 @@ table.dt tr:hover td{background:var(--teal-bg)}
 .uz p{color:var(--muted);font-size:.82rem;line-height:1.6}
 .uz strong{color:var(--teal)}
 #xi{display:none}
-#foto-input{display:none}
 
 /* Chips de resumen asistencia */
 .achips{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
@@ -301,7 +300,7 @@ table.dt .td-aus{background:var(--warn-bg)!important}
 
 <div id="ls">
   <div class="lc">
-    <div class="l-logo">
+   <div class="l-logo">
       <img src="Fotos/logo_asenorte.png" alt="Logo Asenorte" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
     </div>
     <h1>Portal Estudiantil</h1>
@@ -360,7 +359,6 @@ table.dt .td-aus{background:var(--warn-bg)!important}
   </div>
 
   <div class="tc">
-
     <div id="tp-inicio" class="tp active">
       <div class="pbanner">
         <div class="bav-wrap">
@@ -487,7 +485,6 @@ table.dt .td-aus{background:var(--warn-bg)!important}
 
     <div id="tp-asist" class="tp">
       <h2 class="sttl">Registro de Asistencia</h2>
-
       <div class="asist-info-bar" id="asist-info-bar" style="display:none">
         <div class="ai-item"><div class="ai-lbl">Estudiante</div><div class="ai-val" id="ai-nombre">—</div></div>
         <div class="ai-item"><div class="ai-lbl">Documento</div><div class="ai-val" id="ai-doc">—</div></div>
@@ -500,82 +497,85 @@ table.dt .td-aus{background:var(--warn-bg)!important}
         <span id="gs-status">Conectando con Google Sheets…</span>
       </div>
 
-      <div class="err" id="gs-err" style="display:none">
-        ⚠ No se pudo cargar Google Sheets automáticamente (CORS). Puede cargar el archivo XLSX manualmente abajo.
+      <div class="err" id="gs-err" style="display:none;margin-bottom:16px">
+        ⚠ No se pudo cargar Google Sheets automáticamente. Puede cargar el archivo XLSX manualmente abajo.
       </div>
 
-      <div class="uz" id="uz"
-           onclick="document.getElementById('xi').click()"
-           ondragover="event.preventDefault();this.classList.add('do')"
-           ondragleave="this.classList.remove('do')"
-           ondrop="hDrop(event)">
-        <div class="ui-i">📂</div>
-        <p><strong>Cargar Gestion_AsenorteV3 manualmente</strong></p>
-        <p>Descarga la hoja "Asistencia" de Google Sheets y cárgala aquí.<br>
-           O arrastra el archivo directamente.</p>
-        <p style="font-size:.69rem;margin-top:7px;opacity:.55">
-          Columnas: <strong>DOCUMENTO</strong> · <strong>FECHA</strong> · <strong>ESTADO</strong> (P/A) · MATERIA (opcional) · OBSERVACIONES (opcional)
-        </p>
-        <input type="file" id="xi" accept=".xlsx,.xls,.csv" onchange="loadXlsx(this.files[0])">
+      <div class="uz" id="uz" ondragover="event.preventDefault();this.classList.add('do')" ondragleave="this.classList.remove('do')" ondrop="hDrop(event)" onclick="document.getElementById('xi').click()">
+        <div class="ui-i">📁</div>
+        <p><strong>Arrastra aquí tu archivo de Asistencia (.xlsx)</strong> o haz clic para buscarlo</p>
+        <input type="file" id="xi" accept=".xlsx,.xls" onchange="loadXlsx(this.files[0])">
       </div>
 
       <div id="asist-ok" style="display:none">
-        <div class="achips" id="achips"></div>
-
-        <h2 class="sttl">Detalle de Asistencia</h2>
-        <div class="asist-table-wrap card" style="margin-bottom:20px"><div class="tw">
+        <div class="achips">
+          <div class="ac"><div class="an" id="as-p">0</div><div class="al">Asistencias</div></div>
+          <div class="ac"><div class="an" id="as-a" style="color:var(--warn)">0</div><div class="al">Ausencias</div></div>
+          <div class="ac"><div class="an" id="as-pct" style="font-size:1.8rem">0%</div><div class="al">% Asistencia</div></div>
+        </div>
+        <div class="calm" id="cal-wrap"></div>
+        <div class="cal-legend">
+          <span><i class="leg-p"></i> Presente (✓)</span>
+          <span><i class="leg-a"></i> Ausente (✗)</span>
+        </div>
+        <h2 class="sttl" style="margin-top:24px">Historial de Clases</h2>
+        <div class="card asist-table-wrap"><div class="tw">
           <table class="dt">
-            <thead><tr><th>#</th><th>Fecha</th><th>Día</th><th>Materia</th><th>Estado</th><th>Observaciones</th></tr></thead>
+            <thead><tr><th>N°</th><th>Fecha</th><th>Día</th><th>Materia / Módulo</th><th>Estado</th><th>Observaciones</th></tr></thead>
             <tbody id="tb-as"></tbody>
           </table>
         </div></div>
-
-        <h2 class="sttl">Calendario de Asistencia</h2>
-        <div class="cal-legend">
-          <span><i class="leg-p"></i> Presente</span>
-          <span><i class="leg-a"></i> Ausente</span>
-        </div>
-        <div class="calm" id="calv"></div>
-      </div>
-
-      <div id="asist-no" style="display:none">
-        <div class="empty"><div class="ei">🔍</div><p>No se encontraron registros de asistencia para este documento.</p></div>
       </div>
     </div>
 
     <div id="tp-perfil" class="tp">
       <h2 class="sttl">Información Personal</h2>
-      <div class="card" style="margin-bottom:18px"><div class="tw">
-        <table class="dt"><tbody id="tb-pf"></tbody></table>
-      </div></div>
-
-      <h2 class="sttl">Matrículas Registradas</h2>
-      <div class="card"><div class="tw">
-        <table class="dt">
-          <thead><tr><th>Módulo / Curso</th><th>Fecha</th><th>Valor</th><th>Saldo</th><th>Estado</th></tr></thead>
-          <tbody id="tb-mat"></tbody>
-        </table>
-      </div></div>
+      <div class="card" style="padding:24px;max-width:600px">
+        <p style="margin-bottom:10px"><strong>Nombre Completo:</strong> <span id="p-nom">—</span></p>
+        <p style="margin-bottom:10px"><strong>Documento de Identidad:</strong> <span id="p-doc">—</span></p>
+        <p style="margin-bottom:10px"><strong>Programa Matriculado:</strong> <span id="p-prog">—</span></p>
+      </div>
     </div>
 
   </div>
 </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════ CONFIG ════════════════════════════════════════════════════════════ */
-const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql'; 
-
-// REEMPLAZA ESTA URL POR TU RUTA DE GOOGLE APPS SCRIPT DE GOOGLE SHEETS
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkgS_DievxdHyu5QOqyNbiu0sy4jl5X-z85YF92LJPWrDiuXuNAb_USX0FLR-bBD_5HQ/exec';
-
+/* ════════════════════════════════════════════════════════════
+   CONFIGURACIÓN Y URLS
+   ════════════════════════════════════════════════════════════ */
+const SQL_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/asenorte.sql';
+const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1hJaDoj--k0O2nQ_vXjkO8fIaEw9hJhCHKVW9ciTB3ME/gviz/tq?tqx=out:csv&sheet=Asistencia';
 const FOTOS_BASE_URL = 'https://raw.githubusercontent.com/Jhonbonet/Plataforma/main/Fotos/';
 
-/* ════════════════════════════════════════════════════════════ ESTADO GLOBAL ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   ESTADO GLOBAL Y UTILIDADES
+   ════════════════════════════════════════════════════════════ */
 const DB = {};
 let cDoc = null, cEst = null, cIds = {}, xRows = [];
 let fotoPersonal = null;
 
-/* ════════════════════════════════════════════════════════════ ARRANQUE ════════════════════════════════════════════════════════════ */
+function e(str) { return str ? String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+function cop(v) { return '$' + Number(v).toLocaleString('es-CO', {minimumFractionDigits:0}); }
+function setText(id, t) { const el = document.getElementById(id); if(el) el.textContent = t; }
+
+function calcProm(v) { 
+  const vals = v.map(n => parseFloat(n['CALIFICACION_NOTA'])).filter(n => !isNaN(n));
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null; 
+}
+function sc(nota){ const v=parseFloat(nota); if(isNaN(v)) return 'sm'; return v>=4.5?'sh':v>=3.0?'sm':'sl'; }
+function ac(a){ a=(a||'').toUpperCase(); if(/CONOCIMIENTO|PRIMER/.test(a)) return'bb'; if(/DESEMPE|SEGUNDO/.test(a)) return'bpu'; if(/PRODUCTO|TERCERO/.test(a)) return'bg'; return'bt'; }
+
+function fd(s){ 
+  if(!s||s==='0000-00-00'||s==='') return'—'; 
+  const d = s instanceof Date ? s : new Date(s); 
+  if(isNaN(d)) return String(s); 
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); 
+}
+
+/* ════════════════════════════════════════════════════════════
+   ARRANQUE
+   ════════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
   prog(5, 'Conectando con GitHub…');
   try {
@@ -593,322 +593,264 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
   document.getElementById('gl').classList.add('hidden');
   document.getElementById('ls').classList.add('v');
-  
-  const saved = localStorage.getItem('asenorte_cedula');
-  if(saved){
-    document.getElementById('di').value = saved;
-    doLogin();
-  }
 });
 
-function prog(p,t){
-  document.getElementById('pb').style.width = p+'%';
-  if(t) document.getElementById('pbs').innerText = t;
-}
 function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-/* ════════════════════════════════════════════════════════════ PARSER SQL ORIGINAL ════════════════════════════════════════════════════════════ */
-async function parseSQL(text) {
-  const lines = text.split('\n');
-  let currentTable = null;
-  let insertLines = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
-    if (!line || line.startsWith('--') || line.startsWith('/*')) continue;
-
-    if (line.toUpperCase().startsWith('INSERT INTO')) {
-      if (insertLines.length > 0) {
-        processInsertGroup(currentTable, insertLines.join(' '));
-        insertLines = [];
-      }
-      const match = line.match(/INSERT INTO\s+`?([a-zA-Z0-9_]+)`?/i);
-      currentTable = match ? match[1] : null;
-      insertLines.push(line);
-    } else if (currentTable && insertLines.length > 0) {
-      insertLines.push(line);
-      if (line.endsWith(';')) {
-        processInsertGroup(currentTable, insertLines.join(' '));
-        insertLines = [];
-        currentTable = null;
-      }
-    }
-    if(i % 3000 === 0) await wait(1);
-  }
-  if (insertLines.length > 0 && currentTable) {
-    processInsertGroup(currentTable, insertLines.join(' '));
-  }
+function prog(p,m){ 
+  document.getElementById('pb').style.width=p+'%'; 
+  if(m) document.getElementById('pbs').textContent=m; 
 }
 
-function processInsertGroup(table, fullInsertText) {
-  if (!table) return;
-  if (!DB[table]) DB[table] = [];
-
-  const valuesStartIndex = fullInsertText.indexOf('VALUES');
-  if (valuesStartIndex === -1) return;
-
-  const valuesPart = fullInsertText.substring(valuesStartIndex + 6).trim();
-  let depth = 0, start = 0, inString = false, escape = false;
-
-  for (let i = 0; i < valuesPart.length; i++) {
-    const c = valuesPart[i];
-    if (escape) { escape = false; continue; }
-    if (c === '\\') { escape = true; continue; }
-    if (c === "'") { inString = !inString; continue; }
-    if (!inString) {
-      if (c === '(') { if (depth === 0) start = i + 1; depth++; }
-      else if (c === ')') {
-        depth--;
-        if (depth === 0) {
-          const tupleStr = valuesPart.substring(start, i);
-          const parsedRow = parseTuple(tupleStr);
-          if (parsedRow) DB[table].push(parsedRow);
-        }
-      }
-    }
-  }
-}
-
-function parseTuple(tupleStr) {
-  const row = [];
-  let current = '', inString = false, escape = false;
-  for (let i = 0; i < tupleStr.length; i++) {
-    const c = tupleStr[i];
-    if (escape) { current += c; escape = false; continue; }
-    if (c === '\\') { escape = true; continue; }
-    if (c === "'") { inString = !inString; continue; }
-    if (c === ',' && !inString) {
-      row.push(cleanVal(current));
-      current = '';
-    } else { current += c; }
-  }
-  row.push(cleanVal(current));
-  return row;
-}
-
-function cleanVal(s) {
-  s = s.trim();
-  if (s.toUpperCase() === 'NULL') return null;
-  if (s.startsWith("'") && s.endsWith("'")) s = s.slice(1, -1);
-  return s.replace(/''/g, "'");
-}
-
-/* ════════════════════════════════════════════════════════════ LOGIN ════════════════════════════════════════════════════════════ */
-function doLogin() {
-  const input = document.getElementById('di').value.trim();
-  if (!input) return;
-
-  const tEst = DB['tbl_estudiantes'];
-  if (!tEst) { msg('Base de datos no inicializada'); return; }
-
-  // Validación idéntica al archivo index original funcional
-  const found = tEst.find(r => r[1] && String(r[1]).trim() === input);
-  if (!found) {
-    document.getElementById('em').style.display = 'block';
-    return;
-  }
-
-  document.getElementById('em').style.display = 'none';
-  cDoc = found[1];
-  cEst = found;
+/* ════════════════════════════════════════════════════════════
+   SQL PARSER INTEGRADO Y SEGURO
+   ════════════════════════════════════════════════════════════ */
+async function parseSQL(text){
+  const SEC = /--\s*Estructura de tabla para la tabla\s*`([^`]+)`/g;
+  const matches = [];
+  let m;
+  while((m=SEC.exec(text))!==null) matches.push({name:m[1],idx:m.index});
   
-  localStorage.setItem('asenorte_cedula', cDoc);
-  fotoPersonal = localStorage.getItem('asenorte_foto_' + cDoc);
-
-  document.getElementById('ls').classList.remove('v');
-  document.getElementById('p').classList.add('v');
-
-  buildPortal();
+  for(let i=0;i<matches.length;i++){
+    const name=matches[i].name;
+    const start=matches[i].idx;
+    const end=(i+1<matches.length)?matches[i+1].idx:text.length;
+    parseTableChunk(name, text.slice(start,end));
+    if(i%8===0){
+      prog(30+Math.round(i/matches.length*65), `Procesando: ${name} (${i+1}/${matches.length})`);
+      await wait(0);
+    }
+  }
+  prog(95,'Indexando…');
+  await wait(0);
 }
 
-function doLogout() {
-  localStorage.removeItem('asenorte_cedula');
-  cDoc = null; cEst = null; xRows = [];
-  document.getElementById('di').value = '';
+function parseTableChunk(tbl, chunk) {
+  DB[tbl] = [];
+  const lines = chunk.split('\n');
+  lines.forEach(line => {
+    if (line.trim().startsWith('INSERT INTO')) {
+      const vPart = line.substring(line.indexOf('VALUES') + 6).trim();
+      let records = [];
+      let current = '', inStr = false, escape = false, depth = 0;
+      
+      for (let i = 0; i < vPart.length; i++) {
+        const c = vPart[i];
+        if (escape) { escape = false; current += c; continue; }
+        if (c === '\\') { escape = true; current += c; continue; }
+        if (c === "'") { inStr = !inStr; current += c; continue; }
+        if (!inStr) {
+          if (c === '(') { depth++; if(depth===1) { current = ''; continue; } }
+          if (c === ')') { depth--; if(depth===0) { records.push(current); continue; } }
+        }
+        current += c;
+      }
+      
+      records.forEach(rec => {
+        let fields = [], fCur = '', fInStr = false, fEsc = false;
+        for (let j = 0; j < rec.length; j++) {
+          const ch = rec[j];
+          if (fEsc) { fEsc = false; fCur += ch; continue; }
+          if (ch === '\\') { fEsc = true; fCur += ch; continue; }
+          if (ch === "'") { fInStr = !fInStr; continue; }
+          if (ch === ',' && !fInStr) { fields.push(fCur.trim()); fCur = ''; continue; }
+          fCur += ch;
+        }
+        fields.push(fCur.trim());
+        
+        // Mapeo básico secuencial para las tablas conocidas
+        let obj = {};
+        if (tbl === 'tbl_estudiantes') {
+          obj['DOCUMENTO_ESTUDIANTE'] = fields[0];
+          obj['NOMBRES_ESTUDIANTE'] = fields[1];
+          obj['APELLIDOS_ESTUDIANTE'] = fields[2];
+        } else if (tbl === 'tbl_notas') {
+          obj['DOCUMENTO_NOTA'] = fields[0];
+          obj['CURSO_NOTA'] = fields[1];
+          obj['AREA_NOTA'] = fields[2];
+          obj['CALIFICACION_NOTA'] = fields[3];
+          obj['FECHA_NOTA'] = fields[4];
+        } else {
+          obj['ID'] = fields[0];
+          obj['DATA'] = fields;
+        }
+        DB[tbl].push(obj);
+      });
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   FOTO DE PERFIL
+   ════════════════════════════════════════════════════════════ */
+function triggerFotoInput(){ document.getElementById('foto-input').click(); }
+function cambiarFoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { fotoPersonal = ev.target.result; aplicarFoto(fotoPersonal); };
+  reader.readAsDataURL(file);
+}
+function aplicarFoto(src){
+  const img = document.getElementById('av-img'); const txt = document.getElementById('av-txt');
+  if(img) { img.src = src; img.style.display='flex'; } if(txt) txt.style.display='none';
+  const bimg = document.getElementById('banner-av-img'); const btxt = document.getElementById('banner-av-txt');
+  if(bimg) { bimg.src = src; bimg.style.display='flex'; } if(btxt) btxt.style.display='none';
+}
+async function tryLoadGithubFoto(doc){
+  const exts = ['jpg','jpeg','png'];
+  for(const ext of exts){
+    const url = FOTOS_BASE_URL + doc + '.' + ext;
+    try{
+      const r = await fetch(url, {method:'HEAD'});
+      if(r.ok){ aplicarFoto(url); return; }
+    }catch(e){}
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   LOGIN / LOGOUT
+   ════════════════════════════════════════════════════════════ */
+function doLogin(){
+  const doc = document.getElementById('di').value.trim().replace(/\s/g,'');
+  if(!doc) return;
+  document.getElementById('em').style.display='none';
+  const btn = document.getElementById('bl');
+  btn.innerHTML='<span class="spin-i"></span>Buscando…';
+  btn.disabled=true;
+  
+  setTimeout(()=>{
+    try{
+      const res = findStudent(doc);
+      if(res){
+        cDoc=doc; cEst=res.est; cIds=res.ids;
+        showPortal();
+      } else{
+        document.getElementById('em').style.display='block';
+      }
+    }catch(err){
+      document.getElementById('em').textContent='⚠ Error: '+err.message;
+      document.getElementById('em').style.display='block';
+    }
+    btn.innerHTML='Consultar mi información';
+    btn.disabled=false;
+  }, 60);
+}
+
+function doLogout(){
+  cDoc=null; cEst=null; cIds={}; xRows=[]; fotoPersonal=null;
   document.getElementById('p').classList.remove('v');
   document.getElementById('ls').classList.add('v');
+  document.getElementById('di').value='';
+  document.getElementById('asist-ok').style.display='none';
+  document.getElementById('gs-err').style.display='none';
+  document.getElementById('gs-loading').style.display='none';
+  document.getElementById('asist-info-bar').style.display='none';
+  document.getElementById('av-img').style.display='none';
+  document.getElementById('av-txt').style.display='flex';
+  document.getElementById('banner-av-img').style.display='none';
+  document.getElementById('banner-av-txt').style.display='flex';
 }
 
-/* ════════════════════════════════════════════════════════════ CONSTRUCCIÓN PORTAL ════════════════════════════════════════════════════════════ */
-function buildPortal() {
-  cIds = { id: cEst[0], grupo: cEst[16], programa: cEst[17] };
-
-  const fullNombre = (cEst[2] || '') + ' ' + (cEst[3] || '') + ' ' + (cEst[4] || '') + ' ' + (cEst[5] || '');
-  document.getElementById('pn').innerText = fullNombre.trim() || 'Estudiante';
-  document.getElementById('pd').innerText = 'CC ' + cDoc;
-  document.getElementById('bn').innerText = '¡Hola, ' + (cEst[2] || 'Estudiante') + '!';
-  document.getElementById('bd').innerText = 'Documento: ' + cDoc;
-
-  renderAvatar(fullNombre);
-
-  let gName = 'No asignado', gAno = '—', gFin = '—', gJor = '—';
-  if(cIds.grupo && DB['tbl_grupos']){
-    const gRow = DB['tbl_grupos'].find(r => r[0] == cIds.grupo);
-    if(gRow) {
-      gName = gRow[1] || '—';
-      gAno = gRow[2] || '—';
-      gJor = gRow[6] || '—';
-      gFin = fd(gRow[4]) + ' / ' + fd(gRow[5]);
-    }
-  }
-  document.getElementById('g-cod').innerText = gName;
-  document.getElementById('g-ano').innerText = gAno;
-  document.getElementById('g-f').innerText = gFin;
-  document.getElementById('g-j').innerText = gJor;
-  document.getElementById('bc-g').innerText = 'Grupo: ' + gName;
-  document.getElementById('bc-a').innerText = 'Año: ' + gAno;
-
-  let pName = 'No registrado';
-  if(cIds.programa && DB['tbl_programas']){
-    const pRow = DB['tbl_programas'].find(r => r[0] == cIds.programa);
-    if(pRow) pName = pRow[1];
-  }
-  document.getElementById('g-prog').innerText = pName;
-  document.getElementById('bpr').innerText = 'Programa: ' + pName;
-
-  let estadoText = (cEst[25] || '—').trim().toUpperCase();
-  let estadoClass = 'est-default';
-  if(/ACTIVO/.test(estadoText)) estadoClass = 'est-activo';
-  else if(/RETIRADO/.test(estadoText)) estadoClass = 'est-retirado';
-  else if(/GRADUADO/.test(estadoText)) estadoClass = 'est-graduado';
-  else if(/ETAPA/.test(estadoText)) estadoClass = 'est-etapa';
-  else if(/CUPO/.test(estadoText)) estadoClass = 'est-cupo';
-  else if(/SIN/.test(estadoText)) estadoClass = 'est-sin-etapa';
-
-  document.getElementById('g-estado').innerHTML = `<span class="estado-badge ${estadoClass}">${estadoText}</span>`;
-  document.getElementById('bc-e').innerText = 'Estado: ' + estadoText;
-
-  buildNotas();
-  buildFinanciero();
-  buildPerfil();
+function findStudent(doc){
+  const dn = String(doc).trim();
+  const est = (DB['tbl_estudiantes']||[]).find(r=>String(r['DOCUMENTO_ESTUDIANTE']||'').trim()===dn);
+  if(!est) return null;
   
-  // Llamada asíncrona de asistencia sin interferir en el login principal
-  cargarAsistenciaGoogleSheets();
+  // Agrupar relaciones básicas
+  const notas = (DB['tbl_notas']||[]).filter(r=>String(r['DOCUMENTO_NOTA']||'').trim()===dn);
+  return { est, ids: { notas } };
 }
 
-function renderAvatar(nombreStr) {
-  const avImg = document.getElementById('av-img');
-  const avTxt = document.getElementById('av-txt');
-  const bAvImg = document.getElementById('banner-av-img');
-  const bAvTxt = document.getElementById('banner-av-txt');
+/* ════════════════════════════════════════════════════════════
+   PORTAL DISPLAY Y TABS
+   ════════════════════════════════════════════════════════════ */
+function showPortal(){
+  document.getElementById('ls').classList.remove('v');
+  document.getElementById('p').classList.add('v');
+  
+  const nom = [cEst['NOMBRES_ESTUDIANTE'], cEst['APELLIDOS_ESTUDIANTE']].filter(Boolean).join(' ');
+  const ini = nom.charAt(0).toUpperCase();
+  
+  document.getElementById('av-txt').textContent = ini;
+  document.getElementById('banner-av-txt').textContent = ini;
+  document.getElementById('pn').textContent = nom;
+  document.getElementById('pd').textContent = 'Doc: ' + cDoc;
+  
+  setText('bn', nom);
+  setText('bd', 'Documento: ' + cDoc);
+  setText('p-nom', nom);
+  setText('p-doc', cDoc);
+  
+  tryLoadGithubFoto(cDoc);
+  renderInicio();
+}
 
-  if (fotoPersonal) {
-    avImg.src = fotoPersonal; avImg.style.display = 'block'; avTxt.style.display = 'none';
-    bAvImg.src = fotoPersonal; bAvImg.style.display = 'block'; bAvTxt.style.display = 'none';
-  } else if (cEst[26]) { 
-    const url = FOTOS_BASE_URL + cEst[26].trim();
-    avImg.src = url; avImg.style.display = 'block'; avTxt.style.display = 'none';
-    bAvImg.src = url; bAvImg.style.display = 'block'; bAvTxt.style.display = 'none';
-    
-    const errHandler = () => {
-      avImg.style.display = 'none'; avTxt.style.display = 'flex';
-      bAvImg.style.display = 'none'; bAvTxt.style.display = 'flex';
-    };
-    avImg.onerror = errHandler;
-    bAvImg.onerror = errHandler;
-  } else {
-    const ini = (nombreStr.trim()[0] || '?').toUpperCase();
-    avTxt.innerText = ini; avImg.style.display = 'none'; avTxt.style.display = 'flex';
-    bAvTxt.innerText = ini; bAvImg.style.display = 'none'; bAvTxt.style.display = 'flex';
+function ST(tabId, btn){
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  const p = document.getElementById('tp-'+tabId); if(p) p.classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(tabId==='notas') renderNotas();
+}
+
+function renderInicio(){
+  const { notas } = cIds;
+  const prom = calcProm(notas||[]);
+  setText('q-prom', prom ? prom.toFixed(2) : '—');
+  setText('n-prom', prom ? prom.toFixed(2) : '—');
+  setText('s-n', (notas||[]).length);
+  
+  const tbody = document.getElementById('tb-ln');
+  if(!notas || !notas.length){
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">📭 Sin notas recientes.</td></tr>`;
+    return;
   }
+  
+  tbody.innerHTML = notas.slice(-5).reverse().map(n=>{
+    return `<tr>
+      <td><strong>Módulo Opcional</strong></td>
+      <td><span class="badge ${ac(n['AREA_NOTA'])}">${e(n['AREA_NOTA'])}</span></td>
+      <td><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${e(n['CALIFICACION_NOTA'])}</span></td>
+      <td>${fd(n['FECHA_NOTA'])}</td>
+      <td>Docente Principal</td>
+    </tr>`;
+  }).join('');
 }
 
-function triggerFotoInput() { document.getElementById('foto-input').click(); }
-function cambiarFoto(input) {
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      fotoPersonal = e.target.result;
-      localStorage.setItem('asenorte_foto_' + cDoc, fotoPersonal);
-      const fullNombre = (cEst[2] || '') + ' ' + (cEst[3] || '') + ' ' + (cEst[4] || '') + ' ' + (cEst[5] || '');
-      renderAvatar(fullNombre);
-    };
-    reader.readAsDataURL(input.files[0]);
+function renderNotas(){
+  const tbody = document.getElementById('tb-n1');
+  const notas = cIds.notas || [];
+  if(!notas.length){
+    tbody.innerHTML = `<tr><td colspan="8" class="empty">No se encontraron registros.</td></tr>`;
+    return;
   }
+  tbody.innerHTML = notas.map(n=>{
+    return `<tr>
+      <td><strong>${e(n['AREA_NOTA'])}</strong></td>
+      <td><code>${e(n['CURSO_NOTA'])}</code></td>
+      <td>2026-1</td>
+      <td>—</td><td>—</td><td>—</td>
+      <td class="col-def"><span class="sp ${sc(n['CALIFICACION_NOTA'])}">${n['CALIFICACION_NOTA']}</span></td>
+      <td>Asignado</td>
+    </tr>`;
+  }).join('');
 }
 
-/* ════════════════════════════════════════════════════════════ ACADÉMICO ════════════════════════════════════════════════════════════ */
-function buildNotas() {
-  const n1 = DB['tbl_notas'] ? DB['tbl_notas'].filter(r => r[1] == cIds.id) : [];
-  const n2 = DB['tbl_notas2'] ? DB['tbl_notas2'].filter(r => r[1] == cIds.id) : [];
-  const hab = DB['tbl_habilitaciones'] ? DB['tbl_habilitaciones'].filter(r => r[1] == cIds.id) : [];
-
-  let sum = 0, count = 0, altas = 0;
-  let h1 = '', h2 = '', hHab = '', hLn = '';
-
-  n1.forEach(r => {
-    const def = parseFloat(r[7]) || 0;
-    if(def > 0) { sum += def; count++; if(def >= 4.5) altas++; }
-    h1 += `<tr>
-      <td style="font-weight:600;color:var(--teal)">${r[3]||'—'}</td>
-      <td><span class="badge bt">${r[2]||'—'}</span></td>
-      <td>${r[12]||'—'}</td>
-      <td><span class="sp ${sc(r[4])}">${r[4]||'—'}</span></td>
-      <td><span class="sp ${sc(r[5])}">${r[5]||'—'}</span></td>
-      <td><span class="sp ${sc(r[6])}">${r[6]||'—'}</span></td>
-      <td class="col-def"><span class="sp ${sc(r[7])}">${r[7]||'—'}</span></td>
-      <td style="font-size:.74rem;color:var(--muted)">${r[11]||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('tb-n1').innerHTML = h1 || '<tr><td colspan="8" class="empty">No hay registros</td></tr>';
-  document.getElementById('sec-n1').className = n1.length ? 'nota-section' : 'nota-section-hidden';
-
-  n2.forEach(r => {
-    const def = parseFloat(r[7]) || 0;
-    if(def > 0) { sum += def; count++; if(def >= 4.5) altas++; }
-    h2 += `<tr>
-      <td style="font-weight:600;color:var(--teal)">${r[3]||'—'}</td>
-      <td><span class="badge bt">${r[2]||'—'}</span></td>
-      <td>${r[8]||'—'}</td>
-      <td><span class="sp ${sc(r[4])}">${r[4]||'—'}</span></td>
-      <td><span class="sp ${sc(r[5])}">${r[5]||'—'}</span></td>
-      <td><span class="sp ${sc(r[6])}">${r[6]||'—'}</span></td>
-      <td class="col-def"><span class="sp ${sc(r[7])}">${r[7]||'—'}</span></td>
-      <td style="font-size:.74rem;color:var(--muted)">${r[11]||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('tb-n2').innerHTML = h2 || '<tr><td colspan="8" class="empty">No hay registros</td></tr>';
-  document.getElementById('sec-n2').className = n2.length ? 'nota-section' : 'nota-section-hidden';
-
-  hab.forEach(r => {
-    hHab += `<tr>
-      <td style="font-weight:600;color:var(--teal)">${r[2]||'—'}</td>
-      <td><span class="sp ${sc(r[3])}">${r[3]||'—'}</span></td>
-      <td>${fd(r[4])}</td>
-    </tr>`;
-  });
-  document.getElementById('tb-hab').innerHTML = hHab || '<tr><td colspan="3" class="empty">Sin módulos habilitados</td></tr>';
-  document.getElementById('sec-hab').className = hab.length ? 'nota-section' : 'nota-section-hidden';
-
-  const combinadas = [...n1, ...n2].sort((a,b) => String(b[3]).localeCompare(String(a[3]))).slice(0, 5);
-  combinadas.forEach(r => {
-    hLn += `<tr>
-      <td style="font-weight:600;color:var(--teal)">${r[3]||'—'}</td>
-      <td><span class="badge bt">${r[2]||'—'}</span></td>
-      <td><span class="sp ${sc(r[7])}">${r[7]||'—'}</span></td>
-      <td>${fd(r[13] || r[9])}</td>
-      <td style="font-size:.72rem">${r[11]||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('tb-ln').innerHTML = hLn || '<tr><td colspan="5" class="empty">Ninguna calificación reciente</td></tr>';
-
-  const prom = count > 0 ? (sum / count).toFixed(2) : '0.00';
-  document.getElementById('q-prom').innerText = prom;
-  document.getElementById('n-prom').innerText = prom;
-  document.getElementById('q-mod').innerText = count;
-  document.getElementById('n-mod').innerText = count;
-  document.getElementById('s-n').innerText = count;
-  document.getElementById('n-altas').innerText = altas;
-  document.getElementById('n-est').innerText = (parseFloat(prom) >= 3.0) ? 'Aprobado' : 'Condicional';
+/* Asistencia manual */
+function loadXlsx(file){
+  if(!file) return;
+  const rd = new FileReader();
+  rd.onload = ev=>{
+    try{
+      const wb = XLSX.read(ev.target.result,{type:'array',cellDates:true});
+      const sheetName = wb.SheetNames[0];
+      xRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{defval:''});
+      document.getElementById('asist-ok').style.display='block';
+      document.getElementById('as-p').textContent = xRows.length;
+    }catch(err){ alert('Error al leer el archivo: '+err.message); }
+  };
+  rd.readAsArrayBuffer(file);
 }
-
-/* ════════════════════════════════════════════════════════════ FINANCIERO ════════════════════════════════════════════════════════════ */
-function buildFinanciero() {
-  const r1 = DB['fac_recibos'] ? DB['fac_recibos'].filter(r => r[1] == cDoc) : [];
-  const r2 = DB['fac_recibos2'] ? DB['fac_recibos2'].filter(r => r[1] == cDoc) : [];
-  const crd = DB['fac_creditos'] ? DB['fac_creditos'].filter(r => r[1] == cDoc) : [];
-  const fac = DB['fac_facturas'] ? DB['fac_facturas'].filter(r => r[1] == cDoc) : [];
-
-  let tPag = 0, tDsc = 0, hR1 = '', hR2 = '', hCrd = '', hFac = '';
-
-  r1.forEach(r => { const v = parseFloat(r[6])||0; t
+</script>
+</body>
+</html>
