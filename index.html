@@ -788,7 +788,7 @@ function buildPortal() {
   document.getElementById('g-estado').innerHTML = `<span class="estado-badge ${estadoClass}">${estadoText}</span>`;
   document.getElementById('bc-e').innerText = 'Estado: ' + estadoText;
 
-  // 5. Cargar Paneles
+  // 5. Cargar Paneles SQL
   buildNotas();
   buildFinanciero();
   buildPerfil();
@@ -991,8 +991,10 @@ function buildPerfil() {
 
 /* ════════════════════════════════════════════════════════════ CONECTIVIDAD GOOGLE SHEETS DE ASISTENCIA ════════════════════════════════════════════════════════════ */
 async function cargarAsistenciaGoogleSheets() {
+  // Si la URL no está configurada, ignoramos la carga automática y no bloqueamos el login
   if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith('TU_URL')) {
     console.log("Apps Script no configurado. Esperando carga manual.");
+    document.getElementById('q-as').innerText = "Subir archivo";
     return;
   }
 
@@ -1026,8 +1028,8 @@ async function cargarAsistenciaGoogleSheets() {
     console.error("Error cargando Google Sheets:", error);
     divLoad.style.display = 'none';
     divErr.style.display = 'block';
-    divErr.innerText = '⚠ Error en consulta automatizada de asistencia: ' + error.message + '. Intente cargando el archivo de respaldo.';
-    document.getElementById('q-as').innerText = 'Fallo conexión';
+    divErr.innerText = '⚠ Consulta automática deshabilitada o fallida: ' + error.message + '. Puede subir la asistencia manualmente.';
+    document.getElementById('q-as').innerText = 'Manual';
   }
 }
 
