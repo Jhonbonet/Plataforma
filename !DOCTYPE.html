@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asesorías del Norte - Mi QR de Asistencia</title>
+    <!-- Incluir librería para generar QR -->
+    <script src="https://cloudflare.com"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+        #qrcode { display: inline-block; margin-top: 20px; padding: 10px; background: white; border-radius: 10px; }
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+
+    <h2>Asesorías del Norte</h2>
+    <p>Presenta este código dinámico en la entrada</p>
+    
+    <div id="qrcode"></div>
+    <p id="timer" style="color: gray; font-size: 14px;"></p>
+
+    <script>
+        // 1. Configurar variables del estudiante (Obtenidas dinámicamente o quemadas por alumno)
+        // Ejemplo: Si creas un archivo HTML por alumno, o pasas el ID por la URL (ej. index.html?id=EST-001)
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentID = urlParams.get('id') || "EST-120"; 
+
+        const qrContainer = document.getElementById("qrcode");
+        const qrcode = new QRCode(qrContainer, { width: 250, height: 250 });
+
+        function generarQRDinamico() {
+            const ahora = new Date();
+            
+            // Creamos una marca de tiempo basada en la fecha y el minuto actual
+            // Formato resultante: "2026-06-13 08:35" (Evita fraudes de días previos)
+            const anio = ahora.getFullYear();
+            const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+            const dia = String(ahora.getDate()).padStart(2, '0');
+            const hora = String(ahora.getHours()).padStart(2, '0');
+            const minuto = String(ahora.getMinutes()).padStart(2, '0');
+            
+            const marcaTiempo = `${anio}-${mes}-${dia} ${hora}:${minuto}`;
+            
+            // Cadena final que leerá AppSheet: "EST-120|2026-06-13 08:35"
+            const dataParaQR = `${studentID}|${marcaTiempo}`;
+            
+            // Actualizar el QR
+            qrcode.makeCode(dataParaQR);
+            
+            document.getElementById("timer").innerText = "El código se actualiza automáticamente cada minuto.";
+        }
+
+        // Ejecutar inmediatamente y luego refrescar cada 30 segundos
+        generarQRDinamico();
+        setInterval(generarQRDinamico, 30000);
+    </script>
+</body>
+</html>
