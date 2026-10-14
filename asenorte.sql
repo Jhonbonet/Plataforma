@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 13-10-2026 a las 17:05:38
+-- Tiempo de generación: 14-10-2026 a las 17:21:16
 -- Versión del servidor: 5.5.8
 -- Versión de PHP: 5.3.5
 
@@ -9353,7 +9353,7 @@ CREATE TABLE IF NOT EXISTS `fac_recibos` (
   `OBSERVACIONES_RECIBO` text,
   `CAJERO_RECIBO` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ID_RECIBO`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12508 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12513 ;
 
 --
 -- Volcar la base de datos para la tabla `fac_recibos`
@@ -21839,7 +21839,12 @@ INSERT INTO `fac_recibos` (`ID_RECIBO`, `CONSECUTIVO_RECIBO`, `FECHA_RECIBO`, `C
 (12504, 12464, '2026-10-07', 7145, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', 'M20458294', 'MENSUALIDAD', '', ''),
 (12505, 12465, '2026-10-09', 7199, 'NELLY MARIA ÁLVAREZ BORREGO', 100000, 'Consignacion', 'M12789043', 'MENSUALIDAD', '', ''),
 (12506, 12466, '2026-10-13', 7211, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', '1172402654', 'MENSUALIDAD ', '', ''),
-(12507, 12467, '2026-10-09', 7188, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', 'M26995654', 'MENSUALIDAD', '', '');
+(12507, 12467, '2026-10-09', 7188, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', 'M26995654', 'MENSUALIDAD', '', ''),
+(12508, 12468, '2026-10-14', 7141, 'NELLY MARIA ÁLVAREZ BORREGO', 180000, 'Consignacion', '9352025124156584502292700464949827', 'MENSUALIDAD ', '', ''),
+(12509, 12469, '2026-10-14', 7178, 'NELLY MARIA ÁLVAREZ BORREGO', 180000, 'Consignacion', '04390011', 'MENSUALIDAD ', '', ''),
+(12510, 12470, '2026-10-14', 7159, 'NELLY MARIA ÁLVAREZ BORREGO', 70000, 'Consignacion', '1172520798', 'MENSUALIDAD ABONO ', '', ''),
+(12511, 12471, '2026-10-14', 7094, 'NELLY MARIA ÁLVAREZ BORREGO', 150000, 'Consignacion', '1172520371', 'ABONO MENSUALIDAD ', '', ''),
+(12512, 12472, '2026-10-14', 6934, 'NELLY MARIA ÁLVAREZ BORREGO', 300000, 'Consignacion', '05525033', 'ABONO A PROGRAMA AU2024', '', '');
 
 -- --------------------------------------------------------
 
