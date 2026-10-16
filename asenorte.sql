@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 15-10-2026 a las 17:45:41
+-- Tiempo de generación: 16-10-2026 a las 16:39:46
 -- Versión del servidor: 5.5.8
 -- Versión de PHP: 5.3.5
 
@@ -9353,7 +9353,7 @@ CREATE TABLE IF NOT EXISTS `fac_recibos` (
   `OBSERVACIONES_RECIBO` text,
   `CAJERO_RECIBO` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ID_RECIBO`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12515 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12516 ;
 
 --
 -- Volcar la base de datos para la tabla `fac_recibos`
@@ -21846,7 +21846,8 @@ INSERT INTO `fac_recibos` (`ID_RECIBO`, `CONSECUTIVO_RECIBO`, `FECHA_RECIBO`, `C
 (12511, 12471, '2026-10-14', 7094, 'NELLY MARIA ÁLVAREZ BORREGO', 150000, 'Consignacion', '1172520371', 'ABONO MENSUALIDAD ', '', ''),
 (12512, 12472, '2026-10-14', 6934, 'NELLY MARIA ÁLVAREZ BORREGO', 300000, 'Consignacion', '05525033', 'ABONO A PROGRAMA AU2024', '', ''),
 (12513, 12473, '2026-10-15', 7095, 'NELLY MARIA ÁLVAREZ BORREGO', 180000, 'Consignacion', '02308922', 'MENSULIDAD ', '', ''),
-(12514, 12474, '2026-10-15', 7112, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', '77155443842769947266073394113502507', 'MENSUALIDAD', '', '10017');
+(12514, 12474, '2026-10-15', 7112, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', '77155443842769947266073394113502507', 'MENSUALIDAD', '', '10017'),
+(12515, 12475, '2026-10-16', 7111, 'NELLY MARIA ÁLVAREZ BORREGO', 180000, 'Consignacion', 'M16358313', 'MENSUALIDAD', '', '');
 
 -- --------------------------------------------------------
 
@@ -398171,7 +398172,7 @@ INSERT INTO `tbl_parametros` (`ID`, `MODULO`, `PARAMETRO`, `NOMBRE_PARAMETRO`, `
 (24, 'sistema', 'DIRECTOR', NULL, NULL, 'MSc. ERNESTO J. GARCÍA PUCHE', NULL, NULL),
 (25, 'sistema', 'DECRETO', 'DECRETO', NULL, '4904 de 2009', NULL, NULL),
 (26, 'sistema', 'GESTOR', NULL, NULL, 'JHON JADER BONET CANTILLO', NULL, NULL),
-(27, 'sistema', 'FECHA_ALERTA', 'FECHA DE LA ALERTA', NULL, '2025-12-05', NULL, NULL);
+(27, 'sistema', 'FECHA_ALERTA', 'FECHA DE LA ALERTA', NULL, '2026-10-16', NULL, NULL);
 
 -- --------------------------------------------------------
 
