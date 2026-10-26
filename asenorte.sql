@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 24-10-2026 a las 11:40:30
+-- Tiempo de generación: 26-10-2026 a las 15:36:12
 -- Versión del servidor: 5.5.8
 -- Versión de PHP: 5.3.5
 
@@ -9353,7 +9353,7 @@ CREATE TABLE IF NOT EXISTS `fac_recibos` (
   `OBSERVACIONES_RECIBO` text,
   `CAJERO_RECIBO` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ID_RECIBO`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12535 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12537 ;
 
 --
 -- Volcar la base de datos para la tabla `fac_recibos`
@@ -21866,7 +21866,9 @@ INSERT INTO `fac_recibos` (`ID_RECIBO`, `CONSECUTIVO_RECIBO`, `FECHA_RECIBO`, `C
 (12531, 12491, '2026-10-22', 7085, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', '1173060126', 'MENSUALIDAD', '', ''),
 (12532, 12492, '2026-10-24', 7157, 'NELLY MARIA ÁLVAREZ BORREGO', 130000, 'Consignacion', '1172893226', 'mensualidad ', '', ''),
 (12533, 12493, '2026-09-14', 7209, 'NELLY MARIA ÁLVAREZ BORREGO', 130000, 'Consignacion', '08572549', 'MENSUALIDAD ', '', ''),
-(12534, 12494, '2026-10-24', 7209, 'NELLY MARIA ÁLVAREZ BORREGO', 130000, 'Consignacion', '05966672', 'MENSUALIDAD ', '', '');
+(12534, 12494, '2026-10-24', 7209, 'NELLY MARIA ÁLVAREZ BORREGO', 130000, 'Consignacion', '05966672', 'MENSUALIDAD ', '', ''),
+(12535, 12495, '2026-10-26', 7082, 'Lucila Fernandez de Castro', 2655000, 'Consignacion', '278410626', 'pago Omar Enrique Mejia,  Usuario solicitante: Norellys Nohelia De la Rosa Camacho. ICBF DIRECCION REGIONAL MAGDALNA  fabian.ruiz@cedesocial.org', '', ''),
+(12536, 12496, '2026-10-26', 7201, 'NELLY MARIA ÁLVAREZ BORREGO', 200000, 'Consignacion', '1173290245', 'MENSUALIDAD', '', '');
 
 -- --------------------------------------------------------
 
